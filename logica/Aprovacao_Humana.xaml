@@ -1,0 +1,163 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Aprovacao_Humana" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:upaf="clr-namespace:UiPath.Persistence.Activities.FormTask;assembly=UiPath.Persistence.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
+    <x:Property Name="in_Conteudo" Type="InArgument(nsjl:JObject)" />
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_TaskObj" Type="OutArgument(upaf:FormTaskData)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Persistence.Activities</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Aprovação humana — pacote de publicação (suspend/resume)" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="Titulo" />
+      <Variable x:TypeArguments="x:String" Name="HashtagsTexto" />
+      <Variable x:TypeArguments="x:String" Name="JanelaInfo" />
+      <Variable x:TypeArguments="x:String" Name="AvisoLimite" />
+      <Variable x:TypeArguments="x:String" Name="Tema" />
+      <Variable x:TypeArguments="x:String" Name="MediaUrl" />
+      <Variable x:TypeArguments="x:String" Name="Plataforma" />
+      <Variable x:TypeArguments="x:String" Name="DecisaoInit" />
+      <Variable x:TypeArguments="x:String" Name="LegendaEditadaInit" />
+      <Variable x:TypeArguments="x:String" Name="PostUrlInit" />
+      <Variable x:TypeArguments="x:String" Name="MotivoInit" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;tema = data[&quot;Tema&quot;] == null ? &quot;&quot; : data[&quot;Tema&quot;].ToString();&#xA;mediaUrl = data[&quot;MediaUrl&quot;] == null ? &quot;&quot; : data[&quot;MediaUrl&quot;].ToString();&#xA;titulo = &quot;Aprovar e publicar post — &quot; + plataforma + &quot; — &quot; + (tema.Length &gt; 60 ? tema.Substring(0, 60) + &quot;…&quot; : tema);&#xA;hashtagsTexto = conteudo[&quot;Hashtags&quot;] == null ? &quot;&quot; : string.Join(&quot; &quot;, conteudo[&quot;Hashtags&quot;].ToObject&lt;string[]&gt;().Select(h =&gt; &quot;#&quot; + h));&#xA;var janela = ctx != null &amp;&amp; ctx.ContainsKey(&quot;JanelaPublicacao&quot;) ? ctx[&quot;JanelaPublicacao&quot;] as string : null;&#xA;janelaInfo = string.IsNullOrEmpty(janela) ? &quot;Sem janela sugerida configurada — publique quando apropriado.&quot; : &quot;Janela sugerida (informativo): &quot; + janela;&#xA;var limite = ctx != null &amp;&amp; ctx.ContainsKey(&quot;LimitePostsDia&quot;) ? Convert.ToInt32(ctx[&quot;LimitePostsDia&quot;]) : 3;&#xA;var hoje = ctx != null &amp;&amp; ctx.ContainsKey(&quot;PostsPublicadosHoje&quot;) ? Convert.ToInt32(ctx[&quot;PostsPublicadosHoje&quot;]) : 0;&#xA;avisoLimite = hoje &gt;= limite ? &quot;ATENÇÃO: limite diário sugerido atingido (&quot; + hoje + &quot;/&quot; + limite + &quot; posts hoje). A decisão é sua.&quot; : &quot;Posts hoje: &quot; + hoje + &quot;/&quot; + limite + &quot; (informativo).&quot;;&#xA;// Defaults dos campos editáveis da task&#xA;decisao = &quot;Aprovado&quot;;&#xA;legendaEditada = conteudo[&quot;Legenda&quot;] == null ? &quot;&quot; : conteudo[&quot;Legenda&quot;].ToString();&#xA;postUrl = &quot;&quot;;&#xA;motivo = &quot;&quot;;" DisplayName="Montar pacote de publicação" sap2010:WorkflowViewState.IdRef="InvokeCode_pkg">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:Object" x:Key="inData">
+            <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="nsjl:JObject" x:Key="conteudo">
+            <CSharpValue x:TypeArguments="nsjl:JObject">in_Conteudo</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="titulo">
+            <CSharpReference x:TypeArguments="x:String">Titulo</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="plataforma">
+            <CSharpReference x:TypeArguments="x:String">Plataforma</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="tema">
+            <CSharpReference x:TypeArguments="x:String">Tema</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="mediaUrl">
+            <CSharpReference x:TypeArguments="x:String">MediaUrl</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="hashtagsTexto">
+            <CSharpReference x:TypeArguments="x:String">HashtagsTexto</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="janelaInfo">
+            <CSharpReference x:TypeArguments="x:String">JanelaInfo</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="avisoLimite">
+            <CSharpReference x:TypeArguments="x:String">AvisoLimite</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="decisao">
+            <CSharpReference x:TypeArguments="x:String">DecisaoInit</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="legendaEditada">
+            <CSharpReference x:TypeArguments="x:String">LegendaEditadaInit</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="postUrl">
+            <CSharpReference x:TypeArguments="x:String">PostUrlInit</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="motivo">
+            <CSharpReference x:TypeArguments="x:String">MotivoInit</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <upaf:CreateFormTask BucketFolderPath="{x:Null}" BucketName="{x:Null}" BulkFormLayout="{x:Null}" DynamicFormPath="{x:Null}" ExternalTag="{x:Null}" FormLayout="{x:Null}" Group="{x:Null}" Labels="{x:Null}" ReassignGroup="{x:Null}" ReassignUser="{x:Null}" TaskCatalog="{x:Null}" UserNameOrEmail="{x:Null}" BulkFormLayoutGuid="a4e7d2d4-a06a-41c1-a1f1-40aa9ac1b533" DisplayName="Criar task de aprovação" EnableBulkEdit="False" EnableDynamicForms="False" EnableV2="False" EndCriteria="TaskAssigned" FormLayoutGuid="54185359-860a-44ac-becb-2fbf0b5dce01" GenerateInputFields="True" sap2010:WorkflowViewState.IdRef="CreateFormTask_1" StartCriteria="TaskCreated" TaskPriority="Medium" TaskTimerEnabled="False">
+      <upaf:CreateFormTask.TaskTitle>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">Titulo</CSharpValue>
+        </InArgument>
+      </upaf:CreateFormTask.TaskTitle>
+      <upaf:CreateFormTask.TimerDuration>
+        <InArgument x:TypeArguments="s:TimeSpan">
+          <CSharpValue x:TypeArguments="s:TimeSpan">TimeSpan.FromHours(48)</CSharpValue>
+        </InArgument>
+      </upaf:CreateFormTask.TimerDuration>
+      <upaf:CreateFormTask.TaskOutput>
+        <OutArgument x:TypeArguments="upaf:FormTaskData">
+          <CSharpReference x:TypeArguments="upaf:FormTaskData">out_TaskObj</CSharpReference>
+        </OutArgument>
+      </upaf:CreateFormTask.TaskOutput>
+      <upaf:CreateFormTask.FormData>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="plataforma">
+            <CSharpValue x:TypeArguments="x:String">Plataforma</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="tema">
+            <CSharpValue x:TypeArguments="x:String">Tema</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="media_bucket">
+            <CSharpValue x:TypeArguments="x:String">MediaUrl</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="hashtags">
+            <CSharpValue x:TypeArguments="x:String">HashtagsTexto</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="janela_sugerida">
+            <CSharpValue x:TypeArguments="x:String">JanelaInfo</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="aviso_limite">
+            <CSharpValue x:TypeArguments="x:String">AvisoLimite</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="decisao">
+            <CSharpValue x:TypeArguments="x:String">DecisaoInit</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="legenda_editada">
+            <CSharpValue x:TypeArguments="x:String">LegendaEditadaInit</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="url_post_publicado">
+            <CSharpValue x:TypeArguments="x:String">PostUrlInit</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="motivo_rejeicao">
+            <CSharpValue x:TypeArguments="x:String">MotivoInit</CSharpValue>
+          </InArgument>
+        </scg:Dictionary>
+      </upaf:CreateFormTask.FormData>
+    </upaf:CreateFormTask>
+    <ui:LogMessage DisplayName="Task criada — suspend ocorre no Main" sap2010:WorkflowViewState.IdRef="LogMessage_wait" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"Aprovação pendente no Action Center: " + Titulo + " — o humano publica o post e informa a URL (wait no Main, ST-DBP-024)"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

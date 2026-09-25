@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="Main" sap2010:ExpressionActivityEditor.ExpressionActivityEditor="C#" sap2010:WorkflowViewState.IdRef="ActivityBuilder_1" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:av="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:uc="clr-namespace:UiPath.Core;assembly=UiPath.System.Activities" xmlns:ui="clr-namespace:UiPath.Core.Activities;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="Main" sap2010:ExpressionActivityEditor.ExpressionActivityEditor="C#" sap2010:WorkflowViewState.IdRef="ActivityBuilder_1" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:av="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:uc="clr-namespace:UiPath.Core;assembly=UiPath.System.Activities" xmlns:ui="clr-namespace:UiPath.Core.Activities;assembly=UiPath.System.Activities" xmlns:upaf="clr-namespace:UiPath.Persistence.Activities.FormTask;assembly=UiPath.Persistence.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <TextExpression.NamespacesForImplementation>
     <sco:Collection x:TypeArguments="x:String">
       <x:String>System.Activities</x:String>
@@ -23,6 +23,7 @@
       <x:String>System.Xml.Linq</x:String>
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
       <x:String>System.Windows.Markup</x:String>
       <x:String>GlobalVariablesNamespace</x:String>
       <x:String>GlobalConstantsNamespace</x:String>
@@ -50,6 +51,8 @@
       <AssemblyReference>System.Xml</AssemblyReference>
       <AssemblyReference>System.Xml.Linq</AssemblyReference>
       <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Persistence.Activities</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
       <AssemblyReference>System.Data.DataSetExtensions</AssemblyReference>
       <AssemblyReference>System.Net.Mail</AssemblyReference>
       <AssemblyReference>System.ObjectModel</AssemblyReference>
@@ -73,6 +76,11 @@
       <Variable x:TypeArguments="x:Int32" Name="ConsecutiveSystemExceptions" Default="0" />
       <Variable x:TypeArguments="s:Exception" Name="SystemError" />
       <Variable x:TypeArguments="x:String" Name="TransactionStatus" />
+      <Variable x:TypeArguments="upaf:FormTaskData" Name="TaskPendente" />
+      <Variable x:TypeArguments="upaf:FormTaskData" Name="TaskResolvida" />
+      <Variable x:TypeArguments="nsjl:JObject" Name="ConteudoPendente" />
+      <Variable x:TypeArguments="x:String" Name="TaskAcao" />
+      <Variable x:TypeArguments="x:String" Name="PostIdPublicado" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -349,9 +357,86 @@
                         <InArgument x:TypeArguments="scg:List(x:String)" x:Key="in_Plataformas">
                           <CSharpValue x:TypeArguments="scg:List(x:String)">in_Plataformas</CSharpValue>
                         </InArgument>
+                        <OutArgument x:TypeArguments="upaf:FormTaskData" x:Key="out_TaskPendente">
+                          <CSharpReference x:TypeArguments="upaf:FormTaskData">TaskPendente</CSharpReference>
+                        </OutArgument>
+                        <OutArgument x:TypeArguments="nsjl:JObject" x:Key="out_Conteudo">
+                          <CSharpReference x:TypeArguments="nsjl:JObject">ConteudoPendente</CSharpReference>
+                        </OutArgument>
                       </scg:Dictionary>
                     </ui:InvokeWorkflowFile.Arguments>
                   </ui:InvokeWorkflowFile>
+                  <If DisplayName="Task de aprovação pendente?" sap2010:WorkflowViewState.IdRef="If_taskpendente">
+                    <If.Condition>
+                      <InArgument x:TypeArguments="x:Boolean">
+                        <CSharpValue x:TypeArguments="x:Boolean">TaskPendente != null</CSharpValue>
+                      </InArgument>
+                    </If.Condition>
+                    <If.Then>
+                      <Sequence DisplayName="Suspender → aguardar humano → continuar" sap2010:WorkflowViewState.IdRef="Sequence_wait">
+                        <TryCatch DisplayName="Wait com timeout B5 (48h)" sap2010:WorkflowViewState.IdRef="TryCatch_wait">
+                          <TryCatch.Try>
+                            <upaf:WaitForFormTaskAndResume DisplayName="Aguardar decisão humana" sap2010:WorkflowViewState.IdRef="WaitForFormTask_1" StatusMessage="{x:Null}" TimeoutMs="172800000" WaitItemDataObject="{x:Null}">
+                              <upaf:WaitForFormTaskAndResume.TaskInput>
+                                <InArgument x:TypeArguments="upaf:FormTaskData">
+                                  <CSharpValue x:TypeArguments="upaf:FormTaskData">TaskPendente</CSharpValue>
+                                </InArgument>
+                              </upaf:WaitForFormTaskAndResume.TaskInput>
+                              <upaf:WaitForFormTaskAndResume.TaskOutput>
+                                <OutArgument x:TypeArguments="upaf:FormTaskData">
+                                  <CSharpReference x:TypeArguments="upaf:FormTaskData">TaskResolvida</CSharpReference>
+                                </OutArgument>
+                              </upaf:WaitForFormTaskAndResume.TaskOutput>
+                              <upaf:WaitForFormTaskAndResume.TaskAction>
+                                <OutArgument x:TypeArguments="x:String">
+                                  <CSharpReference x:TypeArguments="x:String">TaskAcao</CSharpReference>
+                                </OutArgument>
+                              </upaf:WaitForFormTaskAndResume.TaskAction>
+                            </upaf:WaitForFormTaskAndResume>
+                          </TryCatch.Try>
+                          <TryCatch.Catches>
+                            <Catch x:TypeArguments="s:Exception">
+                              <ActivityAction x:TypeArguments="s:Exception">
+                                <ActivityAction.Argument>
+                                  <DelegateInArgument x:TypeArguments="s:Exception" Name="waitEx" />
+                                </ActivityAction.Argument>
+                                <Sequence DisplayName="Timeout/erro do wait → B5" sap2010:WorkflowViewState.IdRef="Sequence_b5">
+                                  <Throw DisplayName="B5 — timeout de aprovação" sap2010:WorkflowViewState.IdRef="Throw_b5">
+                                    <Throw.Exception>
+                                      <InArgument x:TypeArguments="s:Exception">
+                                        <CSharpValue x:TypeArguments="s:Exception">new BusinessRuleException("B5: aprovação excedeu 48h ou o wait falhou — " + waitEx.Message)</CSharpValue>
+                                      </InArgument>
+                                    </Throw.Exception>
+                                  </Throw>
+                                </Sequence>
+                              </ActivityAction>
+                            </Catch>
+                          </TryCatch.Catches>
+                        </TryCatch>
+                        <ui:InvokeWorkflowFile DisplayName="Pós-aprovação (decisão → registrar)" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_posaprovacao" WorkflowFileName="logica/Pos_Aprovacao.xaml">
+                          <ui:InvokeWorkflowFile.Arguments>
+                            <scg:Dictionary x:TypeArguments="x:String, Argument">
+                              <InArgument x:TypeArguments="upaf:FormTaskData" x:Key="in_TaskObj">
+                                <CSharpValue x:TypeArguments="upaf:FormTaskData">TaskResolvida</CSharpValue>
+                              </InArgument>
+                              <InArgument x:TypeArguments="x:Object" x:Key="in_TransactionData">
+                                <CSharpValue x:TypeArguments="x:Object">TransactionData</CSharpValue>
+                              </InArgument>
+                              <InArgument x:TypeArguments="nsjl:JObject" x:Key="in_Conteudo">
+                                <CSharpValue x:TypeArguments="nsjl:JObject">ConteudoPendente</CSharpValue>
+                              </InArgument>
+                              <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                                <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">ExecucaoContext</CSharpValue>
+                              </InArgument>
+                              <OutArgument x:TypeArguments="x:String" x:Key="out_PostId">
+                                <CSharpReference x:TypeArguments="x:String">PostIdPublicado</CSharpReference>
+                              </OutArgument>
+                            </scg:Dictionary>
+                          </ui:InvokeWorkflowFile.Arguments>
+                        </ui:InvokeWorkflowFile>
+                      </Sequence>
+                    </If.Then>
+                  </If>
                   <Assign DisplayName="Status Success">
                     <Assign.To>
                       <OutArgument x:TypeArguments="x:String">

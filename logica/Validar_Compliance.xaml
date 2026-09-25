@@ -1,0 +1,111 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Validar_Compliance" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
+    <x:Property Name="in_Conteudo" Type="InArgument(nsjl:JObject)" />
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+      <x:String>UiPath.Core.Activities.Storage</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Validar compliance BR-01..BR-05 (B2)" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="Plataforma" />
+      <Variable x:TypeArguments="x:String" Name="MediaUrl" />
+      <Variable x:TypeArguments="scg:IEnumerable(uist:StorageFileInfo)" Name="ArquivosBucket" />
+      <Variable x:TypeArguments="x:String" Name="LogOk" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;mediaUrl = data[&quot;MediaUrl&quot;] == null ? &quot;&quot; : data[&quot;MediaUrl&quot;].ToString();" DisplayName="Extrair plataforma/mídia do item" sap2010:WorkflowViewState.IdRef="InvokeCode_fields">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:Object" x:Key="inData">
+            <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="plataforma">
+            <CSharpReference x:TypeArguments="x:String">Plataforma</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="mediaUrl">
+            <CSharpReference x:TypeArguments="x:String">MediaUrl</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <If DisplayName="Checar mídia no bucket SM_Midia?" sap2010:WorkflowViewState.IdRef="If_media">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">!string.IsNullOrWhiteSpace(MediaUrl)</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Listar bucket" sap2010:WorkflowViewState.IdRef="Sequence_list">
+          <uist:ListStorageFiles Directory="\" DisplayName="Listar SM_Midia" sap2010:WorkflowViewState.IdRef="ListStorageFiles_1" StorageBucketName="SM_Midia">
+            <uist:ListStorageFiles.Result>
+              <OutArgument x:TypeArguments="scg:IEnumerable(uist:StorageFileInfo)">
+                <CSharpReference x:TypeArguments="scg:IEnumerable(uist:StorageFileInfo)">ArquivosBucket</CSharpReference>
+              </OutArgument>
+            </uist:ListStorageFiles.Result>
+          </uist:ListStorageFiles>
+        </Sequence>
+      </If.Then>
+    </If>
+    <ui:InvokeCode Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;var plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;var mediaUrl = data[&quot;MediaUrl&quot;] == null ? &quot;&quot; : data[&quot;MediaUrl&quot;].ToString();&#xA;var legenda = conteudo[&quot;Legenda&quot;] == null ? &quot;&quot; : conteudo[&quot;Legenda&quot;].ToString();&#xA;var hashtags = conteudo[&quot;Hashtags&quot;] == null ? new string[0] : conteudo[&quot;Hashtags&quot;].ToObject&lt;string[]&gt;();&#xA;&#xA;var cfg = ctx != null &amp;&amp; ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;var termos = new List&lt;string&gt;();&#xA;if (cfg[&quot;termos_proibidos&quot;] != null)&#xA;    foreach (var t in cfg[&quot;termos_proibidos&quot;]) termos.Add(t.ToString());&#xA;&#xA;// BR-03: mídia existe no bucket SM_Midia?&#xA;var mediaExiste = false;&#xA;if (arquivos != null &amp;&amp; !string.IsNullOrWhiteSpace(mediaUrl))&#xA;{&#xA;    foreach (var f in arquivos)&#xA;        if (f.FileFullPath == mediaUrl || f.FileFullPath.EndsWith(&quot;/&quot; + mediaUrl) || f.FileFullPath.EndsWith(mediaUrl)) { mediaExiste = true; break; }&#xA;}&#xA;&#xA;var violacoes = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(plataforma, legenda, hashtags, mediaUrl, mediaExiste, termos);&#xA;if (violacoes.Count &gt; 0)&#xA;    throw new UiPath.Core.BusinessRuleException(&quot;Conteúdo violou compliance (B2): &quot; + string.Join(&quot; | &quot;, violacoes));&#xA;msg = &quot;Compliance OK: &quot; + plataforma + &quot;, legenda &quot; + legenda.Length + &quot; chars, &quot; + hashtags.Length + &quot; hashtags&quot;;" DisplayName="ValidarCompliance → B2 se violação" sap2010:WorkflowViewState.IdRef="InvokeCode_validate">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:Object" x:Key="inData">
+            <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="nsjl:JObject" x:Key="conteudo">
+            <CSharpValue x:TypeArguments="nsjl:JObject">in_Conteudo</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="scg:IEnumerable(uist:StorageFileInfo)" x:Key="arquivos">
+            <CSharpValue x:TypeArguments="scg:IEnumerable(uist:StorageFileInfo)">ArquivosBucket</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="msg">
+            <CSharpReference x:TypeArguments="x:String">LogOk</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <ui:LogMessage DisplayName="Compliance aprovado" sap2010:WorkflowViewState.IdRef="LogMessage_ok" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">LogOk</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

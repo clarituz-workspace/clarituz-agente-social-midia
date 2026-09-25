@@ -46,6 +46,74 @@ Responda APENAS com JSON válido, sem markdown, no formato:
             };
         }
 
+        public static string MontarPromptPautas(string nicho, string tomDeVoz, int quantidade)
+        {
+            return
+$@"Você é Camila, social media especialista em campanhas estratégicas de alta conversão.
+
+Sugira {quantidade} pautas de posts para o nicho ""{nicho}"" com tom de voz ""{tomDeVoz}"".
+Cada pauta deve ser específica, acionável e orientada a conversão (não temas genéricos).
+
+Responda APENAS com JSON válido, sem markdown, no formato:
+[{{""tema"": ""..."", ""mediaUrl"": null}}]";
+        }
+
+        public static JArray ParsearPautas(string respostaLlm)
+        {
+            if (string.IsNullOrWhiteSpace(respostaLlm))
+                throw new FormatException("Resposta LLM vazia");
+            var inicio = respostaLlm.IndexOf('[');
+            var fim = respostaLlm.LastIndexOf(']');
+            if (inicio < 0 || fim <= inicio)
+                throw new FormatException("Resposta LLM não contém array JSON de pautas");
+            return JArray.Parse(respostaLlm.Substring(inicio, fim - inicio + 1));
+        }
+
+        // Validação de compliance BR-01..BR-05 — retorna lista de violações (vazia = aprovado).
+        public static List<string> ValidarCompliance(string plataforma, string legenda, string[] hashtags,
+            string mediaUrl, bool mediaExisteNoBucket, IEnumerable<string> termosProibidos)
+        {
+            var violacoes = new List<string>();
+            var limite = LimiteLegenda.TryGetValue(plataforma ?? "", out var l) ? l : 2200;
+
+            // BR-01 — limite de legenda
+            if ((legenda ?? "").Length > limite)
+                violacoes.Add($"BR-01: legenda com {(legenda ?? "").Length} chars excede limite {limite} ({plataforma})");
+
+            // BR-02 — máximo de hashtags
+            var maxHashtags = plataforma == "LinkedIn" ? 5 : 30;
+            var nHashtags = (hashtags ?? Array.Empty<string>()).Length;
+            if (nHashtags > maxHashtags)
+                violacoes.Add($"BR-02: {nHashtags} hashtags excede máximo {maxHashtags} ({plataforma})");
+
+            // BR-03 — mídia obrigatória no Instagram
+            if (plataforma == "Instagram" && (string.IsNullOrWhiteSpace(mediaUrl) || !mediaExisteNoBucket))
+                violacoes.Add("BR-03: post de feed Instagram exige MediaUrl válida no bucket SM_Midia");
+
+            // BR-04 — formato de mídia
+            if (!string.IsNullOrWhiteSpace(mediaUrl))
+            {
+                var ext = mediaUrl.Contains('.')
+                    ? mediaUrl.Substring(mediaUrl.LastIndexOf('.') + 1).ToLowerInvariant()
+                    : "";
+                if (ext != "jpeg" && ext != "jpg" && ext != "png" && ext != "mp4")
+                    violacoes.Add($"BR-04: extensão de mídia '{ext}' não suportada (permitidas: jpeg, png, mp4)");
+            }
+
+            // BR-05 — termos proibidos
+            if (termosProibidos != null)
+            {
+                var texto = ((legenda ?? "") + " " + string.Join(" ", hashtags ?? Array.Empty<string>())).ToLowerInvariant();
+                foreach (var termo in termosProibidos)
+                {
+                    if (!string.IsNullOrWhiteSpace(termo) && texto.Contains(termo.ToLowerInvariant()))
+                        violacoes.Add($"BR-05: termo proibido '{termo}' encontrado no conteúdo");
+                }
+            }
+
+            return violacoes;
+        }
+
         public static string MontarPromptSentimento(WorkItemData item)
         {
             return

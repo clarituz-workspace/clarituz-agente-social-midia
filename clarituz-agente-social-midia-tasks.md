@@ -102,17 +102,17 @@
 ## Task T6 — uipath-rpa — GerarConteudo pipeline (generate → validate → approve → register)
 
 **Identity:** `rpa:clarituz-agente-social-midia:gerar-conteudo-pipeline`
-**Status:** [ ] pending
+**Status:** [x] done
 **Blocked by:** T3, T4
 **Skill prompt:**
 
 > Load uipath-rpa and implement the GerarConteudo transaction pipeline per §3 steps 3–6 of `clarituz-agente-social-midia-sdd.md`: `logica/Gerar_Conteudo.xaml` (ConteudoService → ConteudoGerado), `logica/Validar_Compliance.xaml` (BR-01..BR-05, BusinessException on violation), `logica/Aprovacao_Humana.xaml` (Create Form Task with publication package + `PostUrl` field + janela/limite informative fields → Wait and Resume — suspend point), `logica/Registrar_Post_Publicado.xaml` (resolve post_id from PostUrl via read-only API lookup → enqueue ColetarMetricas DeferDate +24h; B9 on invalid URL). The robot never publishes. Delivery model: cloud.
 > Use values, mappings, and structure exactly as documented in the SDD at clarituz-agente-social-midia-sdd.md. Do not infer or guess.
 
-- [ ] `Gerar_Conteudo.xaml` + `Validar_Compliance.xaml` (BR-01..BR-05)
-- [ ] `Aprovacao_Humana.xaml` — Form Task + suspend/resume + PostUrl
-- [ ] `Registrar_Post_Publicado.xaml` — post_id resolution + metrics enqueue
-- [ ] **Validate:** per-file validate + project build clean
+- [x] `Gerar_Conteudo.xaml` + `Validar_Compliance.xaml` (BR-01..BR-05)
+- [x] `Aprovacao_Humana.xaml` — CreateFormTask apenas (pacote publicação + decisao/legenda_editada/url_post_publicado/motivo_rejeicao). **Desvio ST-DBP-024:** WaitForFormTaskAndResume não pode ficar em sub-workflow → movido para `Main.xaml` (timeout 48h → B5 via TryCatch→BusinessRuleException); decisão pós-resume isolada em `logica/Pos_Aprovacao.xaml` (Rejeitado→B1, Editado→revalida compliance, BR-08 PostUrl obrigatória → Registrar_Post_Publicado). Process.xaml retorna `out_TaskPendente`/`out_Conteudo` para o Main.
+- [x] `Registrar_Post_Publicado.xaml` — post_id resolution + metrics enqueue
+- [x] **Validate:** per-file validate 0 erros + `uip rpa build` Success (warnings: FormActivityLibrary designer, AH URL, Log Message Http_Retry)
 
 ## Task T7 — uipath-rpa — Moderar_Comentario (suggestion tasks only)
 

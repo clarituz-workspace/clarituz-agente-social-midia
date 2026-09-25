@@ -1,0 +1,93 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Gerar_Conteudo" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_Conteudo" Type="OutArgument(nsjl:JObject)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="GerarConteudo — LLM gera legenda+hashtags+mediaPrompt" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="Prompt" />
+      <Variable x:TypeArguments="x:String" Name="RespostaLLM" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;var item = new clarituz_agente_social_midia.WorkItemData&#xA;{&#xA;    TipoTransacao = &quot;GerarConteudo&quot;,&#xA;    Plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString(),&#xA;    Nicho = data[&quot;Nicho&quot;] == null ? &quot;&quot; : data[&quot;Nicho&quot;].ToString(),&#xA;    TomDeVoz = data[&quot;TomDeVoz&quot;] == null ? &quot;&quot; : data[&quot;TomDeVoz&quot;].ToString(),&#xA;    Tema = data[&quot;Tema&quot;] == null ? &quot;&quot; : data[&quot;Tema&quot;].ToString(),&#xA;    MediaUrl = data[&quot;MediaUrl&quot;] == null ? &quot;&quot; : data[&quot;MediaUrl&quot;].ToString()&#xA;};&#xA;var janela = ctx.ContainsKey(&quot;JanelaPublicacao&quot;) ? ctx[&quot;JanelaPublicacao&quot;] as string : null;&#xA;prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptGeracao(item, janela ?? &quot;&quot;);" DisplayName="Montar prompt de geração" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:Object" x:Key="inData">
+            <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="prompt">
+            <CSharpReference x:TypeArguments="x:String">Prompt</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <ui:InvokeWorkflowFile DisplayName="LLM: gerar conteúdo" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_llm" WorkflowFileName="shared/LLM_Completion.xaml">
+      <ui:InvokeWorkflowFile.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="in_Prompt">
+            <CSharpValue x:TypeArguments="x:String">Prompt</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="out_Texto">
+            <CSharpReference x:TypeArguments="x:String">RespostaLLM</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeWorkflowFile.Arguments>
+    </ui:InvokeWorkflowFile>
+    <ui:InvokeCode Code="var gerado = clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(resposta);&#xA;conteudo = JObject.FromObject(gerado);" DisplayName="Parsear ConteudoGerado (E5)" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="resposta">
+            <CSharpValue x:TypeArguments="x:String">RespostaLLM</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="nsjl:JObject" x:Key="conteudo">
+            <CSharpReference x:TypeArguments="nsjl:JObject">out_Conteudo</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <ui:LogMessage DisplayName="Conteúdo gerado" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"GerarConteudo: legenda " + (out_Conteudo["Legenda"] == null ? 0 : out_Conteudo["Legenda"].ToString().Length) + " chars, " + (out_Conteudo["Hashtags"] == null ? 0 : ((JArray)out_Conteudo["Hashtags"]).Count) + " hashtags"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

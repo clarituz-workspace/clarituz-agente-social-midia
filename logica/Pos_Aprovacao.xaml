@@ -1,0 +1,177 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Pos_Aprovacao" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:upaf="clr-namespace:UiPath.Persistence.Activities.FormTask;assembly=UiPath.Persistence.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_TaskObj" Type="InArgument(upaf:FormTaskData)" />
+    <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
+    <x:Property Name="in_Conteudo" Type="InArgument(nsjl:JObject)" />
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_PostId" Type="OutArgument(x:String)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Persistence.Activities</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Pós-aprovação — decisão humana → registrar post" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="Decisao" />
+      <Variable x:TypeArguments="x:String" Name="PostUrl" />
+      <Variable x:TypeArguments="x:String" Name="LegendaEditada" />
+      <Variable x:TypeArguments="x:String" Name="MotivoRejeicao" />
+      <Variable x:TypeArguments="nsjl:JObject" Name="ConteudoFinal" />
+      <Variable x:TypeArguments="x:String" Name="Plataforma" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode Code="var dados = taskObj == null ? new JObject() : taskObj.GetDataJsonObject();&#xA;decisao = dados[&quot;decisao&quot;] == null ? &quot;Aprovado&quot; : dados[&quot;decisao&quot;].ToString();&#xA;postUrl = dados[&quot;url_post_publicado&quot;] == null ? &quot;&quot; : dados[&quot;url_post_publicado&quot;].ToString();&#xA;legendaEditada = dados[&quot;legenda_editada&quot;] == null ? null : dados[&quot;legenda_editada&quot;].ToString();&#xA;motivo = dados[&quot;motivo_rejeicao&quot;] == null ? &quot;&quot; : dados[&quot;motivo_rejeicao&quot;].ToString();&#xA;conteudoFinal = conteudo == null ? new JObject() : (JObject)conteudo.DeepClone();&#xA;if (!string.IsNullOrEmpty(legendaEditada)) conteudoFinal[&quot;Legenda&quot;] = legendaEditada;&#xA;var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();" DisplayName="Ler decisão da task" sap2010:WorkflowViewState.IdRef="InvokeCode_decisao">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="upaf:FormTaskData" x:Key="taskObj">
+            <CSharpValue x:TypeArguments="upaf:FormTaskData">in_TaskObj</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:Object" x:Key="inData">
+            <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="nsjl:JObject" x:Key="conteudo">
+            <CSharpValue x:TypeArguments="nsjl:JObject">in_Conteudo</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="decisao">
+            <CSharpReference x:TypeArguments="x:String">Decisao</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="postUrl">
+            <CSharpReference x:TypeArguments="x:String">PostUrl</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="legendaEditada">
+            <CSharpReference x:TypeArguments="x:String">LegendaEditada</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="motivo">
+            <CSharpReference x:TypeArguments="x:String">MotivoRejeicao</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="nsjl:JObject" x:Key="conteudoFinal">
+            <CSharpReference x:TypeArguments="nsjl:JObject">ConteudoFinal</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="plataforma">
+            <CSharpReference x:TypeArguments="x:String">Plataforma</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <If DisplayName="Rejeitado?" sap2010:WorkflowViewState.IdRef="If_rejeitado">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">Decisao == "Rejeitado"</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Descartar (B1)" sap2010:WorkflowViewState.IdRef="Sequence_b1">
+          <Throw DisplayName="B1 — rejeitado" sap2010:WorkflowViewState.IdRef="Throw_b1">
+            <Throw.Exception>
+              <InArgument x:TypeArguments="s:Exception">
+                <CSharpValue x:TypeArguments="s:Exception">new UiPath.Core.BusinessRuleException("B1: post rejeitado pelo humano — " + MotivoRejeicao)</CSharpValue>
+              </InArgument>
+            </Throw.Exception>
+          </Throw>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Aprovado/Editado → registrar" sap2010:WorkflowViewState.IdRef="Sequence_aprovado">
+          <If DisplayName="PostUrl obrigatória (BR-08)" sap2010:WorkflowViewState.IdRef="If_posturl">
+            <If.Condition>
+              <InArgument x:TypeArguments="x:Boolean">
+                <CSharpValue x:TypeArguments="x:Boolean">string.IsNullOrWhiteSpace(PostUrl)</CSharpValue>
+              </InArgument>
+            </If.Condition>
+            <If.Then>
+              <Sequence DisplayName="Sem PostUrl" sap2010:WorkflowViewState.IdRef="Sequence_noposturl">
+                <Throw DisplayName="BR-08 violado" sap2010:WorkflowViewState.IdRef="Throw_br08">
+                  <Throw.Exception>
+                    <InArgument x:TypeArguments="s:Exception">
+                      <CSharpValue x:TypeArguments="s:Exception">new UiPath.Core.BusinessRuleException("BR-08: decisão '" + Decisao + "' sem URL do post publicado — informar PostUrl na task")</CSharpValue>
+                    </InArgument>
+                  </Throw.Exception>
+                </Throw>
+              </Sequence>
+            </If.Then>
+          </If>
+          <If DisplayName="Editado → revalidar legenda" sap2010:WorkflowViewState.IdRef="If_editado">
+            <If.Condition>
+              <InArgument x:TypeArguments="x:Boolean">
+                <CSharpValue x:TypeArguments="x:Boolean">Decisao == "Editado"</CSharpValue>
+              </InArgument>
+            </If.Condition>
+            <If.Then>
+              <Sequence DisplayName="Revalidar (BR-01..BR-05)" sap2010:WorkflowViewState.IdRef="Sequence_revalidar">
+                <ui:InvokeWorkflowFile DisplayName="2b. Revalidar compliance" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_revalidar" WorkflowFileName="logica/Validar_Compliance.xaml">
+                  <ui:InvokeWorkflowFile.Arguments>
+                    <scg:Dictionary x:TypeArguments="x:String, Argument">
+                      <InArgument x:TypeArguments="x:Object" x:Key="in_TransactionData">
+                        <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
+                      </InArgument>
+                      <InArgument x:TypeArguments="nsjl:JObject" x:Key="in_Conteudo">
+                        <CSharpValue x:TypeArguments="nsjl:JObject">ConteudoFinal</CSharpValue>
+                      </InArgument>
+                      <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                        <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                      </InArgument>
+                    </scg:Dictionary>
+                  </ui:InvokeWorkflowFile.Arguments>
+                </ui:InvokeWorkflowFile>
+              </Sequence>
+            </If.Then>
+          </If>
+          <ui:InvokeWorkflowFile DisplayName="4. Registrar post publicado" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_registrar" WorkflowFileName="logica/Registrar_Post_Publicado.xaml">
+            <ui:InvokeWorkflowFile.Arguments>
+              <scg:Dictionary x:TypeArguments="x:String, Argument">
+                <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                  <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="in_Plataforma">
+                  <CSharpValue x:TypeArguments="x:String">Plataforma</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="in_PostUrl">
+                  <CSharpValue x:TypeArguments="x:String">PostUrl</CSharpValue>
+                </InArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="out_PostId">
+                  <CSharpReference x:TypeArguments="x:String">out_PostId</CSharpReference>
+                </OutArgument>
+              </scg:Dictionary>
+            </ui:InvokeWorkflowFile.Arguments>
+          </ui:InvokeWorkflowFile>
+        </Sequence>
+      </If.Else>
+    </If>
+    <ui:LogMessage DisplayName="Pós-aprovação concluída" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"Decisão: " + Decisao + " — postId=" + (out_PostId ?? "(nenhum)")</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

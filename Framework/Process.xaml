@@ -1,10 +1,12 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="Framework_Process" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="Framework_Process" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:upaf="clr-namespace:UiPath.Persistence.Activities.FormTask;assembly=UiPath.Persistence.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_TransactionItem" Type="InArgument(x:Object)" />
     <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
     <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
     <x:Property Name="in_ModoExecucao" Type="InArgument(x:String)" />
     <x:Property Name="in_Plataformas" Type="InArgument(scg:List(x:String))" />
+    <x:Property Name="out_TaskPendente" Type="OutArgument(upaf:FormTaskData)" />
+    <x:Property Name="out_Conteudo" Type="OutArgument(nsjl:JObject)" />
   </x:Members>
   <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
   <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
@@ -28,6 +30,7 @@
       <AssemblyReference>System</AssemblyReference>
       <AssemblyReference>System.Private.CoreLib</AssemblyReference>
       <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Persistence.Activities</AssemblyReference>
       <AssemblyReference>System.Linq</AssemblyReference>
       <AssemblyReference>Newtonsoft.Json</AssemblyReference>
       <AssemblyReference>System.ObjectModel</AssemblyReference>
@@ -161,14 +164,70 @@
                 </Throw>
               </Sequence>
             </Switch.Default>
-            <Sequence x:Key="GerarConteudo" DisplayName="GerarConteudo (T6)" sap2010:WorkflowViewState.IdRef="Case_gerar">
-              <ui:LogMessage DisplayName="GerarConteudo pendente" sap2010:WorkflowViewState.IdRef="LogMessage_gerar" Level="Warn">
-                <ui:LogMessage.Message>
-                  <InArgument x:TypeArguments="x:Object">
-                    <CSharpValue x:TypeArguments="x:Object">"GerarConteudo recebido — pipeline implementado na T6"</CSharpValue>
+            <Sequence x:Key="GerarConteudo" DisplayName="Pipeline GerarConteudo" sap2010:WorkflowViewState.IdRef="Case_gerar">
+              <Sequence.Variables>
+                <Variable x:TypeArguments="nsjl:JObject" Name="Conteudo" />
+              </Sequence.Variables>
+              <ui:InvokeWorkflowFile DisplayName="1. Gerar conteúdo (LLM)" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_gerar" WorkflowFileName="logica/Gerar_Conteudo.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="x:Object" x:Key="in_TransactionData">
+                      <CSharpValue x:TypeArguments="x:Object">SpecData</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="nsjl:JObject" x:Key="out_Conteudo">
+                      <CSharpReference x:TypeArguments="nsjl:JObject">Conteudo</CSharpReference>
+                    </OutArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+              <ui:InvokeWorkflowFile DisplayName="2. Validar compliance" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_compliance" WorkflowFileName="logica/Validar_Compliance.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="x:Object" x:Key="in_TransactionData">
+                      <CSharpValue x:TypeArguments="x:Object">SpecData</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="nsjl:JObject" x:Key="in_Conteudo">
+                      <CSharpValue x:TypeArguments="nsjl:JObject">Conteudo</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+              <ui:InvokeWorkflowFile DisplayName="3. Criar task de aprovação" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_aprovacao" WorkflowFileName="logica/Aprovacao_Humana.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="x:Object" x:Key="in_TransactionData">
+                      <CSharpValue x:TypeArguments="x:Object">SpecData</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="nsjl:JObject" x:Key="in_Conteudo">
+                      <CSharpValue x:TypeArguments="nsjl:JObject">Conteudo</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="upaf:FormTaskData" x:Key="out_TaskObj">
+                      <CSharpReference x:TypeArguments="upaf:FormTaskData">out_TaskPendente</CSharpReference>
+                    </OutArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+              <Assign DisplayName="Conteúdo → out" sap2010:WorkflowViewState.IdRef="Assign_conteudo_out">
+                <Assign.To>
+                  <OutArgument x:TypeArguments="nsjl:JObject">
+                    <CSharpReference x:TypeArguments="nsjl:JObject">out_Conteudo</CSharpReference>
+                  </OutArgument>
+                </Assign.To>
+                <Assign.Value>
+                  <InArgument x:TypeArguments="nsjl:JObject">
+                    <CSharpValue x:TypeArguments="nsjl:JObject">Conteudo</CSharpValue>
                   </InArgument>
-                </ui:LogMessage.Message>
-              </ui:LogMessage>
+                </Assign.Value>
+              </Assign>
             </Sequence>
             <Sequence x:Key="ModerarComentario" DisplayName="ModerarComentario (T7)" sap2010:WorkflowViewState.IdRef="Case_moderar">
               <ui:LogMessage DisplayName="ModerarComentario pendente" sap2010:WorkflowViewState.IdRef="LogMessage_moderar" Level="Warn">

@@ -1,0 +1,255 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Aprovacao_Humana" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:njl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:upaf="clr-namespace:UiPath.Persistence.Activities.FormTask;assembly=UiPath.Persistence.Activities" xmlns:upat="clr-namespace:UiPath.Persistence.Activities.Tasks;assembly=UiPath.Persistence.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
+    <x:Property Name="in_Conteudo" Type="InArgument(njl:JObject)" />
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_TaskObj" Type="OutArgument(upaf:FormTaskData)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+      <x:String>System.Collections</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Persistence.Activities</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+      <AssemblyReference>GlobalVariablesT1PNoYwrqg</AssemblyReference>
+      <AssemblyReference>UiPath.Studio.Constants</AssemblyReference>
+      <AssemblyReference>System.Collections</AssemblyReference>
+      <AssemblyReference>System.Collections.NonGeneric</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Aprovação humana — pacote de publicação (suspend/resume)" sap:VirtualizedContainerService.HintSize="1180,691.6566666666666" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="Titulo" />
+      <Variable x:TypeArguments="x:String" Name="HashtagsTexto" />
+      <Variable x:TypeArguments="x:String" Name="JanelaInfo" />
+      <Variable x:TypeArguments="x:String" Name="AvisoLimite" />
+      <Variable x:TypeArguments="x:String" Name="Tema" />
+      <Variable x:TypeArguments="x:String" Name="MediaUrl" />
+      <Variable x:TypeArguments="x:String" Name="Plataforma" />
+      <Variable x:TypeArguments="upaf:FormTaskData" Name="TaskObj" />
+      <Variable x:TypeArguments="x:String" Name="AcaoTask" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode ContinueOnError="{x:Null}" Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;tema = data[&quot;Tema&quot;] == null ? &quot;&quot; : data[&quot;Tema&quot;].ToString();&#xA;mediaUrl = data[&quot;MediaUrl&quot;] == null ? &quot;&quot; : data[&quot;MediaUrl&quot;].ToString();&#xA;titulo = &quot;Aprovar e publicar post — &quot; + plataforma + &quot; — &quot; + (tema.Length &gt; 60 ? tema.Substring(0, 60) + &quot;…&quot; : tema);&#xA;hashtagsTexto = conteudo[&quot;Hashtags&quot;] == null ? &quot;&quot; : string.Join(&quot; &quot;, conteudo[&quot;Hashtags&quot;].ToObject&lt;string[]&gt;().Select(h =&gt; &quot;#&quot; + h));&#xA;var janela = ctx != null &amp;&amp; ctx.ContainsKey(&quot;JanelaPublicacao&quot;) ? ctx[&quot;JanelaPublicacao&quot;] as string : null;&#xA;janelaInfo = string.IsNullOrEmpty(janela) ? &quot;Sem janela sugerida configurada — publique quando apropriado.&quot; : &quot;Janela sugerida (informativo): &quot; + janela;&#xA;var limite = ctx != null &amp;&amp; ctx.ContainsKey(&quot;LimitePostsDia&quot;) ? Convert.ToInt32(ctx[&quot;LimitePostsDia&quot;]) : 3;&#xA;var hoje = ctx != null &amp;&amp; ctx.ContainsKey(&quot;PostsPublicadosHoje&quot;) ? Convert.ToInt32(ctx[&quot;PostsPublicadosHoje&quot;]) : 0;&#xA;avisoLimite = hoje &gt;= limite ? &quot;ATENÇÃO: limite diário sugerido atingido (&quot; + hoje + &quot;/&quot; + limite + &quot; posts hoje). A decisão é sua.&quot; : &quot;Posts hoje: &quot; + hoje + &quot;/&quot; + limite + &quot; (informativo).&quot;;&#xA;// Defaults dos campos editáveis da task&#xA;decisao = &quot;Aprovado&quot;;&#xA;legendaEditada = conteudo[&quot;Legenda&quot;] == null ? &quot;&quot; : conteudo[&quot;Legenda&quot;].ToString();&#xA;postUrl = &quot;&quot;;&#xA;motivo = &quot;&quot;;" DisplayName="Montar pacote de publicação" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="InvokeCode_pkg">
+      <ui:InvokeCode.Arguments>
+        <InArgument x:TypeArguments="x:Object" x:Key="inData">
+          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">in_TransactionData</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="njl:JObject" x:Key="conteudo">
+          <CSharpValue x:TypeArguments="njl:JObject" sap2010:WorkflowViewState.IdRef="CSharpValue`1_2">in_Conteudo</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+          <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)" sap2010:WorkflowViewState.IdRef="CSharpValue`1_3">in_ExecucaoContext</CSharpValue>
+        </InArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="titulo">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_1">Titulo</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="plataforma">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_2">Plataforma</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="tema">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_3">Tema</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="mediaUrl">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_4">MediaUrl</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="hashtagsTexto">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_5">HashtagsTexto</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="janelaInfo">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_6">JanelaInfo</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="avisoLimite">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_7">AvisoLimite</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="decisao">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_8">out_Decisao</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="legendaEditada">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_9">out_LegendaEditada</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="postUrl">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_10">out_PostUrl</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="motivo">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_11">out_MotivoRejeicao</CSharpReference>
+        </OutArgument>
+      </ui:InvokeCode.Arguments>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:InvokeCode>
+    <upaf:CreateFormTask AssignmentCriteria="{x:Reference __ReferenceID0}" AutoCompleteOutcome="{x:Null}" BucketFolderPath="{x:Null}" BucketName="{x:Null}" BulkFormLayout="{x:Null}" DynamicFormPath="{x:Null}" ExternalTag="{x:Null}" FormLayout="{x:Null}" Group="{x:Null}" Labels="{x:Null}" ReassignGroup="{x:Null}" ReassignUser="{x:Null}" TaskCatalog="{x:Null}" TimeoutMs="{x:Null}" TimerDuration="{x:Null}" UserNameOrEmail="{x:Null}" BulkFormLayoutGuid="a4e7d2d4-a06a-41c1-a1f1-40aa9ac1b533" DisplayName="Criar task de aprovação" EnableBulkEdit="False" EnableDynamicForms="False" EnableV2="True" EndCriteria="TaskCompleted" FormLayoutGuid="54185359-860a-44ac-becb-2fbf0b5dce01" GenerateInputFields="True" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="CreateFormTask_1" Outcome="Notify" StartCriteria="TaskCreated" TaskPriority="Medium" TaskTimerEnabled="False">
+      <upaf:CreateFormTask.FormData>
+        <InArgument x:TypeArguments="x:String" x:Key="plataforma">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_4">Plataforma</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="x:String" x:Key="tema">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_5">Tema</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="x:String" x:Key="media_bucket">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_6">MediaUrl</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="x:String" x:Key="hashtags">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_7">HashtagsTexto</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="x:String" x:Key="janela_sugerida">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_8">JanelaInfo</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="x:String" x:Key="aviso_limite">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_9">AvisoLimite</CSharpValue>
+        </InArgument>
+        <InOutArgument x:TypeArguments="x:String" x:Key="decisao">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_12">out_Decisao</CSharpReference>
+        </InOutArgument>
+        <InOutArgument x:TypeArguments="x:String" x:Key="legenda_editada">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_13">out_LegendaEditada</CSharpReference>
+        </InOutArgument>
+        <InOutArgument x:TypeArguments="x:String" x:Key="url_post_publicado">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_14">out_PostUrl</CSharpReference>
+        </InOutArgument>
+        <InOutArgument x:TypeArguments="x:String" x:Key="motivo_rejeicao">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_15">out_MotivoRejeicao</CSharpReference>
+        </InOutArgument>
+      </upaf:CreateFormTask.FormData>
+      <upaf:CreateFormTask.ReassignCriteria>
+        <upat:Criteria x:Name="__ReferenceID0" Description="SingleUserDescription" Id="SingleUser" Name="Activity_AssignTasks_AssignmentCriteria_SingleUserName" />
+      </upaf:CreateFormTask.ReassignCriteria>
+      <upaf:CreateFormTask.TaskOutput>
+        <OutArgument x:TypeArguments="upaf:FormTaskData">
+          <CSharpReference x:TypeArguments="upaf:FormTaskData" sap2010:WorkflowViewState.IdRef="CSharpReference`1_16">TaskObj</CSharpReference>
+        </OutArgument>
+      </upaf:CreateFormTask.TaskOutput>
+      <upaf:CreateFormTask.TaskTitle>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_10">Titulo</CSharpValue>
+        </InArgument>
+      </upaf:CreateFormTask.TaskTitle>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </upaf:CreateFormTask>
+    <ui:LogMessage DisplayName="Task criada — aguardando humano" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="LogMessage_wait" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_11">"Aprovação pendente no Action Center: " + Titulo + " — o humano publica o post e informa a URL"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:LogMessage>
+    <TryCatch DisplayName="Aguardar aprovação (48h)" sap:VirtualizedContainerService.HintSize="480,403" sap2010:WorkflowViewState.IdRef="TryCatch_wait">
+      <TryCatch.Try>
+        <Sequence DisplayName="Wait" sap:VirtualizedContainerService.HintSize="480,96" sap2010:WorkflowViewState.IdRef="Sequence_wait">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+          <upaf:WaitForFormTaskAndResume StatusMessage="{x:Null}" WaitItemDataObject="{x:Null}" DisplayName="Suspender até decisão" sap:VirtualizedContainerService.HintSize="450,48" sap2010:WorkflowViewState.IdRef="WaitForFormTaskAndResume_1" TimeoutMs="172800000">
+            <upaf:WaitForFormTaskAndResume.TaskAction>
+              <OutArgument x:TypeArguments="x:String">
+                <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_17">AcaoTask</CSharpReference>
+              </OutArgument>
+            </upaf:WaitForFormTaskAndResume.TaskAction>
+            <upaf:WaitForFormTaskAndResume.TaskInput>
+              <InArgument x:TypeArguments="upaf:FormTaskData">
+                <CSharpValue x:TypeArguments="upaf:FormTaskData" sap2010:WorkflowViewState.IdRef="CSharpValue`1_12">TaskObj</CSharpValue>
+              </InArgument>
+            </upaf:WaitForFormTaskAndResume.TaskInput>
+            <upaf:WaitForFormTaskAndResume.TaskOutput>
+              <OutArgument x:TypeArguments="upaf:FormTaskData">
+                <CSharpReference x:TypeArguments="upaf:FormTaskData" sap2010:WorkflowViewState.IdRef="CSharpReference`1_18">TaskObj</CSharpReference>
+              </OutArgument>
+            </upaf:WaitForFormTaskAndResume.TaskOutput>
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+          </upaf:WaitForFormTaskAndResume>
+        </Sequence>
+      </TryCatch.Try>
+      <TryCatch.Catches>
+        <Catch x:TypeArguments="s:Exception" sap2010:WorkflowViewState.IdRef="Catch`1_1">
+          <ActivityAction x:TypeArguments="s:Exception">
+            <ActivityAction.Argument>
+              <DelegateInArgument x:TypeArguments="s:Exception" Name="waitEx" />
+            </ActivityAction.Argument>
+            <Sequence DisplayName="Timeout B5" sap:VirtualizedContainerService.HintSize="480,96" sap2010:WorkflowViewState.IdRef="Sequence_b5">
+              <sap:WorkflowViewStateService.ViewState>
+                <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                  <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                </scg:Dictionary>
+              </sap:WorkflowViewStateService.ViewState>
+              <Throw DisplayName="B5 — timeout de aprovação" sap:VirtualizedContainerService.HintSize="450,48" sap2010:WorkflowViewState.IdRef="Throw_b5">
+                <sap:WorkflowViewStateService.ViewState>
+                  <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                    <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+                  </scg:Dictionary>
+                </sap:WorkflowViewStateService.ViewState>
+                <InArgument x:TypeArguments="s:Exception">
+                  <CSharpValue x:TypeArguments="s:Exception" sap2010:WorkflowViewState.IdRef="CSharpValue`1_13">new UiPath.Core.BusinessRuleException("B5: aprovação excedeu o prazo de 48h — item abortado (" + waitEx.Message + ")")</CSharpValue>
+                </InArgument>
+              </Throw>
+            </Sequence>
+          </ActivityAction>
+        </Catch>
+      </TryCatch.Catches>
+      <TryCatch.Finally>
+        <Sequence DisplayName="Por fim" sap:VirtualizedContainerService.HintSize="480,96" sap2010:WorkflowViewState.IdRef="Sequence_2">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+        </Sequence>
+      </TryCatch.Finally>
+    </TryCatch>
+    <ui:LogMessage DisplayName="Decisão recebida" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="LogMessage_decision" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_14">"Decisão do humano: " + out_Decisao + " | PostUrl: " + (string.IsNullOrEmpty(out_PostUrl) ? "(vazia)" : out_PostUrl)</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

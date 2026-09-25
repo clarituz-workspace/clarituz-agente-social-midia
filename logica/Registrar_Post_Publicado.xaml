@@ -1,0 +1,254 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Registrar_Post_Publicado" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="in_Plataforma" Type="InArgument(x:String)" />
+    <x:Property Name="in_PostUrl" Type="InArgument(x:String)" />
+    <x:Property Name="out_PostId" Type="OutArgument(x:String)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Registrar post publicado — resolver post_id + agendar métricas" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="PostPermalink" />
+      <Variable x:TypeArguments="x:String" Name="JsonlAtual" />
+      <Variable x:TypeArguments="x:String" Name="JsonlNovo" />
+      <Variable x:TypeArguments="x:String" Name="Referencia" />
+      <Variable x:TypeArguments="scg:Dictionary(x:String, x:Object)" Name="ItemInfo" />
+      <Variable x:TypeArguments="x:String" Name="ContadorJson" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <Sequence DisplayName="Resolver post_id (credenciais no escopo)" sap2010:WorkflowViewState.IdRef="Sequence_resolve">
+      <Sequence.Variables>
+        <Variable x:TypeArguments="sec:SecureString" Name="MetaSecure" />
+        <Variable x:TypeArguments="sec:SecureString" Name="LinkedInSecure" />
+      </Sequence.Variables>
+      <ui:GetRobotCredential AssetName="Meta_SystemUserToken" CacheStrategy="None" DisplayName="Credencial Meta" sap2010:WorkflowViewState.IdRef="GetRobotCredential_meta">
+        <ui:GetRobotCredential.Password>
+          <OutArgument x:TypeArguments="sec:SecureString">
+            <CSharpReference x:TypeArguments="sec:SecureString">MetaSecure</CSharpReference>
+          </OutArgument>
+        </ui:GetRobotCredential.Password>
+      </ui:GetRobotCredential>
+      <ui:GetRobotCredential AssetName="LinkedIn_AccessToken" CacheStrategy="None" DisplayName="Credencial LinkedIn" sap2010:WorkflowViewState.IdRef="GetRobotCredential_li">
+        <ui:GetRobotCredential.Password>
+          <OutArgument x:TypeArguments="sec:SecureString">
+            <CSharpReference x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpReference>
+          </OutArgument>
+        </ui:GetRobotCredential.Password>
+      </ui:GetRobotCredential>
+      <ui:InvokeCode Code="postId = null;&#xA;permalink = postUrl;&#xA;var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;try&#xA;{&#xA;    using (var api = new clarituz_agente_social_midia.SocialApiClient(metaSecure, linkedInSecure))&#xA;    {&#xA;        if (plataforma == &quot;Instagram&quot;)&#xA;        {&#xA;            var igUser = cfg[&quot;ig_user_id&quot;] != null ? cfg[&quot;ig_user_id&quot;].ToString() : null;&#xA;            if (string.IsNullOrEmpty(igUser)) throw new clarituz_agente_social_midia.SocialApiException(0, &quot;ig_user_id não configurado em SM_Config&quot;);&#xA;            var media = api.ResolverMediaIdInstagramAsync(postUrl, igUser).GetAwaiter().GetResult();&#xA;            postId = media[&quot;id&quot;].ToString();&#xA;            permalink = media[&quot;permalink&quot;] != null ? media[&quot;permalink&quot;].ToString() : postUrl;&#xA;        }&#xA;        else if (plataforma == &quot;Facebook&quot;)&#xA;        {&#xA;            var pid = api.ResolverPostIdFacebook(postUrl);&#xA;            var pageId = cfg[&quot;fb_page_id&quot;] != null ? cfg[&quot;fb_page_id&quot;].ToString() : null;&#xA;            postId = string.IsNullOrEmpty(pageId) ? pid : pageId + &quot;_&quot; + pid;&#xA;        }&#xA;        else if (plataforma == &quot;LinkedIn&quot;)&#xA;        {&#xA;            postId = api.ResolverUrnLinkedIn(postUrl);&#xA;        }&#xA;        else&#xA;        {&#xA;            throw new clarituz_agente_social_midia.SocialApiException(0, &quot;Plataforma desconhecida: &quot; + plataforma);&#xA;        }&#xA;    }&#xA;}&#xA;catch (clarituz_agente_social_midia.SocialApiException ex)&#xA;{&#xA;    throw new UiPath.Core.BusinessRuleException(&quot;B9: PostUrl inválida ou post não encontrado — &quot; + ex.Message);&#xA;}" DisplayName="Resolver post_id da URL (B9)" sap2010:WorkflowViewState.IdRef="InvokeCode_resolve">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <InArgument x:TypeArguments="sec:SecureString" x:Key="metaSecure">
+              <CSharpValue x:TypeArguments="sec:SecureString">MetaSecure</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="sec:SecureString" x:Key="linkedInSecure">
+              <CSharpValue x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+              <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="x:String" x:Key="plataforma">
+              <CSharpValue x:TypeArguments="x:String">in_Plataforma</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="x:String" x:Key="postUrl">
+              <CSharpValue x:TypeArguments="x:String">in_PostUrl</CSharpValue>
+            </InArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="postId">
+              <CSharpReference x:TypeArguments="x:String">out_PostId</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="permalink">
+              <CSharpReference x:TypeArguments="x:String">PostPermalink</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+    </Sequence>
+    <TryCatch DisplayName="Ler posts-monitorados.jsonl" sap2010:WorkflowViewState.IdRef="TryCatch_read">
+      <TryCatch.Try>
+        <Sequence DisplayName="Read bucket" sap2010:WorkflowViewState.IdRef="Sequence_read">
+          <uist:ReadStorageText DisplayName="SM_Metricas/posts-monitorados.jsonl" Path="posts-monitorados.jsonl" sap2010:WorkflowViewState.IdRef="ReadStorageText_1" StorageBucketName="SM_Metricas">
+            <uist:ReadStorageText.Result>
+              <OutArgument x:TypeArguments="x:String">
+                <CSharpReference x:TypeArguments="x:String">JsonlAtual</CSharpReference>
+              </OutArgument>
+            </uist:ReadStorageText.Result>
+          </uist:ReadStorageText>
+        </Sequence>
+      </TryCatch.Try>
+      <TryCatch.Catches>
+        <Catch x:TypeArguments="s:Exception">
+          <ActivityAction x:TypeArguments="s:Exception">
+            <ActivityAction.Argument>
+              <DelegateInArgument x:TypeArguments="s:Exception" Name="readEx" />
+            </ActivityAction.Argument>
+            <Sequence DisplayName="Primeiro registro" sap2010:WorkflowViewState.IdRef="Sequence_catch_read">
+              <Assign DisplayName="Jsonl vazio" sap2010:WorkflowViewState.IdRef="Assign_empty">
+                <Assign.To>
+                  <OutArgument x:TypeArguments="x:String">
+                    <CSharpReference x:TypeArguments="x:String">JsonlAtual</CSharpReference>
+                  </OutArgument>
+                </Assign.To>
+                <Assign.Value>
+                  <InArgument x:TypeArguments="x:String">
+                    <CSharpValue x:TypeArguments="x:String">""</CSharpValue>
+                  </InArgument>
+                </Assign.Value>
+              </Assign>
+            </Sequence>
+          </ActivityAction>
+        </Catch>
+      </TryCatch.Catches>
+    </TryCatch>
+    <ui:InvokeCode Code="var linha = new JObject&#xA;{&#xA;    [&quot;postId&quot;] = postId,&#xA;    [&quot;plataforma&quot;] = plataforma,&#xA;    [&quot;postUrl&quot;] = postUrl,&#xA;    [&quot;postPermalink&quot;] = permalink,&#xA;    [&quot;registradoEm&quot;] = DateTime.UtcNow.ToString(&quot;o&quot;),&#xA;    [&quot;proximaColetaEm&quot;] = DateTime.UtcNow.AddHours(24).ToString(&quot;o&quot;)&#xA;};&#xA;var sb = new System.Text.StringBuilder(jsonl ?? &quot;&quot;);&#xA;if (sb.Length &gt; 0 &amp;&amp; !jsonl.EndsWith(&quot;\n&quot;)) sb.AppendLine();&#xA;sb.AppendLine(linha.ToString(Newtonsoft.Json.Formatting.None));&#xA;jsonlNovo = sb.ToString();" DisplayName="Append post monitorado" sap2010:WorkflowViewState.IdRef="InvokeCode_append">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="postId">
+            <CSharpValue x:TypeArguments="x:String">out_PostId</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="plataforma">
+            <CSharpValue x:TypeArguments="x:String">in_Plataforma</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="postUrl">
+            <CSharpValue x:TypeArguments="x:String">in_PostUrl</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="permalink">
+            <CSharpValue x:TypeArguments="x:String">PostPermalink</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="jsonl">
+            <CSharpValue x:TypeArguments="x:String">JsonlAtual</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="jsonlNovo">
+            <CSharpReference x:TypeArguments="x:String">JsonlNovo</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <uist:WriteStorageText DisplayName="Gravar posts-monitorados.jsonl" Path="posts-monitorados.jsonl" sap2010:WorkflowViewState.IdRef="WriteStorageText_1" StorageBucketName="SM_Metricas">
+      <uist:WriteStorageText.Text>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">JsonlNovo</CSharpValue>
+        </InArgument>
+      </uist:WriteStorageText.Text>
+    </uist:WriteStorageText>
+    <ui:InvokeCode Code="referencia = &quot;ColetarMetricas-&quot; + postId + &quot;-&quot; + DateTime.UtcNow.ToString(&quot;yyyyMMdd&quot;);&#xA;itemInfo = new Dictionary&lt;string, object&gt;();&#xA;itemInfo[&quot;TipoTransacao&quot;] = &quot;ColetarMetricas&quot;;&#xA;itemInfo[&quot;Plataforma&quot;] = plataforma;&#xA;itemInfo[&quot;PostId&quot;] = postId;&#xA;itemInfo[&quot;PostUrl&quot;] = postUrl;&#xA;itemInfo[&quot;PostPermalink&quot;] = permalink;&#xA;itemInfo[&quot;DataReferencia&quot;] = DateTime.UtcNow.ToString(&quot;o&quot;);" DisplayName="Montar item ColetarMetricas" sap2010:WorkflowViewState.IdRef="InvokeCode_item">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="postId">
+            <CSharpValue x:TypeArguments="x:String">out_PostId</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="plataforma">
+            <CSharpValue x:TypeArguments="x:String">in_Plataforma</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="postUrl">
+            <CSharpValue x:TypeArguments="x:String">in_PostUrl</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="permalink">
+            <CSharpValue x:TypeArguments="x:String">PostPermalink</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="referencia">
+            <CSharpReference x:TypeArguments="x:String">Referencia</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="itemInfo">
+            <CSharpReference x:TypeArguments="scg:Dictionary(x:String, x:Object)">ItemInfo</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <ui:RetryScope DisplayName="Retry enqueue ×3 (E3)" sap2010:WorkflowViewState.IdRef="RetryScope_enq">
+      <ui:RetryScope.NumberOfRetries>
+        <InArgument x:TypeArguments="x:Int32">
+          <CSharpValue x:TypeArguments="x:Int32">3</CSharpValue>
+        </InArgument>
+      </ui:RetryScope.NumberOfRetries>
+      <ui:RetryScope.RetryInterval>
+        <InArgument x:TypeArguments="s:TimeSpan">
+          <CSharpValue x:TypeArguments="s:TimeSpan">TimeSpan.FromSeconds(2)</CSharpValue>
+        </InArgument>
+      </ui:RetryScope.RetryInterval>
+      <ui:RetryScope.ActivityBody>
+        <ActivityAction>
+          <Sequence DisplayName="AddQueueItem +24h" sap2010:WorkflowViewState.IdRef="Sequence_addq">
+            <ui:AddQueueItem DisplayName="Enqueue ColetarMetricas (defer 24h)" Priority="Normal" QueueType="SM_WorkItems" sap2010:WorkflowViewState.IdRef="AddQueueItem_1">
+              <ui:AddQueueItem.DeferDate>
+                <InArgument x:TypeArguments="s:DateTime">
+                  <CSharpValue x:TypeArguments="s:DateTime">DateTime.UtcNow.AddHours(24)</CSharpValue>
+                </InArgument>
+              </ui:AddQueueItem.DeferDate>
+              <ui:AddQueueItem.Reference>
+                <InArgument x:TypeArguments="x:String">
+                  <CSharpValue x:TypeArguments="x:String">Referencia</CSharpValue>
+                </InArgument>
+              </ui:AddQueueItem.Reference>
+              <ui:AddQueueItem.ItemInformationCollection>
+                <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)">
+                  <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">ItemInfo</CSharpValue>
+                </InArgument>
+              </ui:AddQueueItem.ItemInformationCollection>
+            </ui:AddQueueItem>
+          </Sequence>
+        </ActivityAction>
+      </ui:RetryScope.ActivityBody>
+      <ui:RetryScope.Condition>
+        <ActivityFunc x:TypeArguments="x:Boolean" />
+      </ui:RetryScope.Condition>
+    </ui:RetryScope>
+    <ui:InvokeCode Code="var contador = ctx.ContainsKey(&quot;ContadorDiario&quot;) ? ctx[&quot;ContadorDiario&quot;] as JObject : null;&#xA;if (contador == null) contador = new JObject();&#xA;contador[&quot;data&quot;] = DateTime.UtcNow.ToString(&quot;yyyy-MM-dd&quot;);&#xA;var atual = contador[&quot;count&quot;] == null ? 0 : Convert.ToInt32(contador[&quot;count&quot;]);&#xA;contador[&quot;count&quot;] = atual + 1;&#xA;contadorJson = contador.ToString();" DisplayName="Incrementar contador diário (BR-07)" sap2010:WorkflowViewState.IdRef="InvokeCode_count">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="contadorJson">
+            <CSharpReference x:TypeArguments="x:String">ContadorJson</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <ui:SetAsset AssetName="SM_ContadorDiario" DisplayName="Persistir contador" sap2010:WorkflowViewState.IdRef="SetAsset_count">
+      <ui:SetAsset.Value>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">ContadorJson</CSharpValue>
+        </InArgument>
+      </ui:SetAsset.Value>
+    </ui:SetAsset>
+    <ui:LogMessage DisplayName="Post registrado" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"Post registrado: " + out_PostId + " (" + in_Plataforma + ") — métricas agendadas +24h"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>
