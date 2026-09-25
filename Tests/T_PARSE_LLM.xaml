@@ -45,6 +45,7 @@
       <Variable x:TypeArguments="x:String" Name="ResumoDesemp" />
       <Variable x:TypeArguments="x:String" Name="ResumoVazio" />
       <Variable x:TypeArguments="x:String" Name="PromptCalDesemp" />
+      <Variable x:TypeArguments="x:String" Name="LegendaAlternativa" />
     </Sequence.Variables>
     <Sequence DisplayName="Parsers — Given">
       <ui:LogMessage DisplayName="Given: respostas LLM com e sem fences" Level="Info" sap2010:WorkflowViewState.IdRef="LogMessage_given">
@@ -92,7 +93,7 @@
           </scg:Dictionary>
         </ui:InvokeCode.Arguments>
       </ui:InvokeCode>
-      <ui:InvokeCode Language="CSharp" Code="var monitorados = &quot;{\&quot;postId\&quot;:\&quot;p1\&quot;,\&quot;plataforma\&quot;:\&quot;Instagram\&quot;,\&quot;tema\&quot;:\&quot;hidratacao\&quot;,\&quot;postUrl\&quot;:\&quot;u1\&quot;}\n{\&quot;postId\&quot;:\&quot;p2\&quot;,\&quot;plataforma\&quot;:\&quot;Instagram\&quot;,\&quot;tema\&quot;:\&quot;promocao\&quot;,\&quot;postUrl\&quot;:\&quot;u2\&quot;}\n&quot;;&#xA;var m1 = new clarituz_agente_social_midia.MetricasPost { PostId = &quot;p1&quot;, Plataforma = &quot;Instagram&quot;, Alcance = 1000, Curtidas = 80, Comentarios = 15, Salvamentos = 5, ColetadoEm = DateTime.UtcNow };&#xA;var m2 = new clarituz_agente_social_midia.MetricasPost { PostId = &quot;p2&quot;, Plataforma = &quot;Instagram&quot;, Alcance = 1000, Curtidas = 10, Comentarios = 0, Salvamentos = 0, ColetadoEm = DateTime.UtcNow };&#xA;var metJsonl = clarituz_agente_social_midia.MetricasService.Serializar(m1) + &quot;\n&quot; + clarituz_agente_social_midia.MetricasService.Serializar(m2) + &quot;\n&quot;;&#xA;resumo = clarituz_agente_social_midia.MetricasService.ResumirDesempenho(monitorados, metJsonl);&#xA;resumoVazio = clarituz_agente_social_midia.MetricasService.ResumirDesempenho(&quot;&quot;, &quot;&quot;);&#xA;promptCal = clarituz_agente_social_midia.ConteudoService.MontarPromptCalendario(&quot;estetica&quot;, &quot;leve&quot;, new[] { &quot;Instagram&quot; }, 7, resumo);" DisplayName="Desempenho → resumo + prompt (aprendizado)" sap2010:WorkflowViewState.IdRef="InvokeCode_desemp">
+      <ui:InvokeCode Language="CSharp" Code="var monitorados = &quot;{\&quot;postId\&quot;:\&quot;p1\&quot;,\&quot;plataforma\&quot;:\&quot;Instagram\&quot;,\&quot;tema\&quot;:\&quot;hidratacao\&quot;,\&quot;postUrl\&quot;:\&quot;u1\&quot;,\&quot;registradoEm\&quot;:\&quot;2026-01-01T20:00:00.0000000Z\&quot;}\n{\&quot;postId\&quot;:\&quot;p2\&quot;,\&quot;plataforma\&quot;:\&quot;Instagram\&quot;,\&quot;tema\&quot;:\&quot;promocao\&quot;,\&quot;postUrl\&quot;:\&quot;u2\&quot;,\&quot;registradoEm\&quot;:\&quot;2026-01-01T08:00:00.0000000Z\&quot;}\n&quot;;&#xA;var m1 = new clarituz_agente_social_midia.MetricasPost { PostId = &quot;p1&quot;, Plataforma = &quot;Instagram&quot;, Alcance = 1000, Curtidas = 80, Comentarios = 15, Salvamentos = 5, ColetadoEm = DateTime.UtcNow };&#xA;var m2 = new clarituz_agente_social_midia.MetricasPost { PostId = &quot;p2&quot;, Plataforma = &quot;Instagram&quot;, Alcance = 1000, Curtidas = 10, Comentarios = 0, Salvamentos = 0, ColetadoEm = DateTime.UtcNow };&#xA;var metJsonl = clarituz_agente_social_midia.MetricasService.Serializar(m1) + &quot;\n&quot; + clarituz_agente_social_midia.MetricasService.Serializar(m2) + &quot;\n&quot;;&#xA;resumo = clarituz_agente_social_midia.MetricasService.ResumirDesempenho(monitorados, metJsonl);&#xA;resumoVazio = clarituz_agente_social_midia.MetricasService.ResumirDesempenho(&quot;&quot;, &quot;&quot;);&#xA;promptCal = clarituz_agente_social_midia.ConteudoService.MontarPromptCalendario(&quot;estetica&quot;, &quot;leve&quot;, new[] { &quot;Instagram&quot; }, 7, resumo);&#xA;var respAb = &quot;{\&quot;legenda\&quot;:\&quot;versao A\&quot;,\&quot;legendaAlternativa\&quot;:\&quot;versao B mais direta\&quot;,\&quot;hashtags\&quot;:[],\&quot;mediaPrompt\&quot;:\&quot;x\&quot;}&quot;;&#xA;legAlt = clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(respAb).LegendaAlternativa;" DisplayName="Desempenho → resumo + prompt (aprendizado)" sap2010:WorkflowViewState.IdRef="InvokeCode_desemp">
         <ui:InvokeCode.Arguments>
           <scg:Dictionary x:TypeArguments="x:String, Argument">
             <OutArgument x:TypeArguments="x:String" x:Key="resumo">
@@ -103,6 +104,9 @@
             </OutArgument>
             <OutArgument x:TypeArguments="x:String" x:Key="promptCal">
               <CSharpReference x:TypeArguments="x:String">PromptCalDesemp</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="legAlt">
+              <CSharpReference x:TypeArguments="x:String">LegendaAlternativa</CSharpReference>
             </OutArgument>
           </scg:Dictionary>
         </ui:InvokeCode.Arguments>
@@ -226,6 +230,30 @@
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
             <CSharpValue x:TypeArguments="x:String">"Prompt de calendário com desempenho deveria conter o bloco e o tema top"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Janela aprendida no resumo" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_janela">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">ResumoDesemp != null &amp;&amp; ResumoDesemp.Contains("janela") &amp;&amp; ResumoDesemp.IndexOf("noite") &lt; ResumoDesemp.IndexOf("manha")</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Resumo deveria cruzar registradoEm com engajamento — noite (20h, eng.10%) antes de manha (08h, eng.1%)"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Variante A/B parseada" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_legalt">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">LegendaAlternativa == "versao B mais direta"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"legendaAlternativa do JSON deveria ser parseada para o campo A/B"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>

@@ -1,6 +1,6 @@
 # Manual Completo — Camila, Agente de Social Mídia
 
-**Versão:** 1.0.8 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa (texto + imagem + visão) · **Aprendizado:** o calendário semanal prioriza temas que já engajaram
+**Versão:** 1.0.9 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa (texto + imagem + visão) · **Aprendizado:** o calendário semanal prioriza temas que já engajaram
 
 ---
 
@@ -153,7 +153,8 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 - **Qualidade:** `imagem_qualidade` controla o parâmetro `quality` da API — `gpt-image-1` usa `high` (padrão)/`medium`/`low`; `dall-e-3` mapeia para `hd`/`standard`.
 - **Tamanhos:** `1024x1024` (feed quadrado), `1792x1024` (horizontal), `1024x1792` (stories/reels).
 - **Quando NÃO gera:** se o item já trouxer uma `MediaUrl` (mídia fornecida manualmente tem prioridade) ou se `gerar_imagem=false`.
-- **Formato automático:** se a pauta do calendário for `reels` ou `stories`, a arte sai vertical **1024×1792** (9:16); `feed`/`carrossel` usam o `imagem_tamanho` configurado.
+- **Formato automático:** se a pauta do calendário for `reels` ou `stories`, a arte sai vertical **1024×1792** (9:16); `feed` usa o `imagem_tamanho` configurado; `carrossel` gera **N slides** (`imagem_carrossel_slides`, padrão 3, máx 10) — todos sobem em `geradas/img-*-N.png` e a task mostra o primeiro.
+- **Legenda A/B:** cada post chega na aprovação com duas versões de legenda (`legenda_original` e `legenda_alternativa`) — o operador escolhe, edita ou mescla as duas.
 - **QA visual (`imagem_qa`, padrão `true`):** após gerar a arte, um modelo de visão (gpt-4o-mini) "olha" a imagem e verifica se bate com o briefing, se há texto ilegível, artefatos deformados, marca d'água ou violação dos `termos_proibidos`. Se reprovar, a Camila **regenera uma vez automaticamente** antes de enviar para aprovação. O veredito aparece no log e no campo `NotaImagemQA` do conteúdo — o humano continua sendo a decisão final.
 - **Se falhar** (sem key, sem crédito, timeout): o post segue o fluxo normal e o operador anexa a mídia manualmente na aprovação — o `mediaPrompt` continua visível como briefing.
 - Custo: cada imagem gera uma cobrança na conta OpenAI — monitore o billing.
@@ -174,6 +175,7 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 | `imagem_tamanho` | `SM_Config` | Resolução: `1024x1024` (feed), `1792x1024`, `1024x1792` (stories) |
 | `imagem_qualidade` | `SM_Config` | `high` (padrão)/`medium`/`low` no gpt-image-1; `hd`/`standard` no dall-e-3 |
 | `imagem_qa` | `SM_Config` | `true` (padrão) = visão avalia a arte e regenera 1× se reprovada; `false` = sobe direto |
+| `imagem_carrossel_slides` | `SM_Config` | Nº de slides gerados para pautas `carrossel` (padrão 3, faixa 2–10) |
 | Nicho / tom de voz | Argumento do processo | Define o contexto da campanha; pode variar por execução |
 
 ---
@@ -190,7 +192,7 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 
 ## 7. Qualidade comprovada
 
-Suíte de testes automatizados executada na versão 1.0.8: **30/30 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
+Suíte de testes automatizados executada na versão 1.0.9: **30/30 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
 
 ---
 

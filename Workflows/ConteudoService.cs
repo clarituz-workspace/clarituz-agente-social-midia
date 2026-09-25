@@ -25,11 +25,12 @@ Gere um post para {item.Plataforma} com:
 - Tema/pauta: {item.Tema}
 - Janela de publicação sugerida (informativa): {janelaSugerida}
 - Legenda com no máximo {limite} caracteres (limite da plataforma)
+- Uma legenda ALTERNATIVA (variante B) com abordagem diferente — ex.: se a A for educativa, a B pode ser mais direta/emocional; mesma regra de limite
 - Hashtags relevantes ao nicho (sem # na palavra, retorne só os termos)
 - Um prompt de mídia descrevendo a imagem/vídeo ideal
 
 Responda APENAS com JSON válido, sem markdown, no formato:
-{{""legenda"": ""..."", ""hashtags"": [""..."", ""...""], ""mediaPrompt"": ""...""}}";
+{{""legenda"": ""..."", ""legendaAlternativa"": ""..."", ""hashtags"": [""..."", ""...""], ""mediaPrompt"": ""...""}}";
         }
 
         public static ConteudoGerado ParsearConteudoGerado(string respostaLlm)
@@ -38,6 +39,7 @@ Responda APENAS com JSON válido, sem markdown, no formato:
             return new ConteudoGerado
             {
                 Legenda = json["legenda"]?.ToString() ?? "",
+                LegendaAlternativa = json["legendaAlternativa"]?.ToString() ?? "",
                 Hashtags = json["hashtags"]?.ToObject<string[]>() ?? Array.Empty<string>(),
                 MediaPrompt = json["mediaPrompt"]?.ToString() ?? "",
                 LegendaEditada = null,

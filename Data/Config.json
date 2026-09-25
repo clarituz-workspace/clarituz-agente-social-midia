@@ -12,6 +12,7 @@
   "imagem_tamanho": "1024x1024",
   "imagem_qualidade": "high",
   "imagem_qa": true,
+  "imagem_carrossel_slides": 3,
   "limite_posts_dia": 3,
   "queue_name": "SM_WorkItems",
   "bucket_midia": "SM_Midia",

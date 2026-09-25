@@ -87,14 +87,14 @@ namespace clarituz_agente_social_midia
         // "" quando não há dados — o prompt simplesmente não ganha bloco de desempenho.
         public static string ResumirDesempenho(string monitoradosJsonl, string metricasJsonl)
         {
-            var temas = new Dictionary<string, string>();
+            var meta = new Dictionary<string, JObject>();
             foreach (var linha in Linhas(monitoradosJsonl))
             {
                 try
                 {
                     var o = JObject.Parse(linha);
                     var pid = o["postId"]?.ToString();
-                    if (!string.IsNullOrEmpty(pid)) temas[pid] = o["tema"]?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(pid)) meta[pid] = o;
                 }
                 catch { }
             }
@@ -115,7 +115,9 @@ namespace clarituz_agente_social_midia
             var posts = ultimas.Values.Select(m => new
             {
                 Metricas = m,
-                Tema = temas.TryGetValue(m.PostId, out var t) ? t ?? "" : "",
+                Tema = meta.TryGetValue(m.PostId, out var t) ? t["tema"]?.ToString() ?? "" : "",
+                RegistradoEm = meta.TryGetValue(m.PostId, out var r)
+                    && DateTime.TryParse(r["registradoEm"]?.ToString(), out var dt) ? (DateTime?)dt : null,
                 Taxa = m.Alcance > 0 ? (m.Curtidas + m.Comentarios + m.Salvamentos) / (double)m.Alcance : 0.0
             }).ToList();
 
@@ -130,8 +132,18 @@ namespace clarituz_agente_social_midia
             sb.AppendLine("Média de engajamento por plataforma: " +
                 string.Join("; ", porPlat.Select(g =>
                     $"{(string.IsNullOrEmpty(g.Key) ? "?" : g.Key)}: {g.Average(p => p.Taxa):P1} ({g.Count()} posts)")));
+            var comJanela = posts.Where(p => p.RegistradoEm != null).ToList();
+            if (comJanela.Count > 0)
+                sb.AppendLine("Engajamento médio por janela de publicação (hora UTC do registro): " +
+                    string.Join("; ", comJanela.GroupBy(p => JanelaDe(p.RegistradoEm.Value.Hour))
+                        .OrderByDescending(g => g.Average(p => p.Taxa))
+                        .Select(g => $"{g.Key}: {g.Average(p => p.Taxa):P1} ({g.Count()} posts)")));
             return sb.ToString().Trim();
         }
+
+        private static string JanelaDe(int horaUtc)
+            => horaUtc < 6 ? "madrugada 00-06h" : horaUtc < 12 ? "manha 06-12h"
+             : horaUtc < 18 ? "tarde 12-18h" : "noite 18-24h";
 
         private static IEnumerable<string> Linhas(string jsonl)
             => (jsonl ?? "").Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0);

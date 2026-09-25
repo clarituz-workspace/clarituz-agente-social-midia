@@ -45,6 +45,7 @@
       <Variable x:TypeArguments="x:String" Name="Plataforma" />
       <Variable x:TypeArguments="x:String" Name="DecisaoInit" />
       <Variable x:TypeArguments="x:String" Name="LegendaEditadaInit" />
+      <Variable x:TypeArguments="x:String" Name="LegendaAlternativa" />
       <Variable x:TypeArguments="x:String" Name="PostUrlInit" />
       <Variable x:TypeArguments="x:String" Name="MotivoInit" />
     </Sequence.Variables>
@@ -53,7 +54,7 @@
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:InvokeCode Language="CSharp" Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;tema = data[&quot;Tema&quot;] == null ? &quot;&quot; : data[&quot;Tema&quot;].ToString();&#xA;mediaUrl = data[&quot;MediaUrl&quot;] == null ? &quot;&quot; : data[&quot;MediaUrl&quot;].ToString();&#xA;titulo = &quot;Aprovar e publicar post — &quot; + plataforma + &quot; — &quot; + (tema.Length &gt; 60 ? tema.Substring(0, 60) + &quot;…&quot; : tema);&#xA;hashtagsTexto = conteudo[&quot;Hashtags&quot;] == null ? &quot;&quot; : string.Join(&quot; &quot;, conteudo[&quot;Hashtags&quot;].ToObject&lt;string[]&gt;().Select(h =&gt; &quot;#&quot; + h));&#xA;var janela = ctx != null &amp;&amp; ctx.ContainsKey(&quot;JanelaPublicacao&quot;) ? ctx[&quot;JanelaPublicacao&quot;] as string : null;&#xA;janelaInfo = string.IsNullOrEmpty(janela) ? &quot;Sem janela sugerida configurada — publique quando apropriado.&quot; : &quot;Janela sugerida (informativo): &quot; + janela;&#xA;var limite = ctx != null &amp;&amp; ctx.ContainsKey(&quot;LimitePostsDia&quot;) ? Convert.ToInt32(ctx[&quot;LimitePostsDia&quot;]) : 3;&#xA;var hoje = ctx != null &amp;&amp; ctx.ContainsKey(&quot;PostsPublicadosHoje&quot;) ? Convert.ToInt32(ctx[&quot;PostsPublicadosHoje&quot;]) : 0;&#xA;avisoLimite = hoje &gt;= limite ? &quot;ATENÇÃO: limite diário sugerido atingido (&quot; + hoje + &quot;/&quot; + limite + &quot; posts hoje). A decisão é sua.&quot; : &quot;Posts hoje: &quot; + hoje + &quot;/&quot; + limite + &quot; (informativo).&quot;;&#xA;decisao = &quot;Aprovado&quot;;&#xA;legendaEditada = conteudo[&quot;Legenda&quot;] == null ? &quot;&quot; : conteudo[&quot;Legenda&quot;].ToString();&#xA;postUrl = &quot;&quot;;&#xA;motivo = &quot;&quot;;" DisplayName="Montar pacote de publicação" sap2010:WorkflowViewState.IdRef="InvokeCode_pkg">
+    <ui:InvokeCode Language="CSharp" Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;tema = data[&quot;Tema&quot;] == null ? &quot;&quot; : data[&quot;Tema&quot;].ToString();&#xA;mediaUrl = data[&quot;MediaUrl&quot;] == null ? &quot;&quot; : data[&quot;MediaUrl&quot;].ToString();&#xA;titulo = &quot;Aprovar e publicar post — &quot; + plataforma + &quot; — &quot; + (tema.Length &gt; 60 ? tema.Substring(0, 60) + &quot;…&quot; : tema);&#xA;hashtagsTexto = conteudo[&quot;Hashtags&quot;] == null ? &quot;&quot; : string.Join(&quot; &quot;, conteudo[&quot;Hashtags&quot;].ToObject&lt;string[]&gt;().Select(h =&gt; &quot;#&quot; + h));&#xA;var janela = ctx != null &amp;&amp; ctx.ContainsKey(&quot;JanelaPublicacao&quot;) ? ctx[&quot;JanelaPublicacao&quot;] as string : null;&#xA;janelaInfo = string.IsNullOrEmpty(janela) ? &quot;Sem janela sugerida configurada — publique quando apropriado.&quot; : &quot;Janela sugerida (informativo): &quot; + janela;&#xA;var limite = ctx != null &amp;&amp; ctx.ContainsKey(&quot;LimitePostsDia&quot;) ? Convert.ToInt32(ctx[&quot;LimitePostsDia&quot;]) : 3;&#xA;var hoje = ctx != null &amp;&amp; ctx.ContainsKey(&quot;PostsPublicadosHoje&quot;) ? Convert.ToInt32(ctx[&quot;PostsPublicadosHoje&quot;]) : 0;&#xA;avisoLimite = hoje &gt;= limite ? &quot;ATENÇÃO: limite diário sugerido atingido (&quot; + hoje + &quot;/&quot; + limite + &quot; posts hoje). A decisão é sua.&quot; : &quot;Posts hoje: &quot; + hoje + &quot;/&quot; + limite + &quot; (informativo).&quot;;&#xA;decisao = &quot;Aprovado&quot;;&#xA;legendaEditada = conteudo[&quot;Legenda&quot;] == null ? &quot;&quot; : conteudo[&quot;Legenda&quot;].ToString();&#xA;legendaAlternativa = conteudo[&quot;LegendaAlternativa&quot;] == null ? &quot;&quot; : conteudo[&quot;LegendaAlternativa&quot;].ToString();&#xA;postUrl = &quot;&quot;;&#xA;motivo = &quot;&quot;;" DisplayName="Montar pacote de publicação" sap2010:WorkflowViewState.IdRef="InvokeCode_pkg">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="x:Object" x:Key="inData">
@@ -91,6 +92,9 @@
           </OutArgument>
           <OutArgument x:TypeArguments="x:String" x:Key="legendaEditada">
             <CSharpReference x:TypeArguments="x:String">LegendaEditadaInit</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="legendaAlternativa">
+            <CSharpReference x:TypeArguments="x:String">LegendaAlternativa</CSharpReference>
           </OutArgument>
           <OutArgument x:TypeArguments="x:String" x:Key="postUrl">
             <CSharpReference x:TypeArguments="x:String">PostUrlInit</CSharpReference>
@@ -134,6 +138,9 @@
           </InArgument>
           <InArgument x:TypeArguments="x:String" x:Key="legenda_original">
             <CSharpValue x:TypeArguments="x:String">LegendaEditadaInit</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="legenda_alternativa">
+            <CSharpValue x:TypeArguments="x:String">LegendaAlternativa</CSharpValue>
           </InArgument>
           <InArgument x:TypeArguments="x:String" x:Key="decisao">
             <CSharpValue x:TypeArguments="x:String">DecisaoInit</CSharpValue>

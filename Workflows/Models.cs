@@ -31,6 +31,7 @@ namespace clarituz_agente_social_midia
     public record ConteudoGerado
     {
         public string Legenda { get; init; }
+        public string LegendaAlternativa { get; init; } // variante A/B — humano escolhe na aprovação
         public string[] Hashtags { get; init; }
         public string MediaPrompt { get; init; }
         public string LegendaEditada { get; init; }   // preenchido pós-aprovação se editado
