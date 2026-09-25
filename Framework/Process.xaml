@@ -121,6 +121,20 @@
                 </ui:InvokeWorkflowFile.Arguments>
               </ui:InvokeWorkflowFile>
             </Sequence>
+            <Sequence x:Key="CalendarioEditorial" DisplayName="Calendário editorial automático" sap2010:WorkflowViewState.IdRef="Sequence_calendario">
+              <ui:InvokeWorkflowFile DisplayName="Calendario_Editorial" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_calendario" WorkflowFileName="logica/Calendario_Editorial.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="x:Int32" x:Key="out_Entradas">
+                      <CSharpReference x:TypeArguments="x:Int32">ItensEnfileirados</CSharpReference>
+                    </OutArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+            </Sequence>
             <Sequence x:Key="Relatorio" DisplayName="Relatório de execução" sap2010:WorkflowViewState.IdRef="Sequence_relatorio">
               <ui:InvokeWorkflowFile DisplayName="Relatorio_Execucao" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_relatorio" WorkflowFileName="logica/Relatorio_Execucao.xaml">
                 <ui:InvokeWorkflowFile.Arguments>

@@ -10,8 +10,7 @@ namespace clarituz_agente_social_midia
         public static readonly Dictionary<string, int> LimiteLegenda = new Dictionary<string, int>
         {
             ["Instagram"] = 2200,
-            ["Facebook"] = 63206,
-            ["LinkedIn"] = 3000
+            ["Facebook"] = 63206
         };
 
         public static string MontarPromptGeracao(WorkItemData item, string janelaSugerida)
@@ -69,6 +68,51 @@ Responda APENAS com JSON válido, sem markdown, no formato:
             return JArray.Parse(respostaLlm.Substring(inicio, fim - inicio + 1));
         }
 
+        public static string MontarPromptCalendario(string nicho, string tomDeVoz, string[] plataformas, int dias)
+        {
+            return
+$@"Você é Camila, social media especialista em campanhas estratégicas de alta conversão.
+
+Monte um calendário editorial para os próximos {dias} dias, começando hoje ({DateTime.UtcNow:yyyy-MM-dd}), para o nicho ""{nicho}"" com tom de voz ""{tomDeVoz}"".
+Plataformas: {string.Join(", ", plataformas ?? new[] { "Instagram" })}.
+
+Regras:
+- Distribua os posts ao longo dos dias — no máximo 1 post por dia por plataforma
+- Alterne objetivos: educar, engajar, converter, prova social, oferta
+- Alterne formatos quando fizer sentido: feed, reels, carrossel, stories
+- Cada tema deve ser específico e acionável, orientado a conversão — nada genérico
+
+Responda APENAS com JSON válido, sem markdown, no formato:
+[{{""data"": ""yyyy-MM-dd"", ""tema"": ""..."", ""plataforma"": ""Instagram"", ""formato"": ""feed"", ""objetivo"": ""...""}}]";
+        }
+
+        // Parseia o calendário editorial gerado pela LLM. Cada entrada precisa de data + tema.
+        public static JArray ParsearCalendario(string respostaLlm)
+        {
+            var arr = ParsearPautas(respostaLlm);
+            foreach (var e in arr)
+            {
+                if (e["data"] == null || string.IsNullOrWhiteSpace(e["data"].ToString())
+                    || e["tema"] == null || string.IsNullOrWhiteSpace(e["tema"].ToString()))
+                    throw new FormatException("Entrada de calendário sem data/tema");
+            }
+            return arr;
+        }
+
+        // Entradas do calendário cuja data == hoje (UTC). Retorna array vazio se nada programado.
+        public static JArray EntradasDoDia(JArray calendario, DateTime hojeUtc)
+        {
+            var hoje = hojeUtc.ToString("yyyy-MM-dd");
+            var resultado = new JArray();
+            if (calendario == null) return resultado;
+            foreach (var e in calendario)
+            {
+                var data = e["data"] == null ? "" : e["data"].ToString();
+                if (data.StartsWith(hoje)) resultado.Add(e);
+            }
+            return resultado;
+        }
+
         // Validação de compliance BR-01..BR-05 — retorna lista de violações (vazia = aprovado).
         public static List<string> ValidarCompliance(string plataforma, string legenda, string[] hashtags,
             string mediaUrl, bool mediaExisteNoBucket, IEnumerable<string> termosProibidos)
@@ -81,7 +125,7 @@ Responda APENAS com JSON válido, sem markdown, no formato:
                 violacoes.Add($"BR-01: legenda com {(legenda ?? "").Length} chars excede limite {limite} ({plataforma})");
 
             // BR-02 — máximo de hashtags
-            var maxHashtags = plataforma == "LinkedIn" ? 5 : 30;
+            var maxHashtags = 30;
             var nHashtags = (hashtags ?? Array.Empty<string>()).Length;
             if (nHashtags > maxHashtags)
                 violacoes.Add($"BR-02: {nHashtags} hashtags excede máximo {maxHashtags} ({plataforma})");

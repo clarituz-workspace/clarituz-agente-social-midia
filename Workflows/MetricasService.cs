@@ -13,7 +13,6 @@ namespace clarituz_agente_social_midia
             {
                 case "Instagram": return NormalizarInstagram(postId, dados);
                 case "Facebook": return NormalizarFacebook(postId, dados);
-                case "LinkedIn": return NormalizarLinkedIn(postId, dados);
                 default: throw new ArgumentException($"Plataforma desconhecida: {plataforma}");
             }
         }
@@ -70,24 +69,6 @@ namespace clarituz_agente_social_midia
                 Comentarios = ToInt(campos?["comments"]?["summary"]?["total_count"]),
                 Salvamentos = 0,
                 Cliques = Metrica("post_clicks"),
-                ColetadoEm = DateTime.UtcNow
-            };
-        }
-
-        // LI: { elements: [ { totalShareStatistics: { impressionCount, likeCount, commentCount, clickCount, shareCount, engagement } } ] }
-        private static MetricasPost NormalizarLinkedIn(string postId, JToken dados)
-        {
-            var stats = dados?["elements"]?[0]?["totalShareStatistics"];
-            return new MetricasPost
-            {
-                PostId = postId,
-                Plataforma = "LinkedIn",
-                Alcance = ToInt(stats?["uniqueImpressionsCount"]),
-                Impressoes = ToInt(stats?["impressionCount"]),
-                Curtidas = ToInt(stats?["likeCount"]),
-                Comentarios = ToInt(stats?["commentCount"]),
-                Salvamentos = 0,
-                Cliques = ToInt(stats?["clickCount"]),
                 ColetadoEm = DateTime.UtcNow
             };
         }

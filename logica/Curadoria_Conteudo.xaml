@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="logica.Curadoria_Conteudo" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Curadoria_Conteudo" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
     <x:Property Name="out_PautasGeradas" Type="OutArgument(x:Int32)" />
@@ -41,6 +41,8 @@
       <Variable x:TypeArguments="x:String" Name="Prompt" />
       <Variable x:TypeArguments="x:String" Name="RespostaLLM" />
       <Variable x:TypeArguments="nsjl:JArray" Name="Pautas" />
+      <Variable x:TypeArguments="x:String" Name="CalendarioJson" />
+      <Variable x:TypeArguments="nsjl:JArray" Name="PautasHoje" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -95,6 +97,78 @@
         </InArgument>
       </Assign.Value>
     </Assign>
+    <TryCatch DisplayName="Ler calendário editorial do bucket" sap2010:WorkflowViewState.IdRef="TryCatch_cal">
+      <TryCatch.Try>
+        <uist:ReadStorageText DisplayName="SM_Metricas calendario-editorial.json" Path="calendario/calendario-editorial.json" sap2010:WorkflowViewState.IdRef="ReadStorageText_cal" StorageBucketName="SM_Metricas">
+          <uist:ReadStorageText.Result>
+            <OutArgument x:TypeArguments="x:String">
+              <CSharpReference x:TypeArguments="x:String">CalendarioJson</CSharpReference>
+            </OutArgument>
+          </uist:ReadStorageText.Result>
+        </uist:ReadStorageText>
+      </TryCatch.Try>
+      <TryCatch.Catches>
+        <Catch x:TypeArguments="s:Exception">
+          <ActivityAction x:TypeArguments="s:Exception">
+            <ActivityAction.Argument>
+              <DelegateInArgument x:TypeArguments="s:Exception" Name="calEx" />
+            </ActivityAction.Argument>
+            <Sequence DisplayName="Sem calendário — fallback ad-hoc" sap2010:WorkflowViewState.IdRef="Sequence_nocal">
+              <ui:LogMessage DisplayName="Calendário ausente" sap2010:WorkflowViewState.IdRef="LogMessage_nocal" Level="Warn">
+                <ui:LogMessage.Message>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">"Calendário editorial não encontrado no bucket — gerando pautas ad-hoc: " + calEx.Message</CSharpValue>
+                  </InArgument>
+                </ui:LogMessage.Message>
+              </ui:LogMessage>
+            </Sequence>
+          </ActivityAction>
+        </Catch>
+      </TryCatch.Catches>
+    </TryCatch>
+    <ui:InvokeCode Language="CSharp" Code="pautasHoje = null;&#xA;if (!string.IsNullOrWhiteSpace(json))&#xA;{&#xA;    var cal = clarituz_agente_social_midia.ConteudoService.EntradasDoDia(JArray.Parse(json), DateTime.UtcNow);&#xA;    if (cal.Count &gt; 0) pautasHoje = cal;&#xA;}" DisplayName="Filtrar entradas do dia (UTC)" sap2010:WorkflowViewState.IdRef="InvokeCode_filtro">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="json">
+            <CSharpValue x:TypeArguments="x:String">CalendarioJson</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="nsjl:JArray" x:Key="pautasHoje">
+            <CSharpReference x:TypeArguments="nsjl:JArray">PautasHoje</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <If DisplayName="Tem pautas no calendário hoje?" sap2010:WorkflowViewState.IdRef="If_cal">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">PautasHoje != null</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Usar calendário" sap2010:WorkflowViewState.IdRef="Sequence_usecal">
+          <Assign DisplayName="Pautas = entradas do dia" sap2010:WorkflowViewState.IdRef="Assign_pautascal">
+            <Assign.To>
+              <OutArgument x:TypeArguments="nsjl:JArray">
+                <CSharpReference x:TypeArguments="nsjl:JArray">Pautas</CSharpReference>
+              </OutArgument>
+            </Assign.To>
+            <Assign.Value>
+              <InArgument x:TypeArguments="nsjl:JArray">
+                <CSharpValue x:TypeArguments="nsjl:JArray">PautasHoje</CSharpValue>
+              </InArgument>
+            </Assign.Value>
+          </Assign>
+          <ui:LogMessage DisplayName="Pautas do calendário" sap2010:WorkflowViewState.IdRef="LogMessage_cal" Level="Info">
+            <ui:LogMessage.Message>
+              <InArgument x:TypeArguments="x:Object">
+                <CSharpValue x:TypeArguments="x:Object">"Curadoria: " + PautasHoje.Count + " pauta(s) do calendário editorial para hoje"</CSharpValue>
+              </InArgument>
+            </ui:LogMessage.Message>
+          </ui:LogMessage>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Gerar pautas ad-hoc via LLM" sap2010:WorkflowViewState.IdRef="Sequence_adhoc">
     <ui:InvokeCode Language="CSharp" Code="prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptPautas(nicho, tomDeVoz, 5);" DisplayName="Montar prompt de pautas" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
@@ -134,6 +208,9 @@
         </scg:Dictionary>
       </ui:InvokeCode.Arguments>
     </ui:InvokeCode>
+        </Sequence>
+      </If.Else>
+    </If>
     <Assign DisplayName="Contador" sap2010:WorkflowViewState.IdRef="Assign_count0">
       <Assign.To>
         <OutArgument x:TypeArguments="x:Int32">
@@ -171,8 +248,9 @@
                 <Sequence.Variables>
                   <Variable x:TypeArguments="x:String" Name="Referencia" />
                   <Variable x:TypeArguments="scg:Dictionary(x:String, x:Object)" Name="ItemInfo" />
+                  <Variable x:TypeArguments="x:Boolean" Name="Pular" />
                 </Sequence.Variables>
-                <ui:InvokeCode Language="CSharp" Code="var tema = pauta[&quot;tema&quot;] == null ? &quot;&quot; : pauta[&quot;tema&quot;].ToString();&#xA;var slug = System.Text.RegularExpressions.Regex.Replace(tema.ToLowerInvariant(), &quot;[^a-z0-9]+&quot;, &quot;-&quot;).Trim('-');&#xA;referencia = &quot;GerarConteudo-&quot; + slug + &quot;-&quot; + DateTime.UtcNow.ToString(&quot;yyyyMMdd&quot;);&#xA;itemInfo = new Dictionary&lt;string, object&gt;();&#xA;itemInfo[&quot;TipoTransacao&quot;] = &quot;GerarConteudo&quot;;&#xA;itemInfo[&quot;Plataforma&quot;] = plataforma;&#xA;itemInfo[&quot;Nicho&quot;] = (object)nicho ?? &quot;&quot;;&#xA;itemInfo[&quot;TomDeVoz&quot;] = (object)tomDeVoz ?? &quot;&quot;;&#xA;itemInfo[&quot;Tema&quot;] = tema;&#xA;itemInfo[&quot;MediaUrl&quot;] = pauta[&quot;mediaUrl&quot;] == null ? &quot;&quot; : pauta[&quot;mediaUrl&quot;].ToString();" DisplayName="Montar item GerarConteudo" sap2010:WorkflowViewState.IdRef="InvokeCode_item">
+                <ui:InvokeCode Language="CSharp" Code="pular = false;&#xA;var pautaPlataforma = pauta[&quot;plataforma&quot;] == null ? &quot;&quot; : pauta[&quot;plataforma&quot;].ToString();&#xA;if (!string.IsNullOrEmpty(pautaPlataforma) &amp;&amp; !string.Equals(pautaPlataforma, plataforma, StringComparison.OrdinalIgnoreCase)) { pular = true; return; }&#xA;var tema = pauta[&quot;tema&quot;] == null ? &quot;&quot; : pauta[&quot;tema&quot;].ToString();&#xA;var slug = System.Text.RegularExpressions.Regex.Replace(tema.ToLowerInvariant(), &quot;[^a-z0-9]+&quot;, &quot;-&quot;).Trim('-');&#xA;referencia = &quot;GerarConteudo-&quot; + slug + &quot;-&quot; + DateTime.UtcNow.ToString(&quot;yyyyMMdd&quot;);&#xA;itemInfo = new Dictionary&lt;string, object&gt;();&#xA;itemInfo[&quot;TipoTransacao&quot;] = &quot;GerarConteudo&quot;;&#xA;itemInfo[&quot;Plataforma&quot;] = plataforma;&#xA;itemInfo[&quot;Nicho&quot;] = (object)nicho ?? &quot;&quot;;&#xA;itemInfo[&quot;TomDeVoz&quot;] = (object)tomDeVoz ?? &quot;&quot;;&#xA;itemInfo[&quot;Tema&quot;] = tema;&#xA;itemInfo[&quot;MediaUrl&quot;] = pauta[&quot;mediaUrl&quot;] == null ? &quot;&quot; : pauta[&quot;mediaUrl&quot;].ToString();" DisplayName="Montar item GerarConteudo" sap2010:WorkflowViewState.IdRef="InvokeCode_item">
                   <ui:InvokeCode.Arguments>
                     <scg:Dictionary x:TypeArguments="x:String, Argument">
                       <InArgument x:TypeArguments="nsjl:JToken" x:Key="pauta">
@@ -193,9 +271,19 @@
                       <OutArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="itemInfo">
                         <CSharpReference x:TypeArguments="scg:Dictionary(x:String, x:Object)">ItemInfo</CSharpReference>
                       </OutArgument>
+                      <OutArgument x:TypeArguments="x:Boolean" x:Key="pular">
+                        <CSharpReference x:TypeArguments="x:Boolean">Pular</CSharpReference>
+                      </OutArgument>
                     </scg:Dictionary>
                   </ui:InvokeCode.Arguments>
                 </ui:InvokeCode>
+                <If DisplayName="Pauta é para esta plataforma?" sap2010:WorkflowViewState.IdRef="If_plat">
+                  <If.Condition>
+                    <InArgument x:TypeArguments="x:Boolean">
+                      <CSharpValue x:TypeArguments="x:Boolean">!Pular</CSharpValue>
+                    </InArgument>
+                  </If.Condition>
+                  <If.Then>
                 <TryCatch DisplayName="Enqueue com dedup por reference" sap2010:WorkflowViewState.IdRef="TryCatch_enq">
                   <TryCatch.Try>
                     <Sequence DisplayName="Try enqueue" sap2010:WorkflowViewState.IdRef="Sequence_try_enq">
@@ -265,6 +353,8 @@
                     </Catch>
                   </TryCatch.Catches>
                 </TryCatch>
+                  </If.Then>
+                </If>
               </Sequence>
             </ActivityAction>
           </ForEach>

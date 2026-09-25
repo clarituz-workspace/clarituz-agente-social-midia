@@ -39,6 +39,9 @@
       <Variable x:TypeArguments="x:String" Name="Pauta1" />
       <Variable x:TypeArguments="x:Boolean" Name="ThrowVazio" />
       <Variable x:TypeArguments="x:Boolean" Name="ThrowSemJson" />
+      <Variable x:TypeArguments="x:Int32" Name="NEntradasCal" />
+      <Variable x:TypeArguments="x:Int32" Name="NHojeCal" />
+      <Variable x:TypeArguments="x:Boolean" Name="ThrowCalInvalido" />
     </Sequence.Variables>
     <Sequence DisplayName="Parsers — Given">
       <ui:LogMessage DisplayName="Given: respostas LLM com e sem fences" Level="Info" sap2010:WorkflowViewState.IdRef="LogMessage_given">
@@ -50,7 +53,7 @@
       </ui:LogMessage>
     </Sequence>
     <Sequence DisplayName="Parsers — When">
-      <ui:InvokeCode Language="CSharp" Code="var respostaConteudo = &quot;```json\n{ \&quot;legenda\&quot;: \&quot;3 benefícios da limpeza de pele ✨\&quot;, \&quot;hashtags\&quot;: [\&quot;skincare\&quot;, \&quot;estetica\&quot;, \&quot;limpezadepele\&quot;], \&quot;mediaPrompt\&quot;: \&quot;foto clínica clean\&quot; }\n```&quot;;&#xA;var gerado = clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(respostaConteudo);&#xA;legenda = gerado.Legenda;&#xA;nHashtags = gerado.Hashtags == null ? -1 : gerado.Hashtags.Length;&#xA;mediaPrompt = gerado.MediaPrompt;&#xA;&#xA;var respostaPautas = &quot;Aqui estão as pautas:\n```json\n[{\&quot;tema\&quot;: \&quot;pauta um\&quot;, \&quot;mediaUrl\&quot;: null}, {\&quot;tema\&quot;: \&quot;pauta dois\&quot;, \&quot;mediaUrl\&quot;: null}, {\&quot;tema\&quot;: \&quot;pauta três\&quot;, \&quot;mediaUrl\&quot;: null}]\n```\nEspero que ajude!&quot;;&#xA;var pautas = clarituz_agente_social_midia.ConteudoService.ParsearPautas(respostaPautas);&#xA;nPautas = pautas == null ? -1 : pautas.Count;&#xA;pauta1 = nPautas &gt; 0 &amp;&amp; pautas[0][&quot;tema&quot;] != null ? pautas[0][&quot;tema&quot;].ToString() : &quot;&quot;;&#xA;&#xA;try { clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(&quot;   &quot;); throwVazio = false; }&#xA;catch (FormatException) { throwVazio = true; }&#xA;try { clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(&quot;texto sem json nenhum&quot;); throwSemJson = false; }&#xA;catch (FormatException) { throwSemJson = true; }" DisplayName="Executar parsers" sap2010:WorkflowViewState.IdRef="InvokeCode_run">
+      <ui:InvokeCode Language="CSharp" Code="var respostaConteudo = &quot;```json\n{ \&quot;legenda\&quot;: \&quot;3 benefícios da limpeza de pele ✨\&quot;, \&quot;hashtags\&quot;: [\&quot;skincare\&quot;, \&quot;estetica\&quot;, \&quot;limpezadepele\&quot;], \&quot;mediaPrompt\&quot;: \&quot;foto clínica clean\&quot; }\n```&quot;;&#xA;var gerado = clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(respostaConteudo);&#xA;legenda = gerado.Legenda;&#xA;nHashtags = gerado.Hashtags == null ? -1 : gerado.Hashtags.Length;&#xA;mediaPrompt = gerado.MediaPrompt;&#xA;&#xA;var respostaPautas = &quot;Aqui estão as pautas:\n```json\n[{\&quot;tema\&quot;: \&quot;pauta um\&quot;, \&quot;mediaUrl\&quot;: null}, {\&quot;tema\&quot;: \&quot;pauta dois\&quot;, \&quot;mediaUrl\&quot;: null}, {\&quot;tema\&quot;: \&quot;pauta três\&quot;, \&quot;mediaUrl\&quot;: null}]\n```\nEspero que ajude!&quot;;&#xA;var pautas = clarituz_agente_social_midia.ConteudoService.ParsearPautas(respostaPautas);&#xA;nPautas = pautas == null ? -1 : pautas.Count;&#xA;pauta1 = nPautas &gt; 0 &amp;&amp; pautas[0][&quot;tema&quot;] != null ? pautas[0][&quot;tema&quot;].ToString() : &quot;&quot;;&#xA;&#xA;try { clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(&quot;   &quot;); throwVazio = false; }&#xA;catch (FormatException) { throwVazio = true; }&#xA;try { clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(&quot;texto sem json nenhum&quot;); throwSemJson = false; }&#xA;catch (FormatException) { throwSemJson = true; }&#xA;&#xA;var respostaCal = &quot;```json\n[{\&quot;data\&quot;: \&quot;2099-01-01\&quot;, \&quot;tema\&quot;: \&quot;post A\&quot;, \&quot;plataforma\&quot;: \&quot;Instagram\&quot;, \&quot;formato\&quot;: \&quot;feed\&quot;, \&quot;objetivo\&quot;: \&quot;engajar\&quot;}, {\&quot;data\&quot;: \&quot;2099-01-02\&quot;, \&quot;tema\&quot;: \&quot;post B\&quot;, \&quot;plataforma\&quot;: \&quot;Facebook\&quot;, \&quot;formato\&quot;: \&quot;carrossel\&quot;, \&quot;objetivo\&quot;: \&quot;converter\&quot;}]\n```&quot;;&#xA;var cal = clarituz_agente_social_midia.ConteudoService.ParsearCalendario(respostaCal);&#xA;nEntradasCal = cal == null ? -1 : cal.Count;&#xA;nHojeCal = clarituz_agente_social_midia.ConteudoService.EntradasDoDia(cal, new DateTime(2099, 1, 1)).Count;&#xA;try { clarituz_agente_social_midia.ConteudoService.ParsearCalendario(&quot;[{\&quot;tema\&quot;: \&quot;sem data\&quot;}]&quot;); throwCalInvalido = false; }&#xA;catch (FormatException) { throwCalInvalido = true; }" DisplayName="Executar parsers" sap2010:WorkflowViewState.IdRef="InvokeCode_run">
         <ui:InvokeCode.Arguments>
           <scg:Dictionary x:TypeArguments="x:String, Argument">
             <OutArgument x:TypeArguments="x:String" x:Key="legenda">
@@ -73,6 +76,15 @@
             </OutArgument>
             <OutArgument x:TypeArguments="x:Boolean" x:Key="throwSemJson">
               <CSharpReference x:TypeArguments="x:Boolean">ThrowSemJson</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Int32" x:Key="nEntradasCal">
+              <CSharpReference x:TypeArguments="x:Int32">NEntradasCal</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Int32" x:Key="nHojeCal">
+              <CSharpReference x:TypeArguments="x:Int32">NHojeCal</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Boolean" x:Key="throwCalInvalido">
+              <CSharpReference x:TypeArguments="x:Boolean">ThrowCalInvalido</CSharpReference>
             </OutArgument>
           </scg:Dictionary>
         </ui:InvokeCode.Arguments>
@@ -136,6 +148,30 @@
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
             <CSharpValue x:TypeArguments="x:String">"Resposta vazia/sem JSON deveria lançar FormatException (E5)"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Calendário: 2 entradas, 1 no dia" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_cal">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">NEntradasCal == 2 &amp;&amp; NHojeCal == 1</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Calendário com fences deveria parsear 2 entradas e filtrar 1 para o dia"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Calendário sem data lança" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_calinv">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">ThrowCalInvalido</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Entrada de calendário sem data deveria lançar FormatException"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>

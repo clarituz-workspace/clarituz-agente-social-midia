@@ -72,7 +72,6 @@
     <Sequence DisplayName="Coletar insights (credenciais no escopo)" sap2010:WorkflowViewState.IdRef="Sequence_insights">
       <Sequence.Variables>
         <Variable x:TypeArguments="sec:SecureString" Name="MetaSecure" />
-        <Variable x:TypeArguments="sec:SecureString" Name="LinkedInSecure" />
       </Sequence.Variables>
       <ui:GetRobotCredential AssetName="Meta_SystemUserToken" CacheStrategy="None" DisplayName="Credencial Meta" sap2010:WorkflowViewState.IdRef="GetRobotCredential_meta">
         <ui:GetRobotCredential.Password>
@@ -81,21 +80,11 @@
           </OutArgument>
         </ui:GetRobotCredential.Password>
       </ui:GetRobotCredential>
-      <ui:GetRobotCredential AssetName="LinkedIn_AccessToken" CacheStrategy="None" DisplayName="Credencial LinkedIn" sap2010:WorkflowViewState.IdRef="GetRobotCredential_li">
-        <ui:GetRobotCredential.Password>
-          <OutArgument x:TypeArguments="sec:SecureString">
-            <CSharpReference x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpReference>
-          </OutArgument>
-        </ui:GetRobotCredential.Password>
-      </ui:GetRobotCredential>
-      <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;JToken dados = null;&#xA;using (var api = new clarituz_agente_social_midia.SocialApiClient(metaSecure, linkedInSecure))&#xA;{&#xA;    if (plataforma == &quot;Instagram&quot;)&#xA;    {&#xA;        dados = api.ObterInsightsInstagramAsync(postId).GetAwaiter().GetResult();&#xA;    }&#xA;    else if (plataforma == &quot;Facebook&quot;)&#xA;    {&#xA;        dados = api.ObterInsightsFacebookAsync(postId).GetAwaiter().GetResult();&#xA;    }&#xA;    else if (plataforma == &quot;LinkedIn&quot;)&#xA;    {&#xA;        var orgUrn = cfg[&quot;linkedin_org_urn&quot;] != null ? cfg[&quot;linkedin_org_urn&quot;].ToString() : null;&#xA;        if (string.IsNullOrEmpty(orgUrn)) throw new clarituz_agente_social_midia.SocialApiException(0, &quot;linkedin_org_urn não configurado em SM_Config&quot;);&#xA;        dados = api.ObterEstatisticasPostLinkedInAsync(orgUrn, postId).GetAwaiter().GetResult();&#xA;    }&#xA;    else&#xA;    {&#xA;        throw new UiPath.Core.BusinessRuleException(&quot;BR-14: plataforma desconhecida para métricas: &quot; + plataforma);&#xA;    }&#xA;}&#xA;var metricas = clarituz_agente_social_midia.MetricasService.Normalizar(plataforma, postId, dados);&#xA;metricasJson = JObject.FromObject(metricas);&#xA;linha = clarituz_agente_social_midia.MetricasService.Serializar(metricas);" DisplayName="GET insights → MetricasPost (read-only)" sap2010:WorkflowViewState.IdRef="InvokeCode_insights">
+      <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;JToken dados = null;&#xA;using (var api = new clarituz_agente_social_midia.SocialApiClient(metaSecure))&#xA;{&#xA;    if (plataforma == &quot;Instagram&quot;)&#xA;    {&#xA;        dados = api.ObterInsightsInstagramAsync(postId).GetAwaiter().GetResult();&#xA;    }&#xA;    else if (plataforma == &quot;Facebook&quot;)&#xA;    {&#xA;        dados = api.ObterInsightsFacebookAsync(postId).GetAwaiter().GetResult();&#xA;    }&#xA;    &#xA;    else&#xA;    {&#xA;        throw new UiPath.Core.BusinessRuleException(&quot;BR-14: plataforma desconhecida para métricas: &quot; + plataforma);&#xA;    }&#xA;}&#xA;var metricas = clarituz_agente_social_midia.MetricasService.Normalizar(plataforma, postId, dados);&#xA;metricasJson = JObject.FromObject(metricas);&#xA;linha = clarituz_agente_social_midia.MetricasService.Serializar(metricas);" DisplayName="GET insights → MetricasPost (read-only)" sap2010:WorkflowViewState.IdRef="InvokeCode_insights">
         <ui:InvokeCode.Arguments>
           <scg:Dictionary x:TypeArguments="x:String, Argument">
             <InArgument x:TypeArguments="sec:SecureString" x:Key="metaSecure">
               <CSharpValue x:TypeArguments="sec:SecureString">MetaSecure</CSharpValue>
-            </InArgument>
-            <InArgument x:TypeArguments="sec:SecureString" x:Key="linkedInSecure">
-              <CSharpValue x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpValue>
             </InArgument>
             <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
               <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>

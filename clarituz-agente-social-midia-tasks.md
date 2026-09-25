@@ -160,14 +160,19 @@
 ## Task T10 — uipath-platform — Pack, publish, triggers
 
 **Identity:** `platform:clarituz-agente-social-midia:deploy`
-**Status:** [ ] pending
+**Status:** [x] completed
 **Blocked by:** T9
 **Skill prompt:**
 
 > Load uipath-platform (or `uip rpa pack` + `uip or packages upload`) and publish the package to Orchestrator folder `Shared`, create the process, and configure triggers per §16 of `clarituz-agente-social-midia-sdd.md`: queue trigger on `SM_WorkItems` (max 1 concurrent), scheduled triggers for `Curadoria` (daily), `MonitorarComentarios` (every 15–30 min), `AgendarMetricas` (daily) with `in_ModoExecucao` arguments. Delivery model: cloud.
 > Use values, mappings, and structure exactly as documented in the SDD at clarituz-agente-social-midia-sdd.md. Do not infer or guess.
 
-- [ ] `uip rpa pack` + upload package
-- [ ] Create process in `Shared`
-- [ ] Configure queue + time triggers with mode arguments
-- [ ] **Validate:** process + triggers visible; smoke job runs
+- [x] `uip rpa pack` + upload package — `clarituz-agente-social-midia.1.0.0.nupkg` publicado no feed do tenant
+- [x] Create process in `Shared` — release `729fd7ab-7ecf-46cb-a90a-1a67c3467748`; `processes resources` → todas as dependências (fila, assets, buckets) com `ValidationResult=Success`
+- [x] Configure queue + time triggers with mode arguments — `SM_WorkItems_ConsumirFila` (queue, threshold 1, 1 item/job, max 1 job — evita race no contador diário) + `SM_Curadoria_Diaria` (07:00), `SM_MonitorarComentarios_30min` (cada 30min, dentro da faixa 15–30 do SDD), `SM_AgendarMetricas_Diaria` (06:00) — todos TZ `E. South America Standard Time` (API rejeita IANA), `--input-arguments` com `in_ModoExecucao` correto, runtime Unattended, enabled
+- [x] **Validate:** 4 triggers visíveis/enabled em `Shared` via `triggers list`. Smoke job pendente — depende de credenciais Meta/LinkedIn + conexão GenAI configuradas (manual T1) e de runtimes na pasta
+
+## Change log — pós-T10
+
+- **[x] Remoção do módulo LinkedIn (pedido do usuário)** — escopo agora é Meta-only (Instagram + Facebook). Removidos: métodos LinkedIn do `SocialApiClient` (ctor virou single-token), `NormalizarLinkedIn`, enum/limite/branch de hashtags LinkedIn, `linkedin_org_urn` de `Data/Config.json` + asset `SM_Config`, health check/credencial/branches LI nos 4 workflows que usavam API, asserts LI dos testes. Assets atualizados; pacote **1.0.1** publicado e processo `729fd7ab` atualizado via `update-version`. Asset `LinkedIn_AccessToken` ficou órfão (remoção manual opcional). Testes re-executados verdes; build Success.
+- **[x] Calendário editorial automático (pedido do usuário)** — novo dispatcher `CalendarioEditorial`: `logica/Calendario_Editorial.xaml` chama LLM (`ConteudoService.MontarPromptCalendario`/`ParsearCalendario`, N dias via config `dias_calendario`, default 7) e grava `calendario/calendario-editorial.json` no bucket `SM_Metricas`. `Curadoria_Conteudo` lê o calendário, filtra entradas do dia (`EntradasDoDia`) e respeita `plataforma` por entrada; se ausente/vazio, fallback para geração ad-hoc de pautas. Rota adicionada no `Process.xaml`; trigger `SM_Calendario_Semanal` (`0 30 6 ? * MON`). Pacote **1.0.3** publicado, processo atualizado. Cobertura de teste adicionada a `T_PARSE_LLM` (parse + filtro do dia + entrada inválida → FormatException) — verde.

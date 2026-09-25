@@ -6,7 +6,7 @@ namespace clarituz_agente_social_midia
     // SDD §5 — Option A: records para dados de transação/imutáveis, class para estado mutável.
 
     public enum TipoTransacao { GerarConteudo, ModerarComentario, ColetarMetricas }
-    public enum Plataforma { Instagram, Facebook, LinkedIn }
+    public enum Plataforma { Instagram, Facebook }
     public enum Sentimento { Positivo, Neutro, Negativo, Spam, Crise }
     public enum AcaoModeracao { SugerirResposta, SugerirRespostaPrioritaria, SugerirOcultar }
     public enum DecisaoAprovacao { Aprovado, Editado, Rejeitado }
@@ -14,7 +14,7 @@ namespace clarituz_agente_social_midia
     public record WorkItemData
     {
         public string TipoTransacao { get; init; }   // GerarConteudo | ModerarComentario | ColetarMetricas
-        public string Plataforma { get; init; }       // Instagram | Facebook | LinkedIn
+        public string Plataforma { get; init; }       // Instagram | Facebook
         public string Nicho { get; init; }
         public string TomDeVoz { get; init; }
         public string Tema { get; init; }             // pauta (GerarConteudo)

@@ -28,7 +28,7 @@
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="T-ZW-01 — zero-write garantido (nenhum POST/PUT/DELETE a Meta/LinkedIn)" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="T-ZW-01 — zero-write garantido (nenhum POST/PUT/DELETE a Meta)" sap2010:WorkflowViewState.IdRef="Sequence_1">
     <Sequence.Variables>
       <Variable x:TypeArguments="x:Int32" Name="ArquivosEscaneados" />
       <Variable x:TypeArguments="x:Int32" Name="OcorrenciasProibidas" />

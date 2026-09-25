@@ -1,0 +1,130 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Calendario_Editorial" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_Entradas" Type="OutArgument(x:Int32)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="CalendarioEditorial — LLM gera calendário → bucket SM_Metricas" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="nsjl:JObject" Name="Config" />
+      <Variable x:TypeArguments="x:String" Name="Nicho" />
+      <Variable x:TypeArguments="x:String" Name="TomDeVoz" />
+      <Variable x:TypeArguments="scg:List(x:String)" Name="Plataformas" />
+      <Variable x:TypeArguments="x:Int32" Name="Dias" />
+      <Variable x:TypeArguments="x:String" Name="Prompt" />
+      <Variable x:TypeArguments="x:String" Name="RespostaLLM" />
+      <Variable x:TypeArguments="nsjl:JArray" Name="Calendario" />
+      <Variable x:TypeArguments="x:String" Name="JsonCalendario" />
+    </Sequence.Variables>
+    <Assign DisplayName="Config do contexto" sap2010:WorkflowViewState.IdRef="Assign_cfg">
+      <Assign.To>
+        <OutArgument x:TypeArguments="nsjl:JObject">
+          <CSharpReference x:TypeArguments="nsjl:JObject">Config</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="nsjl:JObject">
+          <CSharpValue x:TypeArguments="nsjl:JObject">in_ExecucaoContext["Config"] as JObject</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <ui:InvokeCode Language="CSharp" Code="nicho = string.IsNullOrEmpty(ctx[&quot;Nicho&quot;] as string) ? Convert.ToString(config[&quot;nicho&quot;]) : ctx[&quot;Nicho&quot;] as string;&#xA;tomDeVoz = string.IsNullOrEmpty(ctx[&quot;TomDeVoz&quot;] as string) ? Convert.ToString(config[&quot;tom_de_voz&quot;]) : ctx[&quot;TomDeVoz&quot;] as string;&#xA;plataformas = ctx[&quot;Plataformas&quot;] as List&lt;string&gt; ?? new List&lt;string&gt; { &quot;Instagram&quot;, &quot;Facebook&quot; };&#xA;dias = 7;&#xA;int cfgDias;&#xA;if (config[&quot;dias_calendario&quot;] != null &amp;&amp; int.TryParse(config[&quot;dias_calendario&quot;].ToString(), out cfgDias) &amp;&amp; cfgDias &gt; 0) dias = cfgDias;&#xA;prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptCalendario(nicho, tomDeVoz, plataformas.ToArray(), dias);" DisplayName="Montar prompt de calendário" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="nsjl:JObject" x:Key="config">
+            <CSharpValue x:TypeArguments="nsjl:JObject">Config</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="nicho">
+            <CSharpReference x:TypeArguments="x:String">Nicho</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="tomDeVoz">
+            <CSharpReference x:TypeArguments="x:String">TomDeVoz</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="plataformas">
+            <CSharpReference x:TypeArguments="scg:List(x:String)">Plataformas</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:Int32" x:Key="dias">
+            <CSharpReference x:TypeArguments="x:Int32">Dias</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="prompt">
+            <CSharpReference x:TypeArguments="x:String">Prompt</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <ui:InvokeWorkflowFile DisplayName="LLM: gerar calendário" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_llm" WorkflowFileName="shared/LLM_Completion.xaml">
+      <ui:InvokeWorkflowFile.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="in_Prompt">
+            <CSharpValue x:TypeArguments="x:String">Prompt</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="out_Texto">
+            <CSharpReference x:TypeArguments="x:String">RespostaLLM</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeWorkflowFile.Arguments>
+    </ui:InvokeWorkflowFile>
+    <ui:InvokeCode Language="CSharp" Code="calendario = clarituz_agente_social_midia.ConteudoService.ParsearCalendario(resposta);&#xA;json = calendario.ToString(Newtonsoft.Json.Formatting.Indented);&#xA;entradas = calendario.Count;" DisplayName="Parsear + validar calendário" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="resposta">
+            <CSharpValue x:TypeArguments="x:String">RespostaLLM</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="nsjl:JArray" x:Key="calendario">
+            <CSharpReference x:TypeArguments="nsjl:JArray">Calendario</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="json">
+            <CSharpReference x:TypeArguments="x:String">JsonCalendario</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:Int32" x:Key="entradas">
+            <CSharpReference x:TypeArguments="x:Int32">out_Entradas</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <uist:WriteStorageText DisplayName="Gravar calendario/calendario-editorial.json" Path="calendario/calendario-editorial.json" sap2010:WorkflowViewState.IdRef="WriteStorageText_cal" StorageBucketName="SM_Metricas">
+      <uist:WriteStorageText.Text>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">JsonCalendario</CSharpValue>
+        </InArgument>
+      </uist:WriteStorageText.Text>
+    </uist:WriteStorageText>
+    <ui:LogMessage DisplayName="Calendário gerado" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"CalendarioEditorial: " + out_Entradas + " entradas para " + Dias + " dias gravadas em SM_Metricas/calendario/calendario-editorial.json"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

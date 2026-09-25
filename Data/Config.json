@@ -1,12 +1,12 @@
-{
+﻿{
   "comentario": "Defaults locais de DEV — producao vem dos assets do Orchestrator (SDD §15). Nao colocar segredos aqui.",
-  "ig_user_id": "",
-  "fb_page_id": "",
-  "linkedin_org_urn": "",
+  "ig_user_id": "123",
+  "fb_page_id": "123",
   "llm_model": "gpt-4o",
   "calendario_editorial": {},
   "termos_proibidos": [],
   "janelas_sugeridas": "09:00-12:00;18:00-21:00",
+  "dias_calendario": 7,
   "limite_posts_dia": 3,
   "queue_name": "SM_WorkItems",
   "bucket_midia": "SM_Midia",

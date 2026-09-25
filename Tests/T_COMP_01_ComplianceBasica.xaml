@@ -1,6 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="Tests.T_COMP_01_ComplianceBasica" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uta="clr-namespace:UiPath.Testing.Activities;assembly=UiPath.Testing.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
-  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+<Activity mc:Ignorable="sap sap2010" x:Class="Tests_T_COMP_01_ComplianceBasica" sap2010:ExpressionActivityEditor.ExpressionActivityEditor="C#" sap2010:WorkflowViewState.IdRef="ActivityBuilder_1" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uta="clr-namespace:UiPath.Testing.Activities;assembly=UiPath.Testing.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <TextExpression.NamespacesForImplementation>
     <sco:Collection x:TypeArguments="x:String">
       <x:String>GlobalConstantsNamespace</x:String>
@@ -28,12 +26,12 @@
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="T-COMP-01 — compliance BR-01..BR-04" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="T-COMP-01 — compliance BR-01..BR-04" sap:VirtualizedContainerService.HintSize="470,186" sap2010:WorkflowViewState.IdRef="Sequence_1">
     <Sequence.Variables>
       <Variable x:TypeArguments="scg:List(x:String)" Name="VOk" />
       <Variable x:TypeArguments="scg:List(x:String)" Name="VLegenda" />
       <Variable x:TypeArguments="scg:List(x:String)" Name="VHashtagsIg" />
-      <Variable x:TypeArguments="scg:List(x:String)" Name="VHashtagsLi" />
+      <Variable x:TypeArguments="scg:List(x:String)" Name="VHashtagsFb" />
       <Variable x:TypeArguments="scg:List(x:String)" Name="VSemMidia" />
       <Variable x:TypeArguments="scg:List(x:String)" Name="VExtensao" />
     </Sequence.Variables>
@@ -46,107 +44,105 @@
       <ui:LogMessage DisplayName="Given: conteúdos de teste" sap2010:WorkflowViewState.IdRef="LogMessage_given" Level="Info">
         <ui:LogMessage.Message>
           <InArgument x:TypeArguments="x:Object">
-            <CSharpValue x:TypeArguments="x:Object">"T-COMP-01: validando BR-01..BR-04 em ConteudoService.ValidarCompliance"</CSharpValue>
+            <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">"T-COMP-01: validando BR-01..BR-04 em ConteudoService.ValidarCompliance"</CSharpValue>
           </InArgument>
         </ui:LogMessage.Message>
       </ui:LogMessage>
     </Sequence>
     <Sequence DisplayName="Compliance — When" sap2010:WorkflowViewState.IdRef="Sequence_when">
-      <ui:InvokeCode Language="CSharp" Code="vOk = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;legenda ok&quot;, new[] { &quot;beleza&quot;, &quot;estetica&quot; }, &quot;foto.jpeg&quot;, true, null);&#xA;vLegenda = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, new string('x', 2300), new[] { &quot;a&quot; }, &quot;foto.jpeg&quot;, true, null);&#xA;vTagsIg = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;ok&quot;, Enumerable.Range(0, 31).Select(i =&gt; &quot;tag&quot; + i).ToArray(), &quot;foto.jpeg&quot;, true, null);&#xA;vTagsLi = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;LinkedIn&quot;, &quot;ok&quot;, Enumerable.Range(0, 6).Select(i =&gt; &quot;tag&quot; + i).ToArray(), null, false, null);&#xA;vSemMidia = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;ok&quot;, new[] { &quot;a&quot; }, &quot;&quot;, false, null);&#xA;vExt = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;ok&quot;, new[] { &quot;a&quot; }, &quot;animacao.gif&quot;, true, null);" DisplayName="Executar ValidarCompliance (6 cenários)" sap2010:WorkflowViewState.IdRef="InvokeCode_run">
+      <ui:InvokeCode ContinueOnError="{x:Null}" Code="vOk = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;legenda ok&quot;, new[] { &quot;beleza&quot;, &quot;estetica&quot; }, &quot;foto.jpeg&quot;, true, null);&#xA;vLegenda = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, new string('x', 2300), new[] { &quot;a&quot; }, &quot;foto.jpeg&quot;, true, null);&#xA;vTagsIg = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;ok&quot;, Enumerable.Range(0, 31).Select(i =&gt; &quot;tag&quot; + i).ToArray(), &quot;foto.jpeg&quot;, true, null);&#xA;vTagsFb = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Facebook&quot;, &quot;ok&quot;, Enumerable.Range(0, 31).Select(i =&gt; &quot;tag&quot; + i).ToArray(), null, false, null);&#xA;vSemMidia = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;ok&quot;, new[] { &quot;a&quot; }, &quot;&quot;, false, null);&#xA;vExt = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;ok&quot;, new[] { &quot;a&quot; }, &quot;animacao.gif&quot;, true, null);" DisplayName="Executar ValidarCompliance (6 cenários)" sap2010:WorkflowViewState.IdRef="InvokeCode_run" Language="CSharp">
         <ui:InvokeCode.Arguments>
-          <scg:Dictionary x:TypeArguments="x:String, Argument">
-            <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vOk">
-              <CSharpReference x:TypeArguments="scg:List(x:String)">VOk</CSharpReference>
-            </OutArgument>
-            <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vLegenda">
-              <CSharpReference x:TypeArguments="scg:List(x:String)">VLegenda</CSharpReference>
-            </OutArgument>
-            <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vTagsIg">
-              <CSharpReference x:TypeArguments="scg:List(x:String)">VHashtagsIg</CSharpReference>
-            </OutArgument>
-            <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vTagsLi">
-              <CSharpReference x:TypeArguments="scg:List(x:String)">VHashtagsLi</CSharpReference>
-            </OutArgument>
-            <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vSemMidia">
-              <CSharpReference x:TypeArguments="scg:List(x:String)">VSemMidia</CSharpReference>
-            </OutArgument>
-            <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vExt">
-              <CSharpReference x:TypeArguments="scg:List(x:String)">VExtensao</CSharpReference>
-            </OutArgument>
-          </scg:Dictionary>
+          <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vOk">
+            <CSharpReference x:TypeArguments="scg:List(x:String)" sap2010:WorkflowViewState.IdRef="CSharpReference`1_1">VOk</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vLegenda">
+            <CSharpReference x:TypeArguments="scg:List(x:String)" sap2010:WorkflowViewState.IdRef="CSharpReference`1_2">VLegenda</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vTagsIg">
+            <CSharpReference x:TypeArguments="scg:List(x:String)" sap2010:WorkflowViewState.IdRef="CSharpReference`1_3">VHashtagsIg</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vTagsFb">
+            <CSharpReference x:TypeArguments="scg:List(x:String)" sap2010:WorkflowViewState.IdRef="CSharpReference`1_4">VHashtagsFb</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vSemMidia">
+            <CSharpReference x:TypeArguments="scg:List(x:String)" sap2010:WorkflowViewState.IdRef="CSharpReference`1_5">VSemMidia</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vExt">
+            <CSharpReference x:TypeArguments="scg:List(x:String)" sap2010:WorkflowViewState.IdRef="CSharpReference`1_6">VExtensao</CSharpReference>
+          </OutArgument>
         </ui:InvokeCode.Arguments>
       </ui:InvokeCode>
     </Sequence>
     <Sequence DisplayName="Compliance — Then" sap2010:WorkflowViewState.IdRef="Sequence_then">
-      <uta:VerifyExpression DisplayName="Válido → 0 violações" sap2010:WorkflowViewState.IdRef="VerifyExpression_ok" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
+      <uta:VerifyExpression AlternativeVerificationTitle="{x:Null}" KeepScreenshots="{x:Null}" Result="{x:Null}" ScreenshotsPath="{x:Null}" ContinueOnFailure="True" DisplayName="Válido → 0 violações" sap2010:WorkflowViewState.IdRef="VerifyExpression_ok" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
         <uta:VerifyExpression.Expression>
           <InArgument x:TypeArguments="x:Boolean">
-            <CSharpValue x:TypeArguments="x:Boolean">VOk != null &amp;&amp; VOk.Count == 0</CSharpValue>
+            <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_2">VOk != null &amp;&amp; VOk.Count == 0</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.Expression>
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
-            <CSharpValue x:TypeArguments="x:String">"Conteúdo válido deveria ter 0 violações"</CSharpValue>
+            <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_3">"Conteúdo válido deveria ter 0 violações"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>
-      <uta:VerifyExpression DisplayName="BR-01 legenda excede" sap2010:WorkflowViewState.IdRef="VerifyExpression_br01" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
+      <uta:VerifyExpression AlternativeVerificationTitle="{x:Null}" KeepScreenshots="{x:Null}" Result="{x:Null}" ScreenshotsPath="{x:Null}" ContinueOnFailure="True" DisplayName="BR-01 legenda excede" sap2010:WorkflowViewState.IdRef="VerifyExpression_br01" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
         <uta:VerifyExpression.Expression>
           <InArgument x:TypeArguments="x:Boolean">
-            <CSharpValue x:TypeArguments="x:Boolean">VLegenda.Any(v =&gt; v.StartsWith("BR-01"))</CSharpValue>
+            <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_4">VLegenda.Any(v =&gt; v.StartsWith("BR-01"))</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.Expression>
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
-            <CSharpValue x:TypeArguments="x:String">"Legenda 2300 chars no IG deveria violar BR-01"</CSharpValue>
+            <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_5">"Legenda 2300 chars no IG deveria violar BR-01"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>
-      <uta:VerifyExpression DisplayName="BR-02 hashtags IG" sap2010:WorkflowViewState.IdRef="VerifyExpression_br02ig" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
+      <uta:VerifyExpression AlternativeVerificationTitle="{x:Null}" KeepScreenshots="{x:Null}" Result="{x:Null}" ScreenshotsPath="{x:Null}" ContinueOnFailure="True" DisplayName="BR-02 hashtags IG" sap2010:WorkflowViewState.IdRef="VerifyExpression_br02ig" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
         <uta:VerifyExpression.Expression>
           <InArgument x:TypeArguments="x:Boolean">
-            <CSharpValue x:TypeArguments="x:Boolean">VHashtagsIg.Any(v =&gt; v.StartsWith("BR-02"))</CSharpValue>
+            <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_6">VHashtagsIg.Any(v =&gt; v.StartsWith("BR-02"))</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.Expression>
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
-            <CSharpValue x:TypeArguments="x:String">"31 hashtags no IG deveria violar BR-02"</CSharpValue>
+            <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_7">"31 hashtags no IG deveria violar BR-02"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>
-      <uta:VerifyExpression DisplayName="BR-02 hashtags LI" sap2010:WorkflowViewState.IdRef="VerifyExpression_br02li" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
+      <uta:VerifyExpression AlternativeVerificationTitle="{x:Null}" KeepScreenshots="{x:Null}" Result="{x:Null}" ScreenshotsPath="{x:Null}" ContinueOnFailure="True" DisplayName="BR-02 hashtags FB" sap2010:WorkflowViewState.IdRef="VerifyExpression_br02fb" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
         <uta:VerifyExpression.Expression>
           <InArgument x:TypeArguments="x:Boolean">
-            <CSharpValue x:TypeArguments="x:Boolean">VHashtagsLi.Any(v =&gt; v.StartsWith("BR-02"))</CSharpValue>
+            <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_8">VHashtagsFb.Any(v =&gt; v.StartsWith("BR-02"))</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.Expression>
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
-            <CSharpValue x:TypeArguments="x:String">"6 hashtags no LinkedIn deveria violar BR-02 (máx 5)"</CSharpValue>
+            <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_9">"31 hashtags no Facebook deveria violar BR-02"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>
-      <uta:VerifyExpression DisplayName="BR-03 mídia IG obrigatória" sap2010:WorkflowViewState.IdRef="VerifyExpression_br03" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
+      <uta:VerifyExpression AlternativeVerificationTitle="{x:Null}" KeepScreenshots="{x:Null}" Result="{x:Null}" ScreenshotsPath="{x:Null}" ContinueOnFailure="True" DisplayName="BR-03 mídia IG obrigatória" sap2010:WorkflowViewState.IdRef="VerifyExpression_br03" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
         <uta:VerifyExpression.Expression>
           <InArgument x:TypeArguments="x:Boolean">
-            <CSharpValue x:TypeArguments="x:Boolean">VSemMidia.Any(v =&gt; v.StartsWith("BR-03"))</CSharpValue>
+            <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_10">VSemMidia.Any(v =&gt; v.StartsWith("BR-03"))</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.Expression>
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
-            <CSharpValue x:TypeArguments="x:String">"IG sem mídia no bucket deveria violar BR-03"</CSharpValue>
+            <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_11">"IG sem mídia no bucket deveria violar BR-03"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>
-      <uta:VerifyExpression DisplayName="BR-04 extensão inválida" sap2010:WorkflowViewState.IdRef="VerifyExpression_br04" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
+      <uta:VerifyExpression AlternativeVerificationTitle="{x:Null}" KeepScreenshots="{x:Null}" Result="{x:Null}" ScreenshotsPath="{x:Null}" ContinueOnFailure="True" DisplayName="BR-04 extensão inválida" sap2010:WorkflowViewState.IdRef="VerifyExpression_br04" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False">
         <uta:VerifyExpression.Expression>
           <InArgument x:TypeArguments="x:Boolean">
-            <CSharpValue x:TypeArguments="x:Boolean">VExtensao.Any(v =&gt; v.StartsWith("BR-04"))</CSharpValue>
+            <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_12">VExtensao.Any(v =&gt; v.StartsWith("BR-04"))</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.Expression>
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
-            <CSharpValue x:TypeArguments="x:String">"Mídia .gif deveria violar BR-04"</CSharpValue>
+            <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_13">"Mídia .gif deveria violar BR-04"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>

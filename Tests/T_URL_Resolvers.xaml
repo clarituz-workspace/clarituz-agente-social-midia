@@ -35,9 +35,7 @@
       <Variable x:TypeArguments="x:String" Name="ShortcodeInvalido" />
       <Variable x:TypeArguments="x:String" Name="FbId" />
       <Variable x:TypeArguments="x:String" Name="FbIdPfbid" />
-      <Variable x:TypeArguments="x:String" Name="LiUrn" />
       <Variable x:TypeArguments="x:Boolean" Name="FbThrow" />
-      <Variable x:TypeArguments="x:Boolean" Name="LiThrow" />
       <Variable x:TypeArguments="x:Boolean" Name="IgNull" />
     </Sequence.Variables>
     <Sequence DisplayName="Resolvers — Given">
@@ -50,7 +48,7 @@
       </ui:LogMessage>
     </Sequence>
     <Sequence DisplayName="Resolvers — When">
-      <ui:InvokeCode Language="CSharp" Code="shortP = clarituz_agente_social_midia.SocialApiClient.ExtrairShortcodeInstagram(&quot;https://www.instagram.com/p/Cx9AbC_12/?img_index=1&quot;);&#xA;shortReel = clarituz_agente_social_midia.SocialApiClient.ExtrairShortcodeInstagram(&quot;https://www.instagram.com/reel/DfGhi_J34/&quot;);&#xA;shortInv = clarituz_agente_social_midia.SocialApiClient.ExtrairShortcodeInstagram(&quot;https://www.instagram.com/usuario/perfil&quot;);&#xA;igNull = shortInv == null;&#xA;&#xA;using (var api = new clarituz_agente_social_midia.SocialApiClient(&quot;fake&quot;, &quot;fake&quot;))&#xA;{&#xA;    fbId = api.ResolverPostIdFacebook(&quot;https://www.facebook.com/minhapagina/posts/123456789&quot;);&#xA;    fbPfbid = api.ResolverPostIdFacebook(&quot;https://www.facebook.com/minhapagina/posts/pfbid0abcDEF123&quot;);&#xA;    liUrn = api.ResolverUrnLinkedIn(&quot;https://www.linkedin.com/feed/update/urn:li:activity:7123456789/&quot;);&#xA;    try { api.ResolverPostIdFacebook(&quot;https://www.facebook.com/minhapagina&quot;); fbThrow = false; }&#xA;    catch (clarituz_agente_social_midia.SocialApiException) { fbThrow = true; }&#xA;    try { api.ResolverUrnLinkedIn(&quot;https://www.linkedin.com/company/minha&quot;); liThrow = false; }&#xA;    catch (clarituz_agente_social_midia.SocialApiException) { liThrow = true; }&#xA;}" DisplayName="Resolver post_ids (sem rede)" sap2010:WorkflowViewState.IdRef="InvokeCode_run">
+      <ui:InvokeCode Language="CSharp" Code="shortP = clarituz_agente_social_midia.SocialApiClient.ExtrairShortcodeInstagram(&quot;https://www.instagram.com/p/Cx9AbC_12/?img_index=1&quot;);&#xA;shortReel = clarituz_agente_social_midia.SocialApiClient.ExtrairShortcodeInstagram(&quot;https://www.instagram.com/reel/DfGhi_J34/&quot;);&#xA;shortInv = clarituz_agente_social_midia.SocialApiClient.ExtrairShortcodeInstagram(&quot;https://www.instagram.com/usuario/perfil&quot;);&#xA;igNull = shortInv == null;&#xA;&#xA;using (var api = new clarituz_agente_social_midia.SocialApiClient(&quot;fake&quot;))&#xA;{&#xA;    fbId = api.ResolverPostIdFacebook(&quot;https://www.facebook.com/minhapagina/posts/123456789&quot;);&#xA;    fbPfbid = api.ResolverPostIdFacebook(&quot;https://www.facebook.com/minhapagina/posts/pfbid0abcDEF123&quot;);&#xA;    try { api.ResolverPostIdFacebook(&quot;https://www.facebook.com/minhapagina&quot;); fbThrow = false; }&#xA;    catch (clarituz_agente_social_midia.SocialApiException) { fbThrow = true; }&#xA;}" DisplayName="Resolver post_ids (sem rede)" sap2010:WorkflowViewState.IdRef="InvokeCode_run">
         <ui:InvokeCode.Arguments>
           <scg:Dictionary x:TypeArguments="x:String, Argument">
             <OutArgument x:TypeArguments="x:String" x:Key="shortP">
@@ -71,14 +69,8 @@
             <OutArgument x:TypeArguments="x:String" x:Key="fbPfbid">
               <CSharpReference x:TypeArguments="x:String">FbIdPfbid</CSharpReference>
             </OutArgument>
-            <OutArgument x:TypeArguments="x:String" x:Key="liUrn">
-              <CSharpReference x:TypeArguments="x:String">LiUrn</CSharpReference>
-            </OutArgument>
             <OutArgument x:TypeArguments="x:Boolean" x:Key="fbThrow">
               <CSharpReference x:TypeArguments="x:Boolean">FbThrow</CSharpReference>
-            </OutArgument>
-            <OutArgument x:TypeArguments="x:Boolean" x:Key="liThrow">
-              <CSharpReference x:TypeArguments="x:Boolean">LiThrow</CSharpReference>
             </OutArgument>
           </scg:Dictionary>
         </ui:InvokeCode.Arguments>
@@ -145,18 +137,6 @@
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>
-      <uta:VerifyExpression DisplayName="LI activity → urn" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_liurn">
-        <uta:VerifyExpression.Expression>
-          <InArgument x:TypeArguments="x:Boolean">
-            <CSharpValue x:TypeArguments="x:Boolean">LiUrn == "urn:li:activity:7123456789"</CSharpValue>
-          </InArgument>
-        </uta:VerifyExpression.Expression>
-        <uta:VerifyExpression.OutputMessageFormat>
-          <InArgument x:TypeArguments="x:String">
-            <CSharpValue x:TypeArguments="x:String">"URL activity deveria virar urn:li:activity:NNN"</CSharpValue>
-          </InArgument>
-        </uta:VerifyExpression.OutputMessageFormat>
-      </uta:VerifyExpression>
       <uta:VerifyExpression DisplayName="B9: FB inválida lança" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_fbthrow">
         <uta:VerifyExpression.Expression>
           <InArgument x:TypeArguments="x:Boolean">
@@ -166,18 +146,6 @@
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
             <CSharpValue x:TypeArguments="x:String">"URL FB sem id deveria lançar SocialApiException"</CSharpValue>
-          </InArgument>
-        </uta:VerifyExpression.OutputMessageFormat>
-      </uta:VerifyExpression>
-      <uta:VerifyExpression DisplayName="B9: LI inválida lança" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_lithrow">
-        <uta:VerifyExpression.Expression>
-          <InArgument x:TypeArguments="x:Boolean">
-            <CSharpValue x:TypeArguments="x:Boolean">LiThrow</CSharpValue>
-          </InArgument>
-        </uta:VerifyExpression.Expression>
-        <uta:VerifyExpression.OutputMessageFormat>
-          <InArgument x:TypeArguments="x:String">
-            <CSharpValue x:TypeArguments="x:String">"URL LI sem urn deveria lançar SocialApiException"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>

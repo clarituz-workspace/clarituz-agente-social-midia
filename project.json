@@ -4,17 +4,17 @@
   "description": "Nome: Camila \r\nCargo: Social Media \r\nEspecialista em campanhas estrategicas de marketing de alta conversao \r\npara diversos nichos",
   "main": "Main.xaml",
   "dependencies": {
-    "UiPath.System.Activities": "[26.8.2]",
-    "UiPath.WebAPI.Activities": "2.5.2",
-    "UiPath.Persistence.Activities": "1.13.0",
     "UiPath.IntegrationService.Activities": "1.33.0",
-    "UiPath.Testing.Activities": "25.10.3"
+    "UiPath.Persistence.Activities": "1.13.0",
+    "UiPath.System.Activities": "[26.8.2]",
+    "UiPath.Testing.Activities": "25.10.3",
+    "UiPath.WebAPI.Activities": "2.5.2"
   },
   "webServices": [],
   "entitiesStores": [],
   "schemaVersion": "4.1",
   "studioVersion": "26.0.202.0",
-  "projectVersion": "1.0.0",
+  "projectVersion": "1.0.3",
   "runtimeOptions": {
     "autoDispose": false,
     "netFrameworkLazyLoading": false,
@@ -48,48 +48,42 @@
         "testCaseId": "66855eb3-c2a3-4f22-b266-130297a44e31",
         "testCaseType": "TestCase",
         "executionTemplateInvokeIsolated": false,
-        "fileName": "Tests\\T_COMP_01_ComplianceBasica.xaml",
-        "publishAsTestCase": true
+        "fileName": "Tests\\T_COMP_01_ComplianceBasica.xaml"
       },
       {
         "editingStatus": "InProgress",
         "testCaseId": "f1d0ec21-3ec0-41f7-a9eb-9e1981a088c8",
         "testCaseType": "TestCase",
         "executionTemplateInvokeIsolated": false,
-        "fileName": "Tests\\T_COMP_02_TermosProibidos.xaml",
-        "publishAsTestCase": true
+        "fileName": "Tests\\T_COMP_02_TermosProibidos.xaml"
       },
       {
         "editingStatus": "InProgress",
         "testCaseId": "44d9be20-7b1c-48c2-b40b-480f12c2a54f",
         "testCaseType": "TestCase",
         "executionTemplateInvokeIsolated": false,
-        "fileName": "Tests\\T_MOD_Sentimentos.xaml",
-        "publishAsTestCase": true
+        "fileName": "Tests\\T_MOD_Sentimentos.xaml"
       },
       {
         "editingStatus": "InProgress",
         "testCaseId": "7d9c9aaa-869d-4d52-b620-043bef918038",
         "testCaseType": "TestCase",
         "executionTemplateInvokeIsolated": false,
-        "fileName": "Tests\\T_URL_Resolvers.xaml",
-        "publishAsTestCase": true
+        "fileName": "Tests\\T_URL_Resolvers.xaml"
       },
       {
         "editingStatus": "InProgress",
         "testCaseId": "296c8e7f-b03c-4208-ad1e-bd7af6effe9f",
         "testCaseType": "TestCase",
         "executionTemplateInvokeIsolated": false,
-        "fileName": "Tests\\T_PARSE_LLM.xaml",
-        "publishAsTestCase": true
+        "fileName": "Tests\\T_PARSE_LLM.xaml"
       },
       {
         "editingStatus": "InProgress",
         "testCaseId": "4ce07a9d-0065-44db-b6e4-52a03cce7376",
         "testCaseType": "TestCase",
         "executionTemplateInvokeIsolated": false,
-        "fileName": "Tests\\T_ZW_ZeroWrite.xaml",
-        "publishAsTestCase": true
+        "fileName": "Tests\\T_ZW_ZeroWrite.xaml"
       }
     ],
     "saveToCloud": false
@@ -111,36 +105,32 @@
           "name": "in_Plataformas",
           "type": "System.String[]",
           "required": false,
-          "hasDefault": false,
-          "defaultValue": null
+          "hasDefault": false
         },
         {
           "name": "in_NichoCampanha",
           "type": "System.String",
           "required": false,
-          "hasDefault": false,
-          "defaultValue": null
+          "hasDefault": false
         },
         {
           "name": "in_TomDeVoz",
           "type": "System.String",
           "required": false,
-          "hasDefault": false,
-          "defaultValue": null
+          "hasDefault": false
         },
         {
           "name": "in_JanelaPublicacao",
           "type": "System.String",
           "required": false,
-          "hasDefault": false,
-          "defaultValue": null
+          "hasDefault": false
         },
         {
           "name": "in_LimitePostsDia",
           "type": "System.Int32",
           "required": false,
           "hasDefault": true,
-          "defaultValue": 3
+          "defaultValue": "3"
         }
       ],
       "output": []

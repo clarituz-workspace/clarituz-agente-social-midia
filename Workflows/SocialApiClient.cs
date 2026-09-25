@@ -21,28 +21,25 @@ namespace clarituz_agente_social_midia
         }
     }
 
-    // Cliente SOMENTE-LEITURA para Meta Graph API e LinkedIn API (SDD §6/§9).
+    // Cliente SOMENTE-LEITURA para Meta Graph API — Instagram e Facebook (SDD §6/§9).
     // Guarda estrutural do invariante zero-write: qualquer método ≠ GET lança exceção.
     public class SocialApiClient : IDisposable
     {
         private const string MetaBase = "https://graph.facebook.com/v21.0";
-        private const string LinkedInBase = "https://api.linkedin.com/v2";
         private static readonly TimeSpan[] Backoff = { TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(8), TimeSpan.FromSeconds(32) };
 
         private readonly HttpClient _http;
         private readonly string _metaToken;
-        private readonly string _linkedInToken;
 
-        public SocialApiClient(string metaToken, string linkedInToken, int timeoutSegundos = 30)
+        public SocialApiClient(string metaToken, int timeoutSegundos = 30)
         {
             _metaToken = metaToken;
-            _linkedInToken = linkedInToken;
             _http = new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSegundos) };
         }
 
-        // Overload para receber credenciais de Orchestrator sem materializar texto em XAML (ST-SEC-009).
-        public SocialApiClient(System.Security.SecureString metaToken, System.Security.SecureString linkedInToken, int timeoutSegundos = 30)
-            : this(SecureParaTexto(metaToken), SecureParaTexto(linkedInToken), timeoutSegundos) { }
+        // Overload para receber credencial de Orchestrator sem materializar texto em XAML (ST-SEC-009).
+        public SocialApiClient(System.Security.SecureString metaToken, int timeoutSegundos = 30)
+            : this(SecureParaTexto(metaToken), timeoutSegundos) { }
 
         private static string SecureParaTexto(System.Security.SecureString seguro)
             => seguro == null ? null : new System.Net.NetworkCredential(string.Empty, seguro).Password;
@@ -54,16 +51,10 @@ namespace clarituz_agente_social_midia
         public async Task<JToken> HealthCheckMetaAsync()
             => await GetMetaAsync("/me");
 
-        public async Task<JToken> HealthCheckLinkedInAsync()
-            => await GetLinkedInAsync("/me");
-
         // ── Comentários (Monitorar_Comentarios — somente leitura) ──
 
         public async Task<JToken> ObterComentariosMetaAsync(string mediaOuPostId)
             => await GetMetaAsync($"/{mediaOuPostId}/comments?fields=id,text,username,timestamp&limit=100");
-
-        public async Task<JToken> ObterComentariosLinkedInAsync(string shareUrn)
-            => await GetLinkedInAsync($"/socialActions/{Uri.EscapeDataString(shareUrn)}/comments");
 
         // ── Fontes para polling de comentários (Monitorar_Comentarios) ──
 
@@ -72,9 +63,6 @@ namespace clarituz_agente_social_midia
 
         public async Task<JToken> ObterFeedFacebookAsync(string pageId, int limite = 25)
             => await GetMetaAsync($"/{pageId}/feed?fields=id,created_time&limit={limite}");
-
-        public async Task<JToken> ObterPostsLinkedInAsync(string organizationalUrn, int limite = 25)
-            => await GetLinkedInAsync($"/ugcPosts?q=authors&authors=List({Uri.EscapeDataString(organizationalUrn)})&count={limite}");
 
         // ── Métricas (Coletar_Metricas — somente leitura) ──
 
@@ -92,13 +80,6 @@ namespace clarituz_agente_social_midia
             };
         }
 
-        public async Task<JToken> ObterEstatisticasLinkedInAsync(string organizationalEntityUrn)
-            => await GetLinkedInAsync($"/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity={Uri.EscapeDataString(organizationalEntityUrn)}");
-
-        // Stats de um post específico (share/ugcPost URN) dentro da org — Coletar_Metricas.
-        public async Task<JToken> ObterEstatisticasPostLinkedInAsync(string organizationalEntityUrn, string shareUrn)
-            => await GetLinkedInAsync($"/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity={Uri.EscapeDataString(organizationalEntityUrn)}&shares=List({Uri.EscapeDataString(shareUrn)})");
-
         // ── Resolução de post_id a partir da URL colada pelo humano (B9) ──
 
         // Instagram: extrai o shortcode de /p/ ou /reel/ e casa com o permalink no feed do ig_user.
@@ -112,7 +93,7 @@ namespace clarituz_agente_social_midia
             for (var pagina = 0; pagina < 3 && proximo != null; pagina++)
             {
                 var feed = proximo.StartsWith("http")
-                    ? await GetRawAsync(proximo, _metaToken)
+                    ? await GetRawAsync(proximo)
                     : await GetMetaAsync(proximo);
 
                 foreach (var m in feed["data"] ?? new JArray())
@@ -135,16 +116,6 @@ namespace clarituz_agente_social_midia
             return m.Groups[1].Value;
         }
 
-        // LinkedIn: extrai urn de activity/ugcPost/share na URL do post.
-        public string ResolverUrnLinkedIn(string postUrl)
-        {
-            var m = System.Text.RegularExpressions.Regex.Match(postUrl, @"(activity|ugcPost|share)[-:](\d+)");
-            if (!m.Success)
-                throw new SocialApiException(0, $"URL do LinkedIn sem URN de post: {postUrl}");
-            var tipo = m.Groups[1].Value;
-            return $"urn:li:{(tipo == "activity" ? "activity" : tipo == "share" ? "share" : "ugcPost")}:{m.Groups[2].Value}";
-        }
-
         public static string ExtrairShortcodeInstagram(string url)
         {
             var m = System.Text.RegularExpressions.Regex.Match(url ?? "", @"instagram\.com/(?:p|reel|reels)/([\w\-]+)");
@@ -154,12 +125,9 @@ namespace clarituz_agente_social_midia
         // ── Núcleo HTTP — read-only + retry E1/E2 ──
 
         private Task<JToken> GetMetaAsync(string path)
-            => GetRawAsync(MetaBase + path, _metaToken);
+            => GetRawAsync(MetaBase + path);
 
-        private Task<JToken> GetLinkedInAsync(string path)
-            => GetRawAsync(LinkedInBase + path, _linkedInToken);
-
-        private async Task<JToken> GetRawAsync(string url, string bearerToken)
+        private async Task<JToken> GetRawAsync(string url)
         {
             Exception ultimoErro = null;
             for (var tentativa = 0; tentativa <= Backoff.Length; tentativa++)
@@ -168,8 +136,8 @@ namespace clarituz_agente_social_midia
                 {
                     using (var req = new HttpRequestMessage(HttpMethod.Get, url))
                     {
-                        if (!string.IsNullOrEmpty(bearerToken))
-                            req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", bearerToken);
+                        if (!string.IsNullOrEmpty(_metaToken))
+                            req.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _metaToken);
 
                         using (var resp = await _http.SendAsync(req).ConfigureAwait(false))
                         {
