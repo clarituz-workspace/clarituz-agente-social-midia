@@ -1,0 +1,88 @@
+{
+  "display": "form",
+  "components": [
+    {
+      "type": "htmlelement",
+      "tag": "h4",
+      "content": "Post gerado pela Camila — revisar, publicar e colar a URL",
+      "input": false,
+      "key": "titulo_secao"
+    },
+    {
+      "type": "columns",
+      "label": "Contexto",
+      "key": "colunas_contexto",
+      "columns": [
+        {
+          "width": 6,
+          "components": [
+            { "type": "textfield", "key": "plataforma", "label": "Plataforma", "disabled": true, "input": true },
+            { "type": "textfield", "key": "media_bucket", "label": "Mídia (SM_Midia)", "disabled": true, "input": true },
+            { "type": "textfield", "key": "aviso_limite", "label": "Limite diário", "disabled": true, "input": true }
+          ]
+        },
+        {
+          "width": 6,
+          "components": [
+            { "type": "textfield", "key": "tema", "label": "Tema da pauta", "disabled": true, "input": true },
+            { "type": "textfield", "key": "janela_sugerida", "label": "Janela sugerida", "disabled": true, "input": true },
+            { "type": "textfield", "key": "hashtags", "label": "Hashtags", "disabled": true, "input": true }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "columns",
+      "label": "Legendas A/B — compare e escolha a base da legenda final",
+      "key": "colunas_legendas",
+      "columns": [
+        {
+          "width": 6,
+          "components": [
+            { "type": "textarea", "key": "legenda_original", "label": "Legenda A (original)", "disabled": true, "rows": 8, "input": true }
+          ]
+        },
+        {
+          "width": 6,
+          "components": [
+            { "type": "textarea", "key": "legenda_alternativa", "label": "Legenda B (alternativa)", "disabled": true, "rows": 8, "input": true }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "radio",
+      "key": "decisao",
+      "label": "Decisão",
+      "inline": true,
+      "values": [
+        { "value": "Aprovado", "label": "Aprovado" },
+        { "value": "Editado", "label": "Editado" },
+        { "value": "Rejeitado", "label": "Rejeitado" }
+      ],
+      "validate": { "required": true },
+      "input": true
+    },
+    {
+      "type": "textarea",
+      "key": "legenda_editada",
+      "label": "Legenda final (edite aqui se precisar — será revalidada)",
+      "rows": 6,
+      "input": true
+    },
+    {
+      "type": "textfield",
+      "key": "url_post_publicado",
+      "label": "URL do post publicado (obrigatório — cole após publicar manualmente)",
+      "placeholder": "https://www.instagram.com/p/... ou https://www.facebook.com/...",
+      "input": true
+    },
+    {
+      "type": "textarea",
+      "key": "motivo_rejeicao",
+      "label": "Motivo da rejeição",
+      "conditional": { "show": true, "when": "decisao", "eq": "Rejeitado" },
+      "input": true
+    }
+  ]
+}

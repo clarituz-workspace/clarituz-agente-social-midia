@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="logica.Agendar_Metricas" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Agendar_Metricas" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
     <x:Property Name="out_Enqueued" Type="OutArgument(x:Int32)" />
@@ -36,12 +36,78 @@
     <Sequence.Variables>
       <Variable x:TypeArguments="x:String" Name="JsonlPosts" />
       <Variable x:TypeArguments="nsjl:JArray" Name="Pendentes" />
+      <Variable x:TypeArguments="x:Boolean" Name="MinioAtivo" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;minioAtivo = clarituz_agente_social_midia.MinioService.Configurado(cfg);" DisplayName="Destino MinIO?" sap2010:WorkflowViewState.IdRef="InvokeCode_destino">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:Boolean" x:Key="minioAtivo">
+            <CSharpReference x:TypeArguments="x:Boolean">MinioAtivo</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <If sap2010:WorkflowViewState.IdRef="If_destino">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">MinioAtivo</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="MinIO: listar posts/* → jsonl" sap2010:WorkflowViewState.IdRef="Sequence_minio_list">
+          <Sequence.Variables>
+            <Variable x:TypeArguments="x:String" Name="MinioUser" />
+            <Variable x:TypeArguments="sec:SecureString" Name="MinioSecure" />
+          </Sequence.Variables>
+          <ui:GetRobotCredential AssetName="MinIO_AccessKey" CacheStrategy="None" DisplayName="Credencial MinIO" sap2010:WorkflowViewState.IdRef="GetRobotCredential_minio">
+            <ui:GetRobotCredential.Username>
+              <OutArgument x:TypeArguments="x:String">
+                <CSharpReference x:TypeArguments="x:String">MinioUser</CSharpReference>
+              </OutArgument>
+            </ui:GetRobotCredential.Username>
+            <ui:GetRobotCredential.Password>
+              <OutArgument x:TypeArguments="sec:SecureString">
+                <CSharpReference x:TypeArguments="sec:SecureString">MinioSecure</CSharpReference>
+              </OutArgument>
+            </ui:GetRobotCredential.Password>
+          </ui:GetRobotCredential>
+          <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;var secret = minioSecure == null ? null : new System.Net.NetworkCredential(string.Empty, minioSecure).Password;&#xA;var objetos = clarituz_agente_social_midia.MinioService.ListarJsonsAsync(cfg, minioUser, secret, &quot;posts/&quot;).GetAwaiter().GetResult();&#xA;jsonl = clarituz_agente_social_midia.MinioService.ParaJsonl(objetos);" DisplayName="GET posts/*.json → jsonl" sap2010:WorkflowViewState.IdRef="InvokeCode_list_minio">
+            <ui:InvokeCode.Arguments>
+              <scg:Dictionary x:TypeArguments="x:String, Argument">
+                <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+                  <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="minioUser">
+                  <CSharpValue x:TypeArguments="x:String">MinioUser</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="sec:SecureString" x:Key="minioSecure">
+                  <CSharpValue x:TypeArguments="sec:SecureString">MinioSecure</CSharpValue>
+                </InArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="jsonl">
+                  <CSharpReference x:TypeArguments="x:String">JsonlPosts</CSharpReference>
+                </OutArgument>
+              </scg:Dictionary>
+            </ui:InvokeCode.Arguments>
+          </ui:InvokeCode>
+          <ui:LogMessage DisplayName="Posts lidos do MinIO" sap2010:WorkflowViewState.IdRef="LogMessage_minio" Level="Info">
+            <ui:LogMessage.Message>
+              <InArgument x:TypeArguments="x:Object">
+                <CSharpValue x:TypeArguments="x:Object">"MinIO list posts/ concluído"</CSharpValue>
+              </InArgument>
+            </ui:LogMessage.Message>
+          </ui:LogMessage>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Bucket legado: posts-monitorados.jsonl" sap2010:WorkflowViewState.IdRef="Sequence_legado">
     <TryCatch DisplayName="Ler posts-monitorados.jsonl" sap2010:WorkflowViewState.IdRef="TryCatch_read">
       <TryCatch.Try>
         <Sequence DisplayName="Read bucket" sap2010:WorkflowViewState.IdRef="Sequence_read">
@@ -85,6 +151,9 @@
         </Catch>
       </TryCatch.Catches>
     </TryCatch>
+        </Sequence>
+      </If.Else>
+    </If>
     <ui:InvokeCode Language="CSharp" Code="pendentes = new JArray();&#xA;if (!string.IsNullOrEmpty(texto))&#xA;{&#xA;    var agora = DateTime.UtcNow;&#xA;    foreach (var linha in texto.Split(new[]{ &quot;\r\n&quot;, &quot;\n&quot; }, StringSplitOptions.RemoveEmptyEntries))&#xA;    {&#xA;        JObject item = null;&#xA;        try { item = JObject.Parse(linha.Trim()); } catch { continue; }&#xA;        var proximaTok = item[&quot;proximaColetaEm&quot;];&#xA;        DateTime proxima;&#xA;        if (proximaTok == null || !DateTime.TryParse(proximaTok.ToString(), out proxima)) continue;&#xA;        if (proxima &lt;= agora) pendentes.Add(item);&#xA;    }&#xA;}" DisplayName="Filtrar posts com coleta vencida" sap2010:WorkflowViewState.IdRef="InvokeCode_filter">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">

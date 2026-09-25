@@ -1,6 +1,6 @@
 # Manual Completo — Camila, Agente de Social Mídia
 
-**Versão:** 1.0.9 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa (texto + imagem + visão) · **Aprendizado:** o calendário semanal prioriza temas que já engajaram
+**Versão:** 1.1.0 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa (texto + imagem + visão) · **Aprendizado:** o calendário semanal prioriza temas e horários que já engajaram
 
 ---
 
@@ -155,9 +155,26 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 - **Quando NÃO gera:** se o item já trouxer uma `MediaUrl` (mídia fornecida manualmente tem prioridade) ou se `gerar_imagem=false`.
 - **Formato automático:** se a pauta do calendário for `reels` ou `stories`, a arte sai vertical **1024×1792** (9:16); `feed` usa o `imagem_tamanho` configurado; `carrossel` gera **N slides** (`imagem_carrossel_slides`, padrão 3, máx 10) — todos sobem em `geradas/img-*-N.png` e a task mostra o primeiro.
 - **Legenda A/B:** cada post chega na aprovação com duas versões de legenda (`legenda_original` e `legenda_alternativa`) — o operador escolhe, edita ou mescla as duas.
-- **QA visual (`imagem_qa`, padrão `true`):** após gerar a arte, um modelo de visão (gpt-4o-mini) "olha" a imagem e verifica se bate com o briefing, se há texto ilegível, artefatos deformados, marca d'água ou violação dos `termos_proibidos`. Se reprovar, a Camila **regenera uma vez automaticamente** antes de enviar para aprovação. O veredito aparece no log e no campo `NotaImagemQA` do conteúdo — o humano continua sendo a decisão final.
+- **QA visual (`imagem_qa`, padrão `true`):** após gerar a arte, um modelo de visão (gpt-4o-mini) "olha" a imagem e pontua uma **rubrica de 4 critérios (0–10)**: aderência ao briefing, legibilidade de texto, artefatos visuais e segurança (marca d'água / termos proibidos). A aprovação é derivada das notas (cada critério ≥ 6, segurança ≥ 8) — o modelo não decide sozinho. Se reprovar, a Camila **regenera uma vez automaticamente** antes de enviar para aprovação. As notas aparecem no log e no campo `NotaImagemQA` do conteúdo — o humano continua sendo a decisão final.
 - **Se falhar** (sem key, sem crédito, timeout): o post segue o fluxo normal e o operador anexa a mídia manualmente na aprovação — o `mediaPrompt` continua visível como briefing.
 - Custo: cada imagem gera uma cobrança na conta OpenAI — monitore o billing.
+
+### 4.6. MinIO — armazenamento de objetos (opcional, recomendado)
+
+Os dados estruturais da Camila (posts monitorados e métricas diárias) podem sair dos arquivos `.jsonl` do bucket e virar **objetos individuais em um MinIO/S3** — cada post vira `posts/{postId}.json` e cada métrica `metricas/{data}/{postId}.json`. Isso elimina a concorrência de leitura-escrita (cada gravação é um PUT atômico por chave) e escala sem arquivo gigante para baixar inteiro.
+
+**Para ativar:**
+
+1. Suba um MinIO (ou use um S3 compatível existente) e crie o bucket `camila`.
+2. Orchestrator → Shared → Assets → `MinIO_AccessKey` → **Username** = access key, **Password** = secret key.
+3. Em `SM_Config`, preencha:
+   ```json
+   "minio_endpoint": "https://minio.suaempresa.com",
+   "minio_bucket": "camila"
+   ```
+4. A partir do próximo job, registros e métricas passam a gravar no MinIO. Sem `minio_endpoint` (vazio), tudo continua funcionando no bucket `SM_Metricas` como antes — a mudança é gradual e reversível.
+
+Os dados já existentes no bucket continuam válidos para o modo legado; os novos passam a ir para o MinIO (a leitura do aprendizado usa a fonte ativa).
 
 ---
 
@@ -176,6 +193,7 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 | `imagem_qualidade` | `SM_Config` | `high` (padrão)/`medium`/`low` no gpt-image-1; `hd`/`standard` no dall-e-3 |
 | `imagem_qa` | `SM_Config` | `true` (padrão) = visão avalia a arte e regenera 1× se reprovada; `false` = sobe direto |
 | `imagem_carrossel_slides` | `SM_Config` | Nº de slides gerados para pautas `carrossel` (padrão 3, faixa 2–10) |
+| `minio_endpoint` / `minio_bucket` | `SM_Config` | Quando preenchido, posts e métricas gravam como objetos no MinIO (vazio = bucket legado) |
 | Nicho / tom de voz | Argumento do processo | Define o contexto da campanha; pode variar por execução |
 
 ---
@@ -192,7 +210,7 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 
 ## 7. Qualidade comprovada
 
-Suíte de testes automatizados executada na versão 1.0.9: **30/30 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
+Suíte de testes automatizados executada na versão 1.1.0: **35/35 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
 
 ---
 

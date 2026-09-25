@@ -42,18 +42,29 @@
       <Variable x:TypeArguments="x:String" Name="NomeArquivo" />
       <Variable x:TypeArguments="x:String" Name="JsonlAtual" />
       <Variable x:TypeArguments="x:String" Name="JsonlNovo" />
+      <Variable x:TypeArguments="x:String" Name="ChaveObj" />
+      <Variable x:TypeArguments="x:Boolean" Name="MinioAtivo" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:InvokeCode Language="CSharp" Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;postId = data[&quot;PostId&quot;] == null ? &quot;&quot; : data[&quot;PostId&quot;].ToString();&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;postUrl = data[&quot;PostUrl&quot;] == null ? &quot;&quot; : data[&quot;PostUrl&quot;].ToString();&#xA;if (string.IsNullOrWhiteSpace(postId)) throw new UiPath.Core.BusinessRuleException(&quot;BR-14: item ColetarMetricas sem PostId — descartando&quot;);&#xA;nomeArquivo = clarituz_agente_social_midia.MetricasService.NomeArquivoDiario();" DisplayName="Extrair PostId/Plataforma" sap2010:WorkflowViewState.IdRef="InvokeCode_extract">
+    <ui:InvokeCode Language="CSharp" Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;postId = data[&quot;PostId&quot;] == null ? &quot;&quot; : data[&quot;PostId&quot;].ToString();&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;postUrl = data[&quot;PostUrl&quot;] == null ? &quot;&quot; : data[&quot;PostUrl&quot;].ToString();&#xA;if (string.IsNullOrWhiteSpace(postId)) throw new UiPath.Core.BusinessRuleException(&quot;BR-14: item ColetarMetricas sem PostId — descartando&quot;);&#xA;nomeArquivo = clarituz_agente_social_midia.MetricasService.NomeArquivoDiario();&#xA;chaveObj = &quot;metricas/&quot; + DateTime.UtcNow.ToString(&quot;yyyy-MM-dd&quot;) + &quot;/&quot; + postId + &quot;.json&quot;;&#xA;var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;minioAtivo = clarituz_agente_social_midia.MinioService.Configurado(cfg);" DisplayName="Extrair PostId/Plataforma" sap2010:WorkflowViewState.IdRef="InvokeCode_extract">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="x:Object" x:Key="inData">
             <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
           </InArgument>
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="chaveObj">
+            <CSharpReference x:TypeArguments="x:String">ChaveObj</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:Boolean" x:Key="minioAtivo">
+            <CSharpReference x:TypeArguments="x:Boolean">MinioAtivo</CSharpReference>
+          </OutArgument>
           <OutArgument x:TypeArguments="x:String" x:Key="postId">
             <CSharpReference x:TypeArguments="x:String">PostId</CSharpReference>
           </OutArgument>
@@ -105,6 +116,62 @@
         </ui:InvokeCode.Arguments>
       </ui:InvokeCode>
     </Sequence>
+    <If sap2010:WorkflowViewState.IdRef="If_destino">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">MinioAtivo</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="MinIO: metricas/{data}/{postId}.json — PUT atômico" sap2010:WorkflowViewState.IdRef="Sequence_minio_put">
+          <Sequence.Variables>
+            <Variable x:TypeArguments="x:String" Name="MinioUser" />
+            <Variable x:TypeArguments="sec:SecureString" Name="MinioSecure" />
+          </Sequence.Variables>
+          <ui:GetRobotCredential AssetName="MinIO_AccessKey" CacheStrategy="None" DisplayName="Credencial MinIO" sap2010:WorkflowViewState.IdRef="GetRobotCredential_minio">
+            <ui:GetRobotCredential.Username>
+              <OutArgument x:TypeArguments="x:String">
+                <CSharpReference x:TypeArguments="x:String">MinioUser</CSharpReference>
+              </OutArgument>
+            </ui:GetRobotCredential.Username>
+            <ui:GetRobotCredential.Password>
+              <OutArgument x:TypeArguments="sec:SecureString">
+                <CSharpReference x:TypeArguments="sec:SecureString">MinioSecure</CSharpReference>
+              </OutArgument>
+            </ui:GetRobotCredential.Password>
+          </ui:GetRobotCredential>
+          <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;var secret = minioSecure == null ? null : new System.Net.NetworkCredential(string.Empty, minioSecure).Password;&#xA;clarituz_agente_social_midia.MinioService.PutJsonAsync(cfg, minioUser, secret, chaveObj, metricas).GetAwaiter().GetResult();" DisplayName="PUT metricas/{data}/{postId}.json (upsert por chave)" sap2010:WorkflowViewState.IdRef="InvokeCode_put_minio">
+            <ui:InvokeCode.Arguments>
+              <scg:Dictionary x:TypeArguments="x:String, Argument">
+                <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+                  <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="minioUser">
+                  <CSharpValue x:TypeArguments="x:String">MinioUser</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="sec:SecureString" x:Key="minioSecure">
+                  <CSharpValue x:TypeArguments="sec:SecureString">MinioSecure</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="chaveObj">
+                  <CSharpValue x:TypeArguments="x:String">ChaveObj</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="nsjl:JObject" x:Key="metricas">
+                  <CSharpValue x:TypeArguments="nsjl:JObject">out_Metricas</CSharpValue>
+                </InArgument>
+              </scg:Dictionary>
+            </ui:InvokeCode.Arguments>
+          </ui:InvokeCode>
+          <ui:LogMessage DisplayName="Objeto gravado no MinIO" sap2010:WorkflowViewState.IdRef="LogMessage_minio" Level="Info">
+            <ui:LogMessage.Message>
+              <InArgument x:TypeArguments="x:Object">
+                <CSharpValue x:TypeArguments="x:Object">"MinIO PUT " + ChaveObj + " (upsert por chave — sem race)"</CSharpValue>
+              </InArgument>
+            </ui:LogMessage.Message>
+          </ui:LogMessage>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Bucket legado: arquivo diário jsonl" sap2010:WorkflowViewState.IdRef="Sequence_legado">
     <TryCatch DisplayName="Ler arquivo diário" sap2010:WorkflowViewState.IdRef="TryCatch_read">
       <TryCatch.Try>
         <Sequence DisplayName="Read bucket" sap2010:WorkflowViewState.IdRef="Sequence_read">
@@ -176,6 +243,9 @@
         </InArgument>
       </uist:WriteStorageText.Text>
     </uist:WriteStorageText>
+        </Sequence>
+      </If.Else>
+    </If>
     <ui:LogMessage DisplayName="Métricas persistidas" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
       <ui:LogMessage.Message>
         <InArgument x:TypeArguments="x:Object">

@@ -16,8 +16,10 @@ namespace clarituz_agente_social_midia
         private const string EndpointChat = "https://api.openai.com/v1/chat/completions";
         private const string ModeloVisao = "gpt-4o-mini";
 
-        // QA visual: um modelo com visão avalia a arte gerada contra o briefing.
-        // Retorna { "aprovada": bool, "motivo": "..." }.
+        // QA visual: um modelo com visão pontua a arte gerada em rubrica estruturada
+        // (0–10 por critério); o veredito é computado aqui — o modelo não decide sozinho.
+        // Retorna { "aprovada": bool, "motivo": "...", "aderencia": n, "legibilidade": n,
+        //           "artefatos": n, "seguranca": n }.
         public static async Task<JObject> AvaliarImagemAsync(
             System.Security.SecureString apiKey,
             byte[] imagemBytes,
@@ -25,12 +27,14 @@ namespace clarituz_agente_social_midia
             string termosProibidos)
         {
             var regras =
-                "Avalie se a imagem gerada serve para um post de social media. " +
-                "Reprove se: não corresponder ao briefing, tiver texto ilegivel ou embaralhado, " +
-                "artefatos visuais quebrados (rostos/maos deformados), marca d'agua, logo de marca famosa, " +
-                "ou conteudo que viole estes termos proibidos: " + (termosProibidos ?? "nenhum") + ". " +
+                "Avalie a imagem como QA de social media, dando nota de 0 a 10 em cada criterio: " +
+                "aderencia (a imagem corresponde ao briefing?), " +
+                "legibilidade (texto na imagem esta legivel e sem erros?), " +
+                "artefatos (10 = sem defeitos; 0 = rostos/maos/bordas quebrados), " +
+                "seguranca (10 = limpa; reduza por marca d'agua, logo de marca famosa, ou violacao destes termos: " +
+                (termosProibidos ?? "nenhum") + "). " +
                 "Briefing: " + briefing + ". " +
-                "Responda APENAS JSON: {\"aprovada\": true|false, \"motivo\": \"frase curta\"}";
+                "Responda APENAS JSON: {\"aderencia\": 0-10, \"legibilidade\": 0-10, \"artefatos\": 0-10, \"seguranca\": 0-10, \"motivo\": \"frase curta\"}";
 
             var corpo = new JObject
             {
@@ -72,9 +76,25 @@ namespace clarituz_agente_social_midia
                             $"OpenAI visao falhou: {(int)resp.StatusCode} — {body?.Substring(0, Math.Min(body?.Length ?? 0, 300))}");
 
                     var texto = JObject.Parse(body)?["choices"]?[0]?["message"]?["content"]?.ToString();
-                    return JObject.Parse(texto);
+                    var notas = JObject.Parse(texto);
+
+                    // Veredito derivado da rubrica — critério objetivo, não delegado ao modelo.
+                    var aprovada =
+                        Nota(notas, "aderencia") >= 6 &&
+                        Nota(notas, "legibilidade") >= 6 &&
+                        Nota(notas, "artefatos") >= 6 &&
+                        Nota(notas, "seguranca") >= 8;
+                    notas["aprovada"] = aprovada;
+                    return notas;
                 }
             }
+        }
+
+        private static int Nota(JObject notas, string criterio)
+        {
+            int n;
+            return notas?[criterio] != null && int.TryParse(notas[criterio].ToString(), out n)
+                ? Math.Max(0, Math.Min(10, n)) : 0;
         }
 
         // Gera uma imagem e retorna os bytes PNG.

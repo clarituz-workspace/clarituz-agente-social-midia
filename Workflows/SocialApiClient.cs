@@ -89,7 +89,7 @@ namespace clarituz_agente_social_midia
             if (string.IsNullOrEmpty(shortcode))
                 throw new SocialApiException(0, $"URL do Instagram sem shortcode: {postUrl}");
 
-            string proximo = $"/{igUserId}/media?fields=id,permalink&limit=100";
+            string proximo = $"/{igUserId}/media?fields=id,permalink,timestamp&limit=100";
             for (var pagina = 0; pagina < 3 && proximo != null; pagina++)
             {
                 var feed = proximo.StartsWith("http")
@@ -106,6 +106,10 @@ namespace clarituz_agente_social_midia
             }
             throw new SocialApiException(404, $"Post não encontrado para o shortcode '{shortcode}' em ig_user {igUserId}");
         }
+
+        // Facebook: data real de publicação do post (created_time).
+        public async Task<JToken> ObterCreatedTimeFacebookAsync(string postId)
+            => await GetMetaAsync($"/{postId}?fields=created_time");
 
         // Facebook: extrai o identificador de posts/NNN, pfbid ou story_fbid.
         public string ResolverPostIdFacebook(string postUrl)

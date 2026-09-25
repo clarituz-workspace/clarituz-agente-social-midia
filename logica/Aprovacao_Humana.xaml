@@ -105,12 +105,17 @@
         </scg:Dictionary>
       </ui:InvokeCode.Arguments>
     </ui:InvokeCode>
-    <upaf:CreateFormTask BucketFolderPath="{x:Null}" BucketName="{x:Null}" BulkFormLayout="{x:Null}" DynamicFormPath="{x:Null}" ExternalTag="{x:Null}" FormLayout="{x:Null}" Group="{x:Null}" Labels="{x:Null}" ReassignGroup="{x:Null}" ReassignUser="{x:Null}" TaskCatalog="{x:Null}" UserNameOrEmail="{x:Null}" BulkFormLayoutGuid="a4e7d2d4-a06a-41c1-a1f1-40aa9ac1b533" DisplayName="Criar task de aprovação" EnableBulkEdit="False" EnableDynamicForms="False" EnableV2="False" EndCriteria="TaskCompleted" FormLayoutGuid="54185359-860a-44ac-becb-2fbf0b5dce01" GenerateInputFields="True" sap2010:WorkflowViewState.IdRef="CreateFormTask_1" StartCriteria="TaskCreated" TaskPriority="Medium" TaskTimerEnabled="False">
+    <upaf:CreateFormTask BucketFolderPath="{x:Null}" BucketName="{x:Null}" BulkFormLayout="{x:Null}" ExternalTag="{x:Null}" FormLayout="{x:Null}" Group="{x:Null}" Labels="{x:Null}" ReassignGroup="{x:Null}" ReassignUser="{x:Null}" TaskCatalog="{x:Null}" UserNameOrEmail="{x:Null}" BulkFormLayoutGuid="a4e7d2d4-a06a-41c1-a1f1-40aa9ac1b533" DisplayName="Criar task de aprovação" EnableBulkEdit="False" EnableDynamicForms="True" EnableV2="False" EndCriteria="TaskCompleted" FormLayoutGuid="54185359-860a-44ac-becb-2fbf0b5dce01" GenerateInputFields="False" sap2010:WorkflowViewState.IdRef="CreateFormTask_1" StartCriteria="TaskCreated" TaskPriority="Medium" TaskTimerEnabled="False">
       <upaf:CreateFormTask.TaskTitle>
         <InArgument x:TypeArguments="x:String">
           <CSharpValue x:TypeArguments="x:String">Titulo</CSharpValue>
         </InArgument>
       </upaf:CreateFormTask.TaskTitle>
+      <upaf:CreateFormTask.DynamicFormPath>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">"forms/aprovacao-post.json"</CSharpValue>
+        </InArgument>
+      </upaf:CreateFormTask.DynamicFormPath>
       <upaf:CreateFormTask.TaskOutput>
         <OutArgument x:TypeArguments="upaf:FormTaskData">
           <CSharpReference x:TypeArguments="upaf:FormTaskData">out_TaskObj</CSharpReference>

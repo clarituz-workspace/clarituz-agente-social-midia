@@ -16,5 +16,7 @@
   "limite_posts_dia": 3,
   "queue_name": "SM_WorkItems",
   "bucket_midia": "SM_Midia",
-  "bucket_metricas": "SM_Metricas"
+  "bucket_metricas": "SM_Metricas",
+  "minio_endpoint": "",
+  "minio_bucket": "camila"
 }

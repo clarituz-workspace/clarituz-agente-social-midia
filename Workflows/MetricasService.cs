@@ -116,8 +116,10 @@ namespace clarituz_agente_social_midia
             {
                 Metricas = m,
                 Tema = meta.TryGetValue(m.PostId, out var t) ? t["tema"]?.ToString() ?? "" : "",
-                RegistradoEm = meta.TryGetValue(m.PostId, out var r)
-                    && DateTime.TryParse(r["registradoEm"]?.ToString(), out var dt) ? (DateTime?)dt : null,
+                // Janela usa a hora real de publicação (publicadoEm, da Graph API);
+                // registradoEm (hora do registro humano) é só fallback.
+                PublicadoEm = meta.TryGetValue(m.PostId, out var r)
+                    && DateTime.TryParse((r["publicadoEm"] ?? r["registradoEm"])?.ToString(), out var dt) ? (DateTime?)dt : null,
                 Taxa = m.Alcance > 0 ? (m.Curtidas + m.Comentarios + m.Salvamentos) / (double)m.Alcance : 0.0
             }).ToList();
 
@@ -132,10 +134,10 @@ namespace clarituz_agente_social_midia
             sb.AppendLine("Média de engajamento por plataforma: " +
                 string.Join("; ", porPlat.Select(g =>
                     $"{(string.IsNullOrEmpty(g.Key) ? "?" : g.Key)}: {g.Average(p => p.Taxa):P1} ({g.Count()} posts)")));
-            var comJanela = posts.Where(p => p.RegistradoEm != null).ToList();
+            var comJanela = posts.Where(p => p.PublicadoEm != null).ToList();
             if (comJanela.Count > 0)
-                sb.AppendLine("Engajamento médio por janela de publicação (hora UTC do registro): " +
-                    string.Join("; ", comJanela.GroupBy(p => JanelaDe(p.RegistradoEm.Value.Hour))
+                sb.AppendLine("Engajamento médio por janela de publicação (hora UTC): " +
+                    string.Join("; ", comJanela.GroupBy(p => JanelaDe(p.PublicadoEm.Value.Hour))
                         .OrderByDescending(g => g.Average(p => p.Taxa))
                         .Select(g => $"{g.Key}: {g.Average(p => p.Taxa):P1} ({g.Count()} posts)")));
             return sb.ToString().Trim();

@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="logica.Calendario_Editorial" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Calendario_Editorial" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
     <x:Property Name="out_Entradas" Type="OutArgument(x:Int32)" />
@@ -46,6 +46,7 @@
       <Variable x:TypeArguments="x:String" Name="MetricasJsonl" />
       <Variable x:TypeArguments="x:String" Name="MetricaDia" />
       <Variable x:TypeArguments="x:String" Name="Desempenho" />
+      <Variable x:TypeArguments="x:Boolean" Name="MinioAtivo" />
     </Sequence.Variables>
     <Assign DisplayName="Config do contexto" sap2010:WorkflowViewState.IdRef="Assign_cfg">
       <Assign.To>
@@ -71,6 +72,74 @@
         </InArgument>
       </Assign.Value>
     </Assign>
+    <Assign DisplayName="MinioAtivo = endpoint configurado" sap2010:WorkflowViewState.IdRef="Assign_minio">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Boolean">
+          <CSharpReference x:TypeArguments="x:Boolean">MinioAtivo</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">clarituz_agente_social_midia.MinioService.Configurado(Config)</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <If sap2010:WorkflowViewState.IdRef="If_destino">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">MinioAtivo</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="MinIO: listar posts/ + metricas/ dos últimos 7 dias" sap2010:WorkflowViewState.IdRef="Sequence_minio_list">
+          <Sequence.Variables>
+            <Variable x:TypeArguments="x:String" Name="MinioUser" />
+            <Variable x:TypeArguments="sec:SecureString" Name="MinioSecure" />
+          </Sequence.Variables>
+          <ui:GetRobotCredential AssetName="MinIO_AccessKey" CacheStrategy="None" DisplayName="Credencial MinIO" sap2010:WorkflowViewState.IdRef="GetRobotCredential_minio">
+            <ui:GetRobotCredential.Username>
+              <OutArgument x:TypeArguments="x:String">
+                <CSharpReference x:TypeArguments="x:String">MinioUser</CSharpReference>
+              </OutArgument>
+            </ui:GetRobotCredential.Username>
+            <ui:GetRobotCredential.Password>
+              <OutArgument x:TypeArguments="sec:SecureString">
+                <CSharpReference x:TypeArguments="sec:SecureString">MinioSecure</CSharpReference>
+              </OutArgument>
+            </ui:GetRobotCredential.Password>
+          </ui:GetRobotCredential>
+          <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;var secret = minioSecure == null ? null : new System.Net.NetworkCredential(string.Empty, minioSecure).Password;&#xA;var posts = clarituz_agente_social_midia.MinioService.ListarJsonsAsync(cfg, minioUser, secret, &quot;posts/&quot;).GetAwaiter().GetResult();&#xA;monitorados = clarituz_agente_social_midia.MinioService.ParaJsonl(posts);&#xA;var mets = new List&lt;JObject&gt;();&#xA;for (var i = 1; i &lt;= 7; i++)&#xA;    mets.AddRange(clarituz_agente_social_midia.MinioService.ListarJsonsAsync(cfg, minioUser, secret, &quot;metricas/&quot; + DateTime.UtcNow.AddDays(-i).ToString(&quot;yyyy-MM-dd&quot;) + &quot;/&quot;).GetAwaiter().GetResult());&#xA;metricasJsonl = clarituz_agente_social_midia.MinioService.ParaJsonl(mets);" DisplayName="GET posts/* + metricas/7d → jsonl" sap2010:WorkflowViewState.IdRef="InvokeCode_list_minio">
+            <ui:InvokeCode.Arguments>
+              <scg:Dictionary x:TypeArguments="x:String, Argument">
+                <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+                  <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="minioUser">
+                  <CSharpValue x:TypeArguments="x:String">MinioUser</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="sec:SecureString" x:Key="minioSecure">
+                  <CSharpValue x:TypeArguments="sec:SecureString">MinioSecure</CSharpValue>
+                </InArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="monitorados">
+                  <CSharpReference x:TypeArguments="x:String">MonitoradosJsonl</CSharpReference>
+                </OutArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="metricasJsonl">
+                  <CSharpReference x:TypeArguments="x:String">MetricasJsonl</CSharpReference>
+                </OutArgument>
+              </scg:Dictionary>
+            </ui:InvokeCode.Arguments>
+          </ui:InvokeCode>
+          <ui:LogMessage DisplayName="Dados lidos do MinIO" sap2010:WorkflowViewState.IdRef="LogMessage_minio" Level="Info">
+            <ui:LogMessage.Message>
+              <InArgument x:TypeArguments="x:Object">
+                <CSharpValue x:TypeArguments="x:Object">"MinIO: posts/ + metricas/ últimos 7 dias lidos (objetos por chave)"</CSharpValue>
+              </InArgument>
+            </ui:LogMessage.Message>
+          </ui:LogMessage>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Bucket legado: jsonl" sap2010:WorkflowViewState.IdRef="Sequence_legado">
     <TryCatch DisplayName="Ler posts-monitorados.jsonl (tema por post)" sap2010:WorkflowViewState.IdRef="TryCatch_mon">
       <TryCatch.Try>
         <uist:ReadStorageText DisplayName="SM_Metricas posts-monitorados.jsonl" Path="posts-monitorados.jsonl" sap2010:WorkflowViewState.IdRef="ReadStorageText_mon" StorageBucketName="SM_Metricas">
@@ -177,6 +246,9 @@
         </Sequence>
       </ActivityAction>
     </ForEach>
+        </Sequence>
+      </If.Else>
+    </If>
     <ui:InvokeCode Language="CSharp" Code="nicho = string.IsNullOrEmpty(ctx[&quot;Nicho&quot;] as string) ? Convert.ToString(config[&quot;nicho&quot;]) : ctx[&quot;Nicho&quot;] as string;&#xA;tomDeVoz = string.IsNullOrEmpty(ctx[&quot;TomDeVoz&quot;] as string) ? Convert.ToString(config[&quot;tom_de_voz&quot;]) : ctx[&quot;TomDeVoz&quot;] as string;&#xA;plataformas = ctx[&quot;Plataformas&quot;] as List&lt;string&gt; ?? new List&lt;string&gt; { &quot;Instagram&quot;, &quot;Facebook&quot; };&#xA;dias = 7;&#xA;int cfgDias;&#xA;if (config[&quot;dias_calendario&quot;] != null &amp;&amp; int.TryParse(config[&quot;dias_calendario&quot;].ToString(), out cfgDias) &amp;&amp; cfgDias &gt; 0) dias = cfgDias;&#xA;desempenho = clarituz_agente_social_midia.MetricasService.ResumirDesempenho(monitorados, metricas);&#xA;prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptCalendario(nicho, tomDeVoz, plataformas.ToArray(), dias, desempenho);" DisplayName="Montar prompt de calendário (com desempenho)" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">

@@ -63,15 +63,17 @@ ST-DBP-024: `WaitForFormTaskAndResume` existe **apenas** em `Main.xaml`; workflo
 | Fila | `SM_WorkItems` | itens `GerarConteudo` / `ModerarComentario` / `ColetarMetricas` |
 | Asset Credential | `Meta_SystemUserToken` | token de System User da Meta (**escopos**: `instagram_basic`, `instagram_manage_comments`, `instagram_manage_insights`, `pages_read_engagement`, `pages_show_list`, `business_management`) |
 | Asset Credential | `OpenAI_ApiKey` | chave `sk-...` da OpenAI para geração de imagem (só usada se `gerar_imagem=true`) |
-| Asset Text | `SM_Config` | `{"ig_user_id":"","fb_page_id":"","llm_model":"gpt-4o","calendario_editorial":{},"termos_proibidos":[],"janelas_sugeridas":"09:00-12:00;18:00-21:00","limite_posts_dia":3,"dias_calendario":7,"gerar_imagem":true,"imagem_modelo":"gpt-image-1","imagem_tamanho":"1024x1024","imagem_qualidade":"high","imagem_qa":true,"imagem_carrossel_slides":3}` |
+| Asset Credential | `MinIO_AccessKey` | Username=access key, Password=secret key do MinIO (só usada se `minio_endpoint` configurado) |
+| Asset Text | `SM_Config` | `{"ig_user_id":"","fb_page_id":"","llm_model":"gpt-4o","calendario_editorial":{},"termos_proibidos":[],"janelas_sugeridas":"09:00-12:00;18:00-21:00","limite_posts_dia":3,"dias_calendario":7,"gerar_imagem":true,"imagem_modelo":"gpt-image-1","imagem_tamanho":"1024x1024","imagem_qualidade":"high","imagem_qa":true,"imagem_carrossel_slides":3,"minio_endpoint":"","minio_bucket":"camila"}` |
 | Asset Text | `SM_ContadorDiario` | contador de posts/dia (reset por data UTC) |
 | Asset Text | `SM_UltimoPollComentarios` | `{"instagram":"","facebook":""}` — watermark do polling |
 | Bucket | `SM_Midia` | mídias aprovadas para publicação |
-| Bucket | `SM_Metricas` | `metricas-*.jsonl`, `posts-monitorados.jsonl`, `relatorios/`, `calendario/calendario-editorial.json` |
+| Bucket | `SM_Metricas` | `metricas-*.jsonl`, `posts-monitorados.jsonl` (modo legado), `relatorios/`, `calendario/calendario-editorial.json` |
+| MinIO (opcional) | bucket `camila` | quando `minio_endpoint` configurado: `posts/{postId}.json` + `metricas/{data}/{postId}.json` — objetos por chave (PUT atômico, sem read-modify-write → elimina race e escala sem arquivo gigante) |
 
 ## Deploy (T10 — já feito)
 
-- Pacote **1.0.9** publicado; processo `clarituz-agente-social-midia` na pasta `Shared` (release `729fd7ab-7ecf-46cb-a90a-1a67c3467748`)
+- Pacote **1.1.0** publicado; processo `clarituz-agente-social-midia` na pasta `Shared` (release `729fd7ab-7ecf-46cb-a90a-1a67c3467748`)
 - Triggers (TZ `E. South America Standard Time`, Unattended):
   - `SM_WorkItems_ConsumirFila` — queue trigger, threshold 1, máx 1 job
   - `SM_Calendario_Semanal` — `0 30 6 ? * MON` (segunda 06:30) → `in_ModoExecucao=CalendarioEditorial`
@@ -86,6 +88,7 @@ ST-DBP-024: `WaitForFormTaskAndResume` existe **apenas** em `Main.xaml`; workflo
 3. **Conexão GenAI** — Integration Service → pasta Shared → UiPath GenAI Activities → Add connection. Hoje `shared/LLM_Completion.xaml` falha explicitamente sem ela (ponto único a substituir pela chamada IS).
 4. **Runtime** — machine template com runtime Unattended atribuído à pasta `Shared`.
 5. Opcional: `UiPath.FormActivityLibrary` (designer de forms), Automation Hub URL da org.
+6. **MinIO (opcional, recomendado)** — `SM_Config.minio_endpoint` + `minio_bucket` + credencial `MinIO_AccessKey`. Com ele, posts/métricas viram objetos por chave (sem race de append, leitura por prefixo); sem ele, usa o bucket legado (jsonl). Form de aprovação customizado: `forms/aprovacao-post.json` (dynamic form — A/B lado a lado).
 
 ## Testes (`Tests/`)
 
