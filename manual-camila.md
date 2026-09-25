@@ -1,6 +1,6 @@
 # Manual Completo — Camila, Agente de Social Mídia
 
-**Versão:** 1.0.4 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa + Power BI
+**Versão:** 1.0.3 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa
 
 ---
 
@@ -130,32 +130,6 @@ Editar o asset `SM_Config` (pasta Shared):
 - **Runtime:** pasta Shared usa robô **Serverless** (nuvem UiPath) — nenhuma máquina local necessária ✅
 - **Mídias:** imagens/vídeos aprovados vão no bucket `SM_Midia` (jpeg, jpg, png, mp4)
 
-### 4.5. Power BI em tempo real (opcional)
-
-A Camila envia cada métrica coletada direto para um dashboard do Power BI — o painel atualiza segundos após a coleta, sem esperar o relatório diário. **Se não configurar, tudo continua funcionando** — a integração é desligada automaticamente.
-
-**Como ativar (uma vez):**
-
-1. No Power BI Service (`app.powerbi.com`), crie um **dataset de streaming/push**: Workspace → `+ Novo` → `Streaming dataset` → `API` — ou peça à equipe de BI
-2. Nomeie a tabela (sugestão: `camila_metricas`) e crie os campos:
-
-| Campo | Tipo | Significado |
-|---|---|---|
-| `post_id` | Texto | ID do post na rede |
-| `plataforma` | Texto | `instagram` ou `facebook` |
-| `alcance` | Número | Contas alcançadas |
-| `impressoes` | Número | Exibições totais |
-| `curtidas` | Número | Likes |
-| `comentarios` | Número | Comentários |
-| `salvamentos` | Número | Saves |
-| `cliques` | Número | Cliques no perfil/link |
-| `coletado_em` | Data/Hora | Quando a Camila coletou |
-
-3. O Power BI exibe a **Push URL** — algo como `https://api.powerbi.com/beta/.../rows?key=...`
-4. Cole no Orchestrator: pasta `Shared` → Assets → `SM_Config` → Edit → preencher `"powerbi_push_url": "https://api.powerbi.com/..."`
-
-**Comportamento:** métrica coletada → gravada no armazenamento UiPath → enviada ao Power BI. Se o push falhar, o dado permanece salvo na UiPath e o relatório diário sai normal — o log registra o aviso. O `powerbi_push_url` contém a chave de escrita do dataset: trate-o como credencial (não compartilhe em e-mail/WhatsApp).
-
 ---
 
 ## 5. Personalização do comportamento
@@ -167,7 +141,6 @@ A Camila envia cada métrica coletada direto para um dashboard do Power BI — o
 | `termos_proibidos` | `SM_Config` | Palavras que bloqueiam o conteúdo antes da aprovação |
 | `dias_calendario` | `SM_Config` | Horizonte do calendário editorial (padrão 7 dias) |
 | `llm_model` | `SM_Config` | Modelo de IA usado (padrão gpt-4o) |
-| `powerbi_push_url` | `SM_Config` | Push URL do streaming dataset Power BI — vazio = integração desligada |
 | Nicho / tom de voz | Argumento do processo | Define o contexto da campanha; pode variar por execução |
 
 ---
@@ -184,7 +157,7 @@ A Camila envia cada métrica coletada direto para um dashboard do Power BI — o
 
 ## 7. Qualidade comprovada
 
-Suíte de testes automatizados executada na versão 1.0.4: **30/30 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
+Suíte de testes automatizados executada na versão 1.0.3: **30/30 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
 
 ---
 

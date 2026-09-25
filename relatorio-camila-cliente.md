@@ -35,14 +35,11 @@ Ponto central do design: **a Camila não publica nada automaticamente**.
 - Comentários **Negativos ou de Crise** vão com **prioridade alta**; **Spam** vem com sugestão de ocultação
 - Novamente: **quem responde, oculta ou ignora é sempre o humano** — a Camila só sugere
 
-### 4. Métricas e relatórios (diário, 06h) + Power BI em tempo real
+### 4. Métricas e relatórios (diário, 06h)
 
 - Após cada publicação, a Camila agenda coletas automáticas de desempenho
 - Consolida curtidas, comentários, compartilhamentos, alcance e impressões em relatórios diários
 - Tudo fica arquivado em armazenamento na nuvem UiPath, disponível para consulta histórica
-- **Integração com Power BI em tempo real:** no momento em que cada métrica é coletada, a Camila envia a linha direto para um dashboard do Power BI — os números aparecem no painel segundos depois da coleta, sem esperar o relatório do dia seguinte
-- **Painel sempre vivo:** alcance, impressões, curtidas, comentários, salvamentos, cliques e data da coleta por post/plataforma
-- **À prova de falhas:** se o Power BI estiver fora do ar, a métrica continua gravada normalmente no armazenamento da UiPath — nenhum dado se perde e o relatório diário não é afetado
 
 ---
 
@@ -72,8 +69,6 @@ A cada 30min ─ Lê comentários novos no IG/FB
 Humano ─ Abre o Action Center → revisa → aprova/edita/rejeita → publica manualmente → cola a URL
 
 +24h ─ Camila coleta as métricas do post publicado
-        └─→ envia a linha na hora para o dashboard do Power BI (tempo real)
-
 06h00 ─ Relatório diário consolidado: o que foi gerado, aprovado, publicado e os resultados
 ```
 
