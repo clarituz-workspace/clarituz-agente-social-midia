@@ -4,7 +4,11 @@
   "description": "Nome: Camila \r\nCargo: Social Media \r\nEspecialista em campanhas estrategicas de marketing de alta conversao \r\npara diversos nichos",
   "main": "Main.xaml",
   "dependencies": {
-    "UiPath.System.Activities": "[26.8.2]"
+    "UiPath.System.Activities": "[26.8.2]",
+    "UiPath.WebAPI.Activities": "2.5.2",
+    "UiPath.Persistence.Activities": "1.13.0",
+    "UiPath.IntegrationService.Activities": "1.33.0",
+    "UiPath.Testing.Activities": "25.10.3"
   },
   "webServices": [],
   "entitiesStores": [],
@@ -17,7 +21,7 @@
     "isPausable": true,
     "isAttended": false,
     "requiresUserInteraction": false,
-    "supportsPersistence": false,
+    "supportsPersistence": true,
     "workflowSerialization": "NewtonsoftJson",
     "excludedLoggedData": [
       "Private:*",
@@ -46,7 +50,50 @@
     {
       "filePath": "Main.xaml",
       "uniqueId": "33a07179-474c-40e7-b73e-366b9a63d53c",
-      "input": [],
+      "input": [
+        {
+          "name": "in_ModoExecucao",
+          "type": "System.String",
+          "required": false,
+          "hasDefault": true,
+          "defaultValue": "ConsumirFila"
+        },
+        {
+          "name": "in_Plataformas",
+          "type": "System.String[]",
+          "required": false,
+          "hasDefault": false,
+          "defaultValue": null
+        },
+        {
+          "name": "in_NichoCampanha",
+          "type": "System.String",
+          "required": false,
+          "hasDefault": false,
+          "defaultValue": null
+        },
+        {
+          "name": "in_TomDeVoz",
+          "type": "System.String",
+          "required": false,
+          "hasDefault": false,
+          "defaultValue": null
+        },
+        {
+          "name": "in_JanelaPublicacao",
+          "type": "System.String",
+          "required": false,
+          "hasDefault": false,
+          "defaultValue": null
+        },
+        {
+          "name": "in_LimitePostsDia",
+          "type": "System.Int32",
+          "required": false,
+          "hasDefault": true,
+          "defaultValue": 3
+        }
+      ],
       "output": []
     }
   ],

@@ -1,3 +1,5 @@
 {
-  "UiPath.System.Activities": "26.8.2"
+  "UiPath.System.Activities": "26.8.2",
+  "UiPath.Testing.Activities": "25.10.3",
+  "UiPath.WebAPI.Activities": "2.5.2"
 }
