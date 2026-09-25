@@ -45,18 +45,18 @@
 ## Task T3 — uipath-rpa — Coded foundation (Models, services, HTTP retry)
 
 **Identity:** `rpa:clarituz-agente-social-midia:coded-foundation`
-**Status:** [ ] pending
+**Status:** [x] done
 **Blocked by:** T2
 **Skill prompt:**
 
 > Load uipath-rpa and implement the coded foundation in `Workflows/` per §5 and §11 of `clarituz-agente-social-midia-sdd.md`: `Models.cs` (records/enums exactly as §5), `SocialApiClient.cs` (Meta Graph + LinkedIn **read-only** client: comments, insights, media lookup — never POST/DELETE to the platforms), `ConteudoService.cs` (prompt building + LLM response parsing), `MetricasService.cs` (metrics normalization/serialization), plus `shared/Http_Retry.xaml` (timeout, exponential backoff, honors `Retry-After`). Delivery model: cloud.
 > Use values, mappings, and structure exactly as documented in the SDD at clarituz-agente-social-midia-sdd.md. Do not infer or guess.
 
-- [ ] `Workflows/Models.cs` — all records/enums from §5
-- [ ] `Workflows/SocialApiClient.cs` — read-only methods only
-- [ ] `Workflows/ConteudoService.cs`, `Workflows/MetricasService.cs`
-- [ ] `shared/Http_Retry.xaml` — retry/backoff/429 wrapper
-- [ ] **Validate:** `uip rpa validate` per file + `uip rpa build` clean
+- [x] `Workflows/Models.cs` — records/enums §5 completos + `SocialApiException`/`ExecucaoContext`
+- [x] `Workflows/SocialApiClient.cs` — somente GET (read-only estrutural): comentários Meta/LinkedIn, insights IG/FB/LI, resolução de post_id a partir de URL humana (shortcode IG, post FB, URN LI), health checks, retry interno 2s→8s→32s honrando `Retry-After`
+- [x] `Workflows/ConteudoService.cs`, `Workflows/MetricasService.cs` — prompts LLM + parse JSON; normalização de métricas IG/FB/LI → `MetricasPost` + serialização JSONL diária
+- [x] `shared/Http_Retry.xaml` — wrapper `NetHttpRequest` moderno (GET fixo = zero-write estrutural): ExponentialBackoff 2s→8s→32s (multiplier 4), `PreferRetryAfterValue`, retry em 429/5xx, timeout 30s
+- [x] **Validate:** per-file 0 erros nos 5 arquivos + `uip rpa build` Success (warnings: FormActivityLibrary.Contracts resolução; AH URL da org; Log Message ausente em Http_Retry)
 
 ## Task T4 — uipath-rpa — Framework workflows (Init, GetTransaction, SetStatus)
 
