@@ -166,7 +166,7 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 | `termos_proibidos` | `SM_Config` | Palavras que bloqueiam o conteúdo antes da aprovação |
 | `dias_calendario` | `SM_Config` | Horizonte do calendário editorial (padrão 7 dias) |
 | `llm_model` | `SM_Config` | Modelo de IA usado para texto (padrão gpt-4o) |
-| `gerar_imagem` | `SM_Config` | Liga/desliga geração automática de arte (padrão `false`) |
+| `gerar_imagem` | `SM_Config` | Liga/desliga geração automática de arte (`true` = gera com gpt-image-1) |
 | `imagem_modelo` | `SM_Config` | Modelo OpenAI de imagem: `gpt-image-1` (padrão, alta qualidade), `dall-e-3`, `dall-e-2` |
 | `imagem_tamanho` | `SM_Config` | Resolução: `1024x1024` (feed), `1792x1024`, `1024x1792` (stories) |
 | `imagem_qualidade` | `SM_Config` | `high` (padrão)/`medium`/`low` no gpt-image-1; `hd`/`standard` no dall-e-3 |

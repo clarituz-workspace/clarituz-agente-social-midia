@@ -7,7 +7,7 @@
   "termos_proibidos": [],
   "janelas_sugeridas": "09:00-12:00;18:00-21:00",
   "dias_calendario": 7,
-  "gerar_imagem": false,
+  "gerar_imagem": true,
   "imagem_modelo": "gpt-image-1",
   "imagem_tamanho": "1024x1024",
   "imagem_qualidade": "high",

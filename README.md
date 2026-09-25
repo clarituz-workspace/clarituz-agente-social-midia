@@ -36,7 +36,7 @@ ST-DBP-024: `WaitForFormTaskAndResume` existe **apenas** em `Main.xaml`; workflo
 | `SocialApiClient.cs` | Cliente Meta **GET-only** — comentários, mídias, insights, resolução de post_id por URL; retry 2s→8s→32s honrando `Retry-After`; `SocialApiException` tipada |
 | `ConteudoService.cs` | Prompts LLM + parsers tolerantes a ```json fences + `ValidarCompliance` (BR-01..05) |
 | `MetricasService.cs` | Normalização IG/FB → `MetricasPost`; arquivo diário `metricas-YYYY-MM-dd.jsonl` |
-| `ImagemService.cs` | Geração de arte via OpenAI Images — único ponto de escrita HTTP externa, destino fixo `api.openai.com`; desligado se `gerar_imagem=false`; falha não bloqueia (humano anexa mídia na aprovação) |
+| `ImagemService.cs` | Geração de arte via OpenAI Images — único ponto de escrita HTTP externa, destino fixo `api.openai.com`; ligado (`gerar_imagem=true`); desligar zerando a flag; falha não bloqueia (humano anexa mídia na aprovação) |
 
 ## Regras de negócio implementadas
 
