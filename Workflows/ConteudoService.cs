@@ -68,14 +68,22 @@ Responda APENAS com JSON válido, sem markdown, no formato:
             return JArray.Parse(respostaLlm.Substring(inicio, fim - inicio + 1));
         }
 
-        public static string MontarPromptCalendario(string nicho, string tomDeVoz, string[] plataformas, int dias)
+        // desempenho: resumo de MetricasService.ResumirDesempenho (loop de aprendizado);
+        // null/vazio = primeira semana, sem histórico.
+        public static string MontarPromptCalendario(string nicho, string tomDeVoz, string[] plataformas, int dias,
+            string desempenho = null)
         {
+            var blocoDesempenho = string.IsNullOrWhiteSpace(desempenho) ? "" :
+$@"
+Desempenho recente dos posts já publicados (priorize temas/plataformas que engajam mais):
+{desempenho}
+";
             return
 $@"Você é Camila, social media especialista em campanhas estratégicas de alta conversão.
 
 Monte um calendário editorial para os próximos {dias} dias, começando hoje ({DateTime.UtcNow:yyyy-MM-dd}), para o nicho ""{nicho}"" com tom de voz ""{tomDeVoz}"".
 Plataformas: {string.Join(", ", plataformas ?? new[] { "Instagram" })}.
-
+{blocoDesempenho}
 Regras:
 - Distribua os posts ao longo dos dias — no máximo 1 post por dia por plataforma
 - Alterne objetivos: educar, engajar, converter, prova social, oferta

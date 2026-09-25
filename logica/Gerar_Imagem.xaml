@@ -1,7 +1,7 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="logica.Gerar_Imagem" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="logica_Gerar_Imagem" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:njl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ss="clr-namespace:System.Security;assembly=System.Private.CoreLib" xmlns:ucas="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
-    <x:Property Name="in_Conteudo" Type="InArgument(nsjl:JObject)" />
+    <x:Property Name="in_Conteudo" Type="InArgument(njl:JObject)" />
     <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
     <x:Property Name="out_MediaUrl" Type="OutArgument(x:String)" />
   </x:Members>
@@ -21,6 +21,7 @@
       <x:String>Newtonsoft.Json.Linq</x:String>
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
+      <x:String>System.Collections</x:String>
     </sco:Collection>
   </TextExpression.NamespacesForImplementation>
   <TextExpression.ReferencesForImplementation>
@@ -33,9 +34,12 @@
       <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
       <AssemblyReference>System.ObjectModel</AssemblyReference>
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+      <AssemblyReference>UiPath.Studio.Constants</AssemblyReference>
+      <AssemblyReference>System.Collections</AssemblyReference>
+      <AssemblyReference>System.Collections.NonGeneric</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="GerarImagem — mediaPrompt → OpenAI Images → SM_Midia" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="GerarImagem — mediaPrompt → OpenAI Images → SM_Midia" sap:VirtualizedContainerService.HintSize="1066,693" sap2010:WorkflowViewState.IdRef="Sequence_1">
     <Sequence.Variables>
       <Variable x:TypeArguments="x:Boolean" Name="Habilitada" />
       <Variable x:TypeArguments="x:String" Name="MediaPrompt" />
@@ -54,155 +58,203 @@
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;habilitada = cfg[&quot;gerar_imagem&quot;] != null &amp;&amp; cfg[&quot;gerar_imagem&quot;].ToObject&lt;bool&gt;();&#xA;modelo = cfg[&quot;imagem_modelo&quot;] == null ? &quot;gpt-image-1&quot; : cfg[&quot;imagem_modelo&quot;].ToString();&#xA;tamanho = cfg[&quot;imagem_tamanho&quot;] == null ? &quot;1024x1024&quot; : cfg[&quot;imagem_tamanho&quot;].ToString();&#xA;qualidade = cfg[&quot;imagem_qualidade&quot;] == null ? &quot;high&quot; : cfg[&quot;imagem_qualidade&quot;].ToString();&#xA;qa = cfg[&quot;imagem_qa&quot;] == null || cfg[&quot;imagem_qa&quot;].ToObject&lt;bool&gt;();&#xA;var tp = new List&lt;string&gt;();&#xA;if (cfg[&quot;termos_proibidos&quot;] != null) foreach (var t in cfg[&quot;termos_proibidos&quot;]) tp.Add(t.ToString());&#xA;termos = string.Join(&quot;, &quot;, tp);&#xA;var mediaJaInformada = inData != null &amp;&amp; JObject.FromObject(inData)[&quot;MediaUrl&quot;] != null &amp;&amp; !string.IsNullOrWhiteSpace(JObject.FromObject(inData)[&quot;MediaUrl&quot;].ToString());&#xA;prompt = conteudo == null || conteudo[&quot;MediaPrompt&quot;] == null ? &quot;&quot; : conteudo[&quot;MediaPrompt&quot;].ToString();&#xA;if (mediaJaInformada || string.IsNullOrWhiteSpace(prompt)) habilitada = false;" DisplayName="Config + decide se gera imagem" sap2010:WorkflowViewState.IdRef="InvokeCode_cfg">
+    <ui:InvokeCode ContinueOnError="{x:Null}" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;habilitada = cfg[&quot;gerar_imagem&quot;] != null &amp;&amp; cfg[&quot;gerar_imagem&quot;].ToObject&lt;bool&gt;();&#xA;modelo = cfg[&quot;imagem_modelo&quot;] == null ? &quot;gpt-image-1&quot; : cfg[&quot;imagem_modelo&quot;].ToString();&#xA;tamanho = cfg[&quot;imagem_tamanho&quot;] == null ? &quot;1024x1024&quot; : cfg[&quot;imagem_tamanho&quot;].ToString();&#xA;qualidade = cfg[&quot;imagem_qualidade&quot;] == null ? &quot;high&quot; : cfg[&quot;imagem_qualidade&quot;].ToString();&#xA;qa = cfg[&quot;imagem_qa&quot;] == null || cfg[&quot;imagem_qa&quot;].ToObject&lt;bool&gt;();&#xA;var tp = new List&lt;string&gt;();&#xA;if (cfg[&quot;termos_proibidos&quot;] != null) foreach (var t in cfg[&quot;termos_proibidos&quot;]) tp.Add(t.ToString());&#xA;termos = string.Join(&quot;, &quot;, tp);&#xA;var mediaJaInformada = inData != null &amp;&amp; JObject.FromObject(inData)[&quot;MediaUrl&quot;] != null &amp;&amp; !string.IsNullOrWhiteSpace(JObject.FromObject(inData)[&quot;MediaUrl&quot;].ToString());&#xA;prompt = conteudo == null || conteudo[&quot;MediaPrompt&quot;] == null ? &quot;&quot; : conteudo[&quot;MediaPrompt&quot;].ToString();&#xA;var formato = conteudo == null || conteudo[&quot;Formato&quot;] == null ? &quot;&quot; : conteudo[&quot;Formato&quot;].ToString().ToLowerInvariant();&#xA;if (formato == &quot;reels&quot; || formato == &quot;stories&quot;)&#xA;{&#xA;    tamanho = &quot;1024x1792&quot;;&#xA;    prompt += &quot;. Composicao vertical 9:16, assunto principal no terco central, respiro no topo e na base&quot;;&#xA;}&#xA;if (mediaJaInformada || string.IsNullOrWhiteSpace(prompt)) habilitada = false;" DisplayName="Config + decide se gera imagem" sap:VirtualizedContainerService.HintSize="510,48" sap2010:WorkflowViewState.IdRef="InvokeCode_cfg" Language="CSharp">
       <ui:InvokeCode.Arguments>
-        <scg:Dictionary x:TypeArguments="x:String, Argument">
-          <InArgument x:TypeArguments="x:Object" x:Key="inData">
-            <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
-          </InArgument>
-          <InArgument x:TypeArguments="nsjl:JObject" x:Key="conteudo">
-            <CSharpValue x:TypeArguments="nsjl:JObject">in_Conteudo</CSharpValue>
-          </InArgument>
-          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
-            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
-          </InArgument>
-          <OutArgument x:TypeArguments="x:Boolean" x:Key="habilitada">
-            <CSharpReference x:TypeArguments="x:Boolean">Habilitada</CSharpReference>
-          </OutArgument>
-          <OutArgument x:TypeArguments="x:String" x:Key="modelo">
-            <CSharpReference x:TypeArguments="x:String">Modelo</CSharpReference>
-          </OutArgument>
-          <OutArgument x:TypeArguments="x:String" x:Key="tamanho">
-            <CSharpReference x:TypeArguments="x:String">Tamanho</CSharpReference>
-          </OutArgument>
-          <OutArgument x:TypeArguments="x:String" x:Key="prompt">
-            <CSharpReference x:TypeArguments="x:String">MediaPrompt</CSharpReference>
-          </OutArgument>
-          <OutArgument x:TypeArguments="x:String" x:Key="qualidade">
-            <CSharpReference x:TypeArguments="x:String">Qualidade</CSharpReference>
-          </OutArgument>
-          <OutArgument x:TypeArguments="x:Boolean" x:Key="qa">
-            <CSharpReference x:TypeArguments="x:Boolean">QaVisual</CSharpReference>
-          </OutArgument>
-          <OutArgument x:TypeArguments="x:String" x:Key="termos">
-            <CSharpReference x:TypeArguments="x:String">TermosProibidos</CSharpReference>
-          </OutArgument>
-        </scg:Dictionary>
+        <InArgument x:TypeArguments="x:Object" x:Key="inData">
+          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">in_TransactionData</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="njl:JObject" x:Key="conteudo">
+          <CSharpValue x:TypeArguments="njl:JObject" sap2010:WorkflowViewState.IdRef="CSharpValue`1_2">in_Conteudo</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+          <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)" sap2010:WorkflowViewState.IdRef="CSharpValue`1_3">in_ExecucaoContext</CSharpValue>
+        </InArgument>
+        <OutArgument x:TypeArguments="x:Boolean" x:Key="habilitada">
+          <CSharpReference x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpReference`1_1">Habilitada</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="modelo">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_2">Modelo</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="tamanho">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_3">Tamanho</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="prompt">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_4">MediaPrompt</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="qualidade">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_5">Qualidade</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:Boolean" x:Key="qa">
+          <CSharpReference x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpReference`1_6">QaVisual</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="termos">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_7">TermosProibidos</CSharpReference>
+        </OutArgument>
       </ui:InvokeCode.Arguments>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
     </ui:InvokeCode>
-    <If DisplayName="Geração de imagem habilitada?" sap2010:WorkflowViewState.IdRef="If_habilitada">
+    <If DisplayName="Geração de imagem habilitada?" sap:VirtualizedContainerService.HintSize="510,621" sap2010:WorkflowViewState.IdRef="If_habilitada">
       <If.Condition>
         <InArgument x:TypeArguments="x:Boolean">
-          <CSharpValue x:TypeArguments="x:Boolean">Habilitada</CSharpValue>
+          <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_4">Habilitada</CSharpValue>
         </InArgument>
       </If.Condition>
       <If.Then>
-        <Sequence DisplayName="Gerar e subir arte" sap2010:WorkflowViewState.IdRef="Sequence_gen">
+        <Sequence DisplayName="Gerar e subir arte" sap:VirtualizedContainerService.HintSize="510,453" sap2010:WorkflowViewState.IdRef="Sequence_gen">
           <Sequence.Variables>
-            <Variable x:TypeArguments="sec:SecureString" Name="OpenAiSecure" />
+            <Variable x:TypeArguments="ss:SecureString" Name="OpenAiSecure" />
           </Sequence.Variables>
-          <ui:GetRobotCredential AssetName="OpenAI_ApiKey" CacheStrategy="None" DisplayName="Credencial OpenAI" sap2010:WorkflowViewState.IdRef="GetRobotCredential_openai">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+          <ui:GetRobotCredential TimeoutMS="{x:Null}" Username="{x:Null}" AssetName="OpenAI_ApiKey" CacheStrategy="None" DisplayName="Credencial OpenAI" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="GetRobotCredential_openai">
             <ui:GetRobotCredential.Password>
-              <OutArgument x:TypeArguments="sec:SecureString">
-                <CSharpReference x:TypeArguments="sec:SecureString">OpenAiSecure</CSharpReference>
+              <OutArgument x:TypeArguments="ss:SecureString">
+                <CSharpReference x:TypeArguments="ss:SecureString" sap2010:WorkflowViewState.IdRef="CSharpReference`1_8">OpenAiSecure</CSharpReference>
               </OutArgument>
             </ui:GetRobotCredential.Password>
-          </ui:GetRobotCredential>
-          <ui:InvokeCode Language="CSharp" Code="erro = null;&#xA;try&#xA;{&#xA;    nomeArquivo = &quot;img-&quot; + DateTime.UtcNow.Ticks + &quot;.png&quot;;&#xA;    var bytes = clarituz_agente_social_midia.ImagemService.GerarImagemAsync(apiKey, prompt, modelo, tamanho, qualidade).GetAwaiter().GetResult();&#xA;    notaQa = null;&#xA;    if (qa)&#xA;    {&#xA;        var aval = clarituz_agente_social_midia.ImagemService.AvaliarImagemAsync(apiKey, bytes, prompt, termos).GetAwaiter().GetResult();&#xA;        var ok = aval[&quot;aprovada&quot;] != null &amp;&amp; aval[&quot;aprovada&quot;].ToObject&lt;bool&gt;();&#xA;        notaQa = aval[&quot;motivo&quot;] == null ? null : aval[&quot;motivo&quot;].ToString();&#xA;        if (!ok)&#xA;        {&#xA;            var bytes2 = clarituz_agente_social_midia.ImagemService.GerarImagemAsync(apiKey, prompt, modelo, tamanho, qualidade).GetAwaiter().GetResult();&#xA;            var aval2 = clarituz_agente_social_midia.ImagemService.AvaliarImagemAsync(apiKey, bytes2, prompt, termos).GetAwaiter().GetResult();&#xA;            if (aval2[&quot;aprovada&quot;] != null &amp;&amp; aval2[&quot;aprovada&quot;].ToObject&lt;bool&gt;()) { bytes = bytes2; notaQa = aval2[&quot;motivo&quot;] == null ? null : aval2[&quot;motivo&quot;].ToString(); }&#xA;            else notaQa = &quot;QA reprovou 2x: &quot; + (aval2[&quot;motivo&quot;] == null ? notaQa : aval2[&quot;motivo&quot;].ToString());&#xA;        }&#xA;        if (conteudo != null) conteudo[&quot;NotaImagemQA&quot;] = notaQa;&#xA;    }&#xA;    caminho = Path.Combine(Path.GetTempPath(), nomeArquivo);&#xA;    File.WriteAllBytes(caminho, bytes);&#xA;}&#xA;catch (Exception ex) { erro = ex.Message; }" DisplayName="OpenAI Images → QA visual → arquivo temp" sap2010:WorkflowViewState.IdRef="InvokeCode_gen">
-            <ui:InvokeCode.Arguments>
-              <scg:Dictionary x:TypeArguments="x:String, Argument">
-                <InArgument x:TypeArguments="sec:SecureString" x:Key="apiKey">
-                  <CSharpValue x:TypeArguments="sec:SecureString">OpenAiSecure</CSharpValue>
-                </InArgument>
-                <InArgument x:TypeArguments="x:String" x:Key="prompt">
-                  <CSharpValue x:TypeArguments="x:String">MediaPrompt</CSharpValue>
-                </InArgument>
-                <InArgument x:TypeArguments="x:String" x:Key="modelo">
-                  <CSharpValue x:TypeArguments="x:String">Modelo</CSharpValue>
-                </InArgument>
-                <InArgument x:TypeArguments="x:String" x:Key="tamanho">
-                  <CSharpValue x:TypeArguments="x:String">Tamanho</CSharpValue>
-                </InArgument>
-                <InArgument x:TypeArguments="x:String" x:Key="qualidade">
-                  <CSharpValue x:TypeArguments="x:String">Qualidade</CSharpValue>
-                </InArgument>
-                <InArgument x:TypeArguments="x:Boolean" x:Key="qa">
-                  <CSharpValue x:TypeArguments="x:Boolean">QaVisual</CSharpValue>
-                </InArgument>
-                <InArgument x:TypeArguments="x:String" x:Key="termos">
-                  <CSharpValue x:TypeArguments="x:String">TermosProibidos</CSharpValue>
-                </InArgument>
-                <InArgument x:TypeArguments="nsjl:JObject" x:Key="conteudo">
-                  <CSharpValue x:TypeArguments="nsjl:JObject">in_Conteudo</CSharpValue>
-                </InArgument>
-                <OutArgument x:TypeArguments="x:String" x:Key="notaQa">
-                  <CSharpReference x:TypeArguments="x:String">NotaQa</CSharpReference>
-                </OutArgument>
-                <OutArgument x:TypeArguments="x:String" x:Key="nomeArquivo">
-                  <CSharpReference x:TypeArguments="x:String">NomeArquivo</CSharpReference>
-                </OutArgument>
-                <OutArgument x:TypeArguments="x:String" x:Key="caminho">
-                  <CSharpReference x:TypeArguments="x:String">CaminhoLocal</CSharpReference>
-                </OutArgument>
-                <OutArgument x:TypeArguments="x:String" x:Key="erro">
-                  <CSharpReference x:TypeArguments="x:String">ErroImagem</CSharpReference>
-                </OutArgument>
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">False</x:Boolean>
               </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+          </ui:GetRobotCredential>
+          <ui:InvokeCode ContinueOnError="{x:Null}" Code="erro = null;&#xA;try&#xA;{&#xA;    nomeArquivo = &quot;img-&quot; + DateTime.UtcNow.Ticks + &quot;.png&quot;;&#xA;    var bytes = clarituz_agente_social_midia.ImagemService.GerarImagemAsync(apiKey, prompt, modelo, tamanho, qualidade).GetAwaiter().GetResult();&#xA;    notaQa = null;&#xA;    if (qa)&#xA;    {&#xA;        var aval = clarituz_agente_social_midia.ImagemService.AvaliarImagemAsync(apiKey, bytes, prompt, termos).GetAwaiter().GetResult();&#xA;        var ok = aval[&quot;aprovada&quot;] != null &amp;&amp; aval[&quot;aprovada&quot;].ToObject&lt;bool&gt;();&#xA;        notaQa = aval[&quot;motivo&quot;] == null ? null : aval[&quot;motivo&quot;].ToString();&#xA;        if (!ok)&#xA;        {&#xA;            var bytes2 = clarituz_agente_social_midia.ImagemService.GerarImagemAsync(apiKey, prompt, modelo, tamanho, qualidade).GetAwaiter().GetResult();&#xA;            var aval2 = clarituz_agente_social_midia.ImagemService.AvaliarImagemAsync(apiKey, bytes2, prompt, termos).GetAwaiter().GetResult();&#xA;            if (aval2[&quot;aprovada&quot;] != null &amp;&amp; aval2[&quot;aprovada&quot;].ToObject&lt;bool&gt;()) { bytes = bytes2; notaQa = aval2[&quot;motivo&quot;] == null ? null : aval2[&quot;motivo&quot;].ToString(); }&#xA;            else notaQa = &quot;QA reprovou 2x: &quot; + (aval2[&quot;motivo&quot;] == null ? notaQa : aval2[&quot;motivo&quot;].ToString());&#xA;        }&#xA;        if (conteudo != null) conteudo[&quot;NotaImagemQA&quot;] = notaQa;&#xA;    }&#xA;    caminho = Path.Combine(Path.GetTempPath(), nomeArquivo);&#xA;    File.WriteAllBytes(caminho, bytes);&#xA;}&#xA;catch (Exception ex) { erro = ex.Message; }" DisplayName="OpenAI Images → QA visual → arquivo temp" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="InvokeCode_gen" Language="CSharp">
+            <ui:InvokeCode.Arguments>
+              <InArgument x:TypeArguments="ss:SecureString" x:Key="apiKey">
+                <CSharpValue x:TypeArguments="ss:SecureString" sap2010:WorkflowViewState.IdRef="CSharpValue`1_5">OpenAiSecure</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="prompt">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_6">MediaPrompt</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="modelo">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_7">Modelo</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="tamanho">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_8">Tamanho</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="qualidade">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_9">Qualidade</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:Boolean" x:Key="qa">
+                <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_10">QaVisual</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="termos">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_11">TermosProibidos</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="njl:JObject" x:Key="conteudo">
+                <CSharpValue x:TypeArguments="njl:JObject" sap2010:WorkflowViewState.IdRef="CSharpValue`1_12">in_Conteudo</CSharpValue>
+              </InArgument>
+              <OutArgument x:TypeArguments="x:String" x:Key="notaQa">
+                <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_9">NotaQa</CSharpReference>
+              </OutArgument>
+              <OutArgument x:TypeArguments="x:String" x:Key="nomeArquivo">
+                <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_10">NomeArquivo</CSharpReference>
+              </OutArgument>
+              <OutArgument x:TypeArguments="x:String" x:Key="caminho">
+                <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_11">CaminhoLocal</CSharpReference>
+              </OutArgument>
+              <OutArgument x:TypeArguments="x:String" x:Key="erro">
+                <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_12">ErroImagem</CSharpReference>
+              </OutArgument>
             </ui:InvokeCode.Arguments>
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
           </ui:InvokeCode>
-          <If DisplayName="Imagem gerada?" sap2010:WorkflowViewState.IdRef="If_ok">
+          <If DisplayName="Imagem gerada?" sap:VirtualizedContainerService.HintSize="480,309" sap2010:WorkflowViewState.IdRef="If_ok">
             <If.Condition>
               <InArgument x:TypeArguments="x:Boolean">
-                <CSharpValue x:TypeArguments="x:Boolean">string.IsNullOrEmpty(ErroImagem)</CSharpValue>
+                <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_13">string.IsNullOrEmpty(ErroImagem)</CSharpValue>
               </InArgument>
             </If.Condition>
             <If.Then>
-              <Sequence DisplayName="Upload SM_Midia" sap2010:WorkflowViewState.IdRef="Sequence_upload">
-                <uist:UploadStorageFile DisplayName="Subir arte gerada" sap2010:WorkflowViewState.IdRef="UploadStorageFile_1" StorageBucketName="SM_Midia" Destination="geradas/">
-                  <uist:UploadStorageFile.Path>
+              <Sequence DisplayName="Upload SM_Midia" sap:VirtualizedContainerService.HintSize="480,192" sap2010:WorkflowViewState.IdRef="Sequence_upload">
+                <sap:WorkflowViewStateService.ViewState>
+                  <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                    <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                  </scg:Dictionary>
+                </sap:WorkflowViewStateService.ViewState>
+                <ucas:UploadStorageFile FileResource="{x:Null}" TimeoutMS="{x:Null}" Destination="geradas/" DisplayName="Subir arte gerada" sap:VirtualizedContainerService.HintSize="450,48" sap2010:WorkflowViewState.IdRef="UploadStorageFile_1" StorageBucketName="SM_Midia">
+                  <ucas:UploadStorageFile.FileName>
                     <InArgument x:TypeArguments="x:String">
-                      <CSharpValue x:TypeArguments="x:String">CaminhoLocal</CSharpValue>
+                      <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_15">NomeArquivo</CSharpValue>
                     </InArgument>
-                  </uist:UploadStorageFile.Path>
-                  <uist:UploadStorageFile.FileName>
+                  </ucas:UploadStorageFile.FileName>
+                  <ucas:UploadStorageFile.Path>
                     <InArgument x:TypeArguments="x:String">
-                      <CSharpValue x:TypeArguments="x:String">NomeArquivo</CSharpValue>
+                      <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_14">CaminhoLocal</CSharpValue>
                     </InArgument>
-                  </uist:UploadStorageFile.FileName>
-                </uist:UploadStorageFile>
-                <ui:InvokeCode Language="CSharp" Code="mediaUrl = &quot;geradas/&quot; + nomeArquivo;" DisplayName="MediaUrl = geradas/nome" sap2010:WorkflowViewState.IdRef="InvokeCode_mediaurl">
-                  <ui:InvokeCode.Arguments>
-                    <scg:Dictionary x:TypeArguments="x:String, Argument">
-                      <InArgument x:TypeArguments="x:String" x:Key="nomeArquivo">
-                        <CSharpValue x:TypeArguments="x:String">NomeArquivo</CSharpValue>
-                      </InArgument>
-                      <OutArgument x:TypeArguments="x:String" x:Key="mediaUrl">
-                        <CSharpReference x:TypeArguments="x:String">out_MediaUrl</CSharpReference>
-                      </OutArgument>
+                  </ucas:UploadStorageFile.Path>
+                  <sap:WorkflowViewStateService.ViewState>
+                    <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                      <x:Boolean x:Key="IsExpanded">False</x:Boolean>
                     </scg:Dictionary>
+                  </sap:WorkflowViewStateService.ViewState>
+                </ucas:UploadStorageFile>
+                <ui:InvokeCode ContinueOnError="{x:Null}" Code="mediaUrl = &quot;geradas/&quot; + nomeArquivo;" DisplayName="MediaUrl = geradas/nome" sap:VirtualizedContainerService.HintSize="450,48" sap2010:WorkflowViewState.IdRef="InvokeCode_mediaurl" Language="CSharp">
+                  <ui:InvokeCode.Arguments>
+                    <InArgument x:TypeArguments="x:String" x:Key="nomeArquivo">
+                      <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_16">NomeArquivo</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="x:String" x:Key="mediaUrl">
+                      <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_13">out_MediaUrl</CSharpReference>
+                    </OutArgument>
                   </ui:InvokeCode.Arguments>
+                  <sap:WorkflowViewStateService.ViewState>
+                    <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                      <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+                    </scg:Dictionary>
+                  </sap:WorkflowViewStateService.ViewState>
                 </ui:InvokeCode>
-                <ui:LogMessage DisplayName="Arte gerada" Level="Info" sap2010:WorkflowViewState.IdRef="LogMessage_ok">
+                <ui:LogMessage DisplayName="Arte gerada" sap:VirtualizedContainerService.HintSize="450,48" sap2010:WorkflowViewState.IdRef="LogMessage_ok" Level="Info">
                   <ui:LogMessage.Message>
                     <InArgument x:TypeArguments="x:Object">
-                      <CSharpValue x:TypeArguments="x:Object">"Imagem gerada (" + Modelo + " " + Tamanho + ") → SM_Midia/" + out_MediaUrl + (string.IsNullOrEmpty(NotaQa) ? "" : " | QA: " + NotaQa)</CSharpValue>
+                      <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_17">"Imagem gerada (" + Modelo + " " + Tamanho + ") → SM_Midia/" + out_MediaUrl + (string.IsNullOrEmpty(NotaQa) ? "" : " | QA: " + NotaQa)</CSharpValue>
                     </InArgument>
                   </ui:LogMessage.Message>
+                  <sap:WorkflowViewStateService.ViewState>
+                    <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                      <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+                    </scg:Dictionary>
+                  </sap:WorkflowViewStateService.ViewState>
                 </ui:LogMessage>
               </Sequence>
             </If.Then>
             <If.Else>
-              <ui:LogMessage DisplayName="Geração falhou (warn)" Level="Warn" sap2010:WorkflowViewState.IdRef="LogMessage_fail">
+              <ui:LogMessage DisplayName="Geração falhou (warn)" sap:VirtualizedContainerService.HintSize="450,24" sap2010:WorkflowViewState.IdRef="LogMessage_fail" Level="Warn">
                 <ui:LogMessage.Message>
                   <InArgument x:TypeArguments="x:Object">
-                    <CSharpValue x:TypeArguments="x:Object">"Geração de imagem falhou (não-bloqueante — operador anexa mídia manual na aprovação): " + ErroImagem</CSharpValue>
+                    <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_18">"Geração de imagem falhou (não-bloqueante — operador anexa mídia manual na aprovação): " + ErroImagem</CSharpValue>
                   </InArgument>
                 </ui:LogMessage.Message>
+                <sap:WorkflowViewStateService.ViewState>
+                  <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                    <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+                  </scg:Dictionary>
+                </sap:WorkflowViewStateService.ViewState>
               </ui:LogMessage>
             </If.Else>
           </If>
         </Sequence>
       </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Else" sap:VirtualizedContainerService.HintSize="480,96" sap2010:WorkflowViewState.IdRef="Sequence_2">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+        </Sequence>
+      </If.Else>
     </If>
   </Sequence>
 </Activity>

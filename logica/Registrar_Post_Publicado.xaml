@@ -3,6 +3,7 @@
     <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
     <x:Property Name="in_Plataforma" Type="InArgument(x:String)" />
     <x:Property Name="in_PostUrl" Type="InArgument(x:String)" />
+    <x:Property Name="in_Tema" Type="InArgument(x:String)" />
     <x:Property Name="out_PostId" Type="OutArgument(x:String)" />
   </x:Members>
   <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
@@ -120,7 +121,7 @@
         </Catch>
       </TryCatch.Catches>
     </TryCatch>
-    <ui:InvokeCode Language="CSharp" Code="var linha = new JObject&#xA;{&#xA;    [&quot;postId&quot;] = postId,&#xA;    [&quot;plataforma&quot;] = plataforma,&#xA;    [&quot;postUrl&quot;] = postUrl,&#xA;    [&quot;postPermalink&quot;] = permalink,&#xA;    [&quot;registradoEm&quot;] = DateTime.UtcNow.ToString(&quot;o&quot;),&#xA;    [&quot;proximaColetaEm&quot;] = DateTime.UtcNow.AddHours(24).ToString(&quot;o&quot;)&#xA;};&#xA;var sb = new System.Text.StringBuilder(jsonl ?? &quot;&quot;);&#xA;if (sb.Length &gt; 0 &amp;&amp; !jsonl.EndsWith(&quot;\n&quot;)) sb.AppendLine();&#xA;sb.AppendLine(linha.ToString(Newtonsoft.Json.Formatting.None));&#xA;jsonlNovo = sb.ToString();" DisplayName="Append post monitorado" sap2010:WorkflowViewState.IdRef="InvokeCode_append">
+    <ui:InvokeCode Language="CSharp" Code="var linha = new JObject&#xA;{&#xA;    [&quot;postId&quot;] = postId,&#xA;    [&quot;plataforma&quot;] = plataforma,&#xA;    [&quot;postUrl&quot;] = postUrl,&#xA;    [&quot;tema&quot;] = tema,&#xA;    [&quot;postPermalink&quot;] = permalink,&#xA;    [&quot;registradoEm&quot;] = DateTime.UtcNow.ToString(&quot;o&quot;),&#xA;    [&quot;proximaColetaEm&quot;] = DateTime.UtcNow.AddHours(24).ToString(&quot;o&quot;)&#xA;};&#xA;var sb = new System.Text.StringBuilder(jsonl ?? &quot;&quot;);&#xA;if (sb.Length &gt; 0 &amp;&amp; !jsonl.EndsWith(&quot;\n&quot;)) sb.AppendLine();&#xA;sb.AppendLine(linha.ToString(Newtonsoft.Json.Formatting.None));&#xA;jsonlNovo = sb.ToString();" DisplayName="Append post monitorado" sap2010:WorkflowViewState.IdRef="InvokeCode_append">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="x:String" x:Key="postId">
@@ -131,6 +132,9 @@
           </InArgument>
           <InArgument x:TypeArguments="x:String" x:Key="postUrl">
             <CSharpValue x:TypeArguments="x:String">in_PostUrl</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="tema">
+            <CSharpValue x:TypeArguments="x:String">in_Tema</CSharpValue>
           </InArgument>
           <InArgument x:TypeArguments="x:String" x:Key="permalink">
             <CSharpValue x:TypeArguments="x:String">PostPermalink</CSharpValue>

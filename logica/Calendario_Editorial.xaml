@@ -42,6 +42,10 @@
       <Variable x:TypeArguments="x:String" Name="RespostaLLM" />
       <Variable x:TypeArguments="nsjl:JArray" Name="Calendario" />
       <Variable x:TypeArguments="x:String" Name="JsonCalendario" />
+      <Variable x:TypeArguments="x:String" Name="MonitoradosJsonl" />
+      <Variable x:TypeArguments="x:String" Name="MetricasJsonl" />
+      <Variable x:TypeArguments="x:String" Name="MetricaDia" />
+      <Variable x:TypeArguments="x:String" Name="Desempenho" />
     </Sequence.Variables>
     <Assign DisplayName="Config do contexto" sap2010:WorkflowViewState.IdRef="Assign_cfg">
       <Assign.To>
@@ -55,7 +59,125 @@
         </InArgument>
       </Assign.Value>
     </Assign>
-    <ui:InvokeCode Language="CSharp" Code="nicho = string.IsNullOrEmpty(ctx[&quot;Nicho&quot;] as string) ? Convert.ToString(config[&quot;nicho&quot;]) : ctx[&quot;Nicho&quot;] as string;&#xA;tomDeVoz = string.IsNullOrEmpty(ctx[&quot;TomDeVoz&quot;] as string) ? Convert.ToString(config[&quot;tom_de_voz&quot;]) : ctx[&quot;TomDeVoz&quot;] as string;&#xA;plataformas = ctx[&quot;Plataformas&quot;] as List&lt;string&gt; ?? new List&lt;string&gt; { &quot;Instagram&quot;, &quot;Facebook&quot; };&#xA;dias = 7;&#xA;int cfgDias;&#xA;if (config[&quot;dias_calendario&quot;] != null &amp;&amp; int.TryParse(config[&quot;dias_calendario&quot;].ToString(), out cfgDias) &amp;&amp; cfgDias &gt; 0) dias = cfgDias;&#xA;prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptCalendario(nicho, tomDeVoz, plataformas.ToArray(), dias);" DisplayName="Montar prompt de calendário" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
+    <Assign DisplayName="MetricasJsonl vazio" sap2010:WorkflowViewState.IdRef="Assign_mets0">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">
+          <CSharpReference x:TypeArguments="x:String">MetricasJsonl</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">""</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <TryCatch DisplayName="Ler posts-monitorados.jsonl (tema por post)" sap2010:WorkflowViewState.IdRef="TryCatch_mon">
+      <TryCatch.Try>
+        <uist:ReadStorageText DisplayName="SM_Metricas posts-monitorados.jsonl" Path="posts-monitorados.jsonl" sap2010:WorkflowViewState.IdRef="ReadStorageText_mon" StorageBucketName="SM_Metricas">
+          <uist:ReadStorageText.Result>
+            <OutArgument x:TypeArguments="x:String">
+              <CSharpReference x:TypeArguments="x:String">MonitoradosJsonl</CSharpReference>
+            </OutArgument>
+          </uist:ReadStorageText.Result>
+        </uist:ReadStorageText>
+      </TryCatch.Try>
+      <TryCatch.Catches>
+        <Catch x:TypeArguments="s:Exception">
+          <ActivityAction x:TypeArguments="s:Exception">
+            <ActivityAction.Argument>
+              <DelegateInArgument x:TypeArguments="s:Exception" Name="monEx" />
+            </ActivityAction.Argument>
+            <Sequence DisplayName="Sem posts monitorados ainda" sap2010:WorkflowViewState.IdRef="Sequence_nomon">
+              <Assign DisplayName="MonitoradosJsonl vazio" sap2010:WorkflowViewState.IdRef="Assign_mon0">
+                <Assign.To>
+                  <OutArgument x:TypeArguments="x:String">
+                    <CSharpReference x:TypeArguments="x:String">MonitoradosJsonl</CSharpReference>
+                  </OutArgument>
+                </Assign.To>
+                <Assign.Value>
+                  <InArgument x:TypeArguments="x:String">
+                    <CSharpValue x:TypeArguments="x:String">""</CSharpValue>
+                  </InArgument>
+                </Assign.Value>
+              </Assign>
+            </Sequence>
+          </ActivityAction>
+        </Catch>
+      </TryCatch.Catches>
+    </TryCatch>
+    <ForEach x:TypeArguments="x:Int32" DisplayName="Métricas dos últimos 7 dias" sap2010:WorkflowViewState.IdRef="ForEach_mets">
+      <ForEach.Values>
+        <InArgument x:TypeArguments="scg:IEnumerable(x:Int32)">
+          <CSharpValue x:TypeArguments="scg:IEnumerable(x:Int32)">Enumerable.Range(1, 7)</CSharpValue>
+        </InArgument>
+      </ForEach.Values>
+      <ActivityAction x:TypeArguments="x:Int32">
+        <ActivityAction.Argument>
+          <DelegateInArgument x:TypeArguments="x:Int32" Name="diasAtras" />
+        </ActivityAction.Argument>
+        <Sequence DisplayName="Ler metricas do dia" sap2010:WorkflowViewState.IdRef="Sequence_diaria">
+          <Assign DisplayName="MetricaDia vazio" sap2010:WorkflowViewState.IdRef="Assign_dia0">
+            <Assign.To>
+              <OutArgument x:TypeArguments="x:String">
+                <CSharpReference x:TypeArguments="x:String">MetricaDia</CSharpReference>
+              </OutArgument>
+            </Assign.To>
+            <Assign.Value>
+              <InArgument x:TypeArguments="x:String">
+                <CSharpValue x:TypeArguments="x:String">""</CSharpValue>
+              </InArgument>
+            </Assign.Value>
+          </Assign>
+          <TryCatch DisplayName="metricas-YYYY-MM-dd.jsonl" sap2010:WorkflowViewState.IdRef="TryCatch_dia">
+            <TryCatch.Try>
+              <uist:ReadStorageText DisplayName="Ler arquivo diário" sap2010:WorkflowViewState.IdRef="ReadStorageText_dia" StorageBucketName="SM_Metricas">
+                <uist:ReadStorageText.Path>
+                  <InArgument x:TypeArguments="x:String">
+                    <CSharpValue x:TypeArguments="x:String">"metricas-" + DateTime.UtcNow.AddDays(-diasAtras).ToString("yyyy-MM-dd") + ".jsonl"</CSharpValue>
+                  </InArgument>
+                </uist:ReadStorageText.Path>
+                <uist:ReadStorageText.Result>
+                  <OutArgument x:TypeArguments="x:String">
+                    <CSharpReference x:TypeArguments="x:String">MetricaDia</CSharpReference>
+                  </OutArgument>
+                </uist:ReadStorageText.Result>
+              </uist:ReadStorageText>
+            </TryCatch.Try>
+            <TryCatch.Catches>
+              <Catch x:TypeArguments="s:Exception">
+                <ActivityAction x:TypeArguments="s:Exception">
+                  <ActivityAction.Argument>
+                    <DelegateInArgument x:TypeArguments="s:Exception" Name="diaEx" />
+                  </ActivityAction.Argument>
+                  <Sequence DisplayName="Dia sem arquivo — segue" sap2010:WorkflowViewState.IdRef="Sequence_nodia">
+                    <ui:LogMessage DisplayName="Sem arquivo do dia" sap2010:WorkflowViewState.IdRef="LogMessage_nodia" Level="Trace">
+                      <ui:LogMessage.Message>
+                        <InArgument x:TypeArguments="x:Object">
+                          <CSharpValue x:TypeArguments="x:Object">"CalendarioEditorial: sem metricas-" + DateTime.UtcNow.AddDays(-diasAtras).ToString("yyyy-MM-dd") + ".jsonl (esperado nos primeiros dias)"</CSharpValue>
+                        </InArgument>
+                      </ui:LogMessage.Message>
+                    </ui:LogMessage>
+                  </Sequence>
+                </ActivityAction>
+              </Catch>
+            </TryCatch.Catches>
+          </TryCatch>
+          <Assign DisplayName="Acumula linhas" sap2010:WorkflowViewState.IdRef="Assign_acum">
+            <Assign.To>
+              <OutArgument x:TypeArguments="x:String">
+                <CSharpReference x:TypeArguments="x:String">MetricasJsonl</CSharpReference>
+              </OutArgument>
+            </Assign.To>
+            <Assign.Value>
+              <InArgument x:TypeArguments="x:String">
+                <CSharpValue x:TypeArguments="x:String">MetricasJsonl + MetricaDia</CSharpValue>
+              </InArgument>
+            </Assign.Value>
+          </Assign>
+        </Sequence>
+      </ActivityAction>
+    </ForEach>
+    <ui:InvokeCode Language="CSharp" Code="nicho = string.IsNullOrEmpty(ctx[&quot;Nicho&quot;] as string) ? Convert.ToString(config[&quot;nicho&quot;]) : ctx[&quot;Nicho&quot;] as string;&#xA;tomDeVoz = string.IsNullOrEmpty(ctx[&quot;TomDeVoz&quot;] as string) ? Convert.ToString(config[&quot;tom_de_voz&quot;]) : ctx[&quot;TomDeVoz&quot;] as string;&#xA;plataformas = ctx[&quot;Plataformas&quot;] as List&lt;string&gt; ?? new List&lt;string&gt; { &quot;Instagram&quot;, &quot;Facebook&quot; };&#xA;dias = 7;&#xA;int cfgDias;&#xA;if (config[&quot;dias_calendario&quot;] != null &amp;&amp; int.TryParse(config[&quot;dias_calendario&quot;].ToString(), out cfgDias) &amp;&amp; cfgDias &gt; 0) dias = cfgDias;&#xA;desempenho = clarituz_agente_social_midia.MetricasService.ResumirDesempenho(monitorados, metricas);&#xA;prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptCalendario(nicho, tomDeVoz, plataformas.ToArray(), dias, desempenho);" DisplayName="Montar prompt de calendário (com desempenho)" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
@@ -75,6 +197,15 @@
           </OutArgument>
           <OutArgument x:TypeArguments="x:Int32" x:Key="dias">
             <CSharpReference x:TypeArguments="x:Int32">Dias</CSharpReference>
+          </OutArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="monitorados">
+            <CSharpValue x:TypeArguments="x:String">MonitoradosJsonl</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="metricas">
+            <CSharpValue x:TypeArguments="x:String">MetricasJsonl</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="desempenho">
+            <CSharpReference x:TypeArguments="x:String">Desempenho</CSharpReference>
           </OutArgument>
           <OutArgument x:TypeArguments="x:String" x:Key="prompt">
             <CSharpReference x:TypeArguments="x:String">Prompt</CSharpReference>
@@ -122,7 +253,7 @@
     <ui:LogMessage DisplayName="Calendário gerado" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
       <ui:LogMessage.Message>
         <InArgument x:TypeArguments="x:Object">
-          <CSharpValue x:TypeArguments="x:Object">"CalendarioEditorial: " + out_Entradas + " entradas para " + Dias + " dias gravadas em SM_Metricas/calendario/calendario-editorial.json"</CSharpValue>
+          <CSharpValue x:TypeArguments="x:Object">"CalendarioEditorial: " + out_Entradas + " entradas para " + Dias + " dias gravadas em SM_Metricas/calendario/calendario-editorial.json" + (string.IsNullOrEmpty(Desempenho) ? " (sem histórico de desempenho)" : " | aprendizado: " + Desempenho.Replace("\n", " / ").Substring(0, Math.Min(160, Desempenho.Length)))</CSharpValue>
         </InArgument>
       </ui:LogMessage.Message>
     </ui:LogMessage>

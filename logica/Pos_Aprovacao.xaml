@@ -43,13 +43,14 @@
       <Variable x:TypeArguments="x:String" Name="MotivoRejeicao" />
       <Variable x:TypeArguments="nsjl:JObject" Name="ConteudoFinal" />
       <Variable x:TypeArguments="x:String" Name="Plataforma" />
+      <Variable x:TypeArguments="x:String" Name="Tema" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:InvokeCode Language="CSharp" Code="var dados = taskObj == null ? new JObject() : taskObj.GetDataJsonObject();&#xA;decisao = dados[&quot;decisao&quot;] == null ? &quot;Aprovado&quot; : dados[&quot;decisao&quot;].ToString();&#xA;postUrl = dados[&quot;url_post_publicado&quot;] == null ? &quot;&quot; : dados[&quot;url_post_publicado&quot;].ToString();&#xA;legendaEditada = dados[&quot;legenda_editada&quot;] == null ? null : dados[&quot;legenda_editada&quot;].ToString();&#xA;motivo = dados[&quot;motivo_rejeicao&quot;] == null ? &quot;&quot; : dados[&quot;motivo_rejeicao&quot;].ToString();&#xA;conteudoFinal = conteudo == null ? new JObject() : (JObject)conteudo.DeepClone();&#xA;if (!string.IsNullOrEmpty(legendaEditada)) conteudoFinal[&quot;Legenda&quot;] = legendaEditada;&#xA;var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();" DisplayName="Ler decisão da task" sap2010:WorkflowViewState.IdRef="InvokeCode_decisao">
+    <ui:InvokeCode Language="CSharp" Code="var dados = taskObj == null ? new JObject() : taskObj.GetDataJsonObject();&#xA;decisao = dados[&quot;decisao&quot;] == null ? &quot;Aprovado&quot; : dados[&quot;decisao&quot;].ToString();&#xA;postUrl = dados[&quot;url_post_publicado&quot;] == null ? &quot;&quot; : dados[&quot;url_post_publicado&quot;].ToString();&#xA;legendaEditada = dados[&quot;legenda_editada&quot;] == null ? null : dados[&quot;legenda_editada&quot;].ToString();&#xA;motivo = dados[&quot;motivo_rejeicao&quot;] == null ? &quot;&quot; : dados[&quot;motivo_rejeicao&quot;].ToString();&#xA;conteudoFinal = conteudo == null ? new JObject() : (JObject)conteudo.DeepClone();&#xA;if (!string.IsNullOrEmpty(legendaEditada)) conteudoFinal[&quot;Legenda&quot;] = legendaEditada;&#xA;var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;tema = conteudoFinal[&quot;Tema&quot;] == null ? &quot;&quot; : conteudoFinal[&quot;Tema&quot;].ToString();" DisplayName="Ler decisão da task" sap2010:WorkflowViewState.IdRef="InvokeCode_decisao">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="upaf:FormTaskData" x:Key="taskObj">
@@ -78,6 +79,9 @@
           </OutArgument>
           <OutArgument x:TypeArguments="x:String" x:Key="plataforma">
             <CSharpReference x:TypeArguments="x:String">Plataforma</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="tema">
+            <CSharpReference x:TypeArguments="x:String">Tema</CSharpReference>
           </OutArgument>
         </scg:Dictionary>
       </ui:InvokeCode.Arguments>
@@ -156,6 +160,9 @@
                 </InArgument>
                 <InArgument x:TypeArguments="x:String" x:Key="in_PostUrl">
                   <CSharpValue x:TypeArguments="x:String">PostUrl</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="in_Tema">
+                  <CSharpValue x:TypeArguments="x:String">Tema</CSharpValue>
                 </InArgument>
                 <OutArgument x:TypeArguments="x:String" x:Key="out_PostId">
                   <CSharpReference x:TypeArguments="x:String">out_PostId</CSharpReference>

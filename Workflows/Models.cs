@@ -18,6 +18,7 @@ namespace clarituz_agente_social_midia
         public string Nicho { get; init; }
         public string TomDeVoz { get; init; }
         public string Tema { get; init; }             // pauta (GerarConteudo)
+        public string Formato { get; init; }          // feed | reels | carrossel | stories (calendário)
         public string MediaUrl { get; init; }
         public string CommentId { get; init; }        // ModerarComentario
         public string CommentTexto { get; init; }

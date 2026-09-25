@@ -1,7 +1,7 @@
 # Camila — Relatório de Testes de QA
 
 **Projeto:** clarituz-agente-social-midia
-**Versão testada:** 1.0.7 (publicada e ativa no Orchestrator, pasta Shared)
+**Versão testada:** 1.0.8 (publicada e ativa no Orchestrator, pasta Shared)
 **Data da execução:** 2026-02-10
 **Ferramenta:** UiPath `uip rpa run` / `uip rpa validate` / `uip rpa build`
 **Resultado geral:** ✅ **APROVADO — 6/6 testes, 0 erros de validação**
@@ -113,7 +113,7 @@ Os testes cobrem a lógica; para produção, restam apenas configurações no Or
 
 ## Taxa de acerto do projeto
 
-**Suíte automatizada: 30/30 assertions — 100% de acerto** ✅
+**Suíte automatizada: 33/33 assertions — 100% de acerto** ✅
 
 | Teste | Assertions | Passou | Taxa |
 |---|---|---|---|
@@ -121,9 +121,9 @@ Os testes cobrem a lógica; para produção, restam apenas configurações no Or
 | T_COMP_02 — Termos proibidos BR-05 | 3 | 3 | 100% |
 | T_MOD — Sentimentos e priorização | 5 | 5 | 100% |
 | T_URL — Resolvers IG/FB | 6 | 6 | 100% |
-| T_PARSE — Parsers LLM + calendário | 7 | 7 | 100% |
+| T_PARSE — Parsers LLM + calendário + loop de aprendizado | 10 | 10 | 100% |
 | T_ZW — Zero-write (29 arquivos varridos) | 3 | 3 | 100% |
-| **Total** | **30** | **30** | **100%** |
+| **Total** | **33** | **33** | **100%** |
 
 **Cobertura estática:** validação do projeto inteiro → **0 erros**; build → **Success**; zero ocorrências de escrita em plataforma.
 
@@ -135,4 +135,4 @@ Os 100% medem a camada **determinística e testável** do projeto: validação d
 
 ## Conclusão
 
-A suíte de QA confirma que a Camila está funcionalmente íntegra na versão 1.0.7: geração de calendário editorial, curadoria de conteúdo, validação de compliance, aprovação humana obrigatória, moderação com priorização por sentimento, coleta de métricas e a garantia de **zero escrita** nas plataformas — todos verificados e passando.
+A suíte de QA confirma que a Camila está funcionalmente íntegra na versão 1.0.8: geração de calendário editorial, curadoria de conteúdo, validação de compliance, aprovação humana obrigatória, moderação com priorização por sentimento, coleta de métricas e a garantia de **zero escrita** nas plataformas — todos verificados e passando.

@@ -42,6 +42,9 @@
       <Variable x:TypeArguments="x:Int32" Name="NEntradasCal" />
       <Variable x:TypeArguments="x:Int32" Name="NHojeCal" />
       <Variable x:TypeArguments="x:Boolean" Name="ThrowCalInvalido" />
+      <Variable x:TypeArguments="x:String" Name="ResumoDesemp" />
+      <Variable x:TypeArguments="x:String" Name="ResumoVazio" />
+      <Variable x:TypeArguments="x:String" Name="PromptCalDesemp" />
     </Sequence.Variables>
     <Sequence DisplayName="Parsers — Given">
       <ui:LogMessage DisplayName="Given: respostas LLM com e sem fences" Level="Info" sap2010:WorkflowViewState.IdRef="LogMessage_given">
@@ -85,6 +88,21 @@
             </OutArgument>
             <OutArgument x:TypeArguments="x:Boolean" x:Key="throwCalInvalido">
               <CSharpReference x:TypeArguments="x:Boolean">ThrowCalInvalido</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+      <ui:InvokeCode Language="CSharp" Code="var monitorados = &quot;{\&quot;postId\&quot;:\&quot;p1\&quot;,\&quot;plataforma\&quot;:\&quot;Instagram\&quot;,\&quot;tema\&quot;:\&quot;hidratacao\&quot;,\&quot;postUrl\&quot;:\&quot;u1\&quot;}\n{\&quot;postId\&quot;:\&quot;p2\&quot;,\&quot;plataforma\&quot;:\&quot;Instagram\&quot;,\&quot;tema\&quot;:\&quot;promocao\&quot;,\&quot;postUrl\&quot;:\&quot;u2\&quot;}\n&quot;;&#xA;var m1 = new clarituz_agente_social_midia.MetricasPost { PostId = &quot;p1&quot;, Plataforma = &quot;Instagram&quot;, Alcance = 1000, Curtidas = 80, Comentarios = 15, Salvamentos = 5, ColetadoEm = DateTime.UtcNow };&#xA;var m2 = new clarituz_agente_social_midia.MetricasPost { PostId = &quot;p2&quot;, Plataforma = &quot;Instagram&quot;, Alcance = 1000, Curtidas = 10, Comentarios = 0, Salvamentos = 0, ColetadoEm = DateTime.UtcNow };&#xA;var metJsonl = clarituz_agente_social_midia.MetricasService.Serializar(m1) + &quot;\n&quot; + clarituz_agente_social_midia.MetricasService.Serializar(m2) + &quot;\n&quot;;&#xA;resumo = clarituz_agente_social_midia.MetricasService.ResumirDesempenho(monitorados, metJsonl);&#xA;resumoVazio = clarituz_agente_social_midia.MetricasService.ResumirDesempenho(&quot;&quot;, &quot;&quot;);&#xA;promptCal = clarituz_agente_social_midia.ConteudoService.MontarPromptCalendario(&quot;estetica&quot;, &quot;leve&quot;, new[] { &quot;Instagram&quot; }, 7, resumo);" DisplayName="Desempenho → resumo + prompt (aprendizado)" sap2010:WorkflowViewState.IdRef="InvokeCode_desemp">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <OutArgument x:TypeArguments="x:String" x:Key="resumo">
+              <CSharpReference x:TypeArguments="x:String">ResumoDesemp</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="resumoVazio">
+              <CSharpReference x:TypeArguments="x:String">ResumoVazio</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="promptCal">
+              <CSharpReference x:TypeArguments="x:String">PromptCalDesemp</CSharpReference>
             </OutArgument>
           </scg:Dictionary>
         </ui:InvokeCode.Arguments>
@@ -172,6 +190,42 @@
         <uta:VerifyExpression.OutputMessageFormat>
           <InArgument x:TypeArguments="x:String">
             <CSharpValue x:TypeArguments="x:String">"Entrada de calendário sem data deveria lançar FormatException"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Resumo: top tema por engajamento" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_desemp">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">ResumoDesemp != null &amp;&amp; ResumoDesemp.IndexOf("hidratacao") >= 0 &amp;&amp; ResumoDesemp.IndexOf("hidratacao") &lt; ResumoDesemp.IndexOf("promocao")</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Tema com maior engajamento (hidratacao, 10%) deveria aparecer antes de promocao (1%)"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Resumo vazio sem dados" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_desempvazio">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">ResumoVazio == ""</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Sem posts-monitorados/métricas o resumo deveria ser vazio (prompt sem bloco de desempenho)"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Prompt do calendário injeta desempenho" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_promptdesemp">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">PromptCalDesemp != null &amp;&amp; PromptCalDesemp.Contains("Desempenho recente") &amp;&amp; PromptCalDesemp.Contains("hidratacao")</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Prompt de calendário com desempenho deveria conter o bloco e o tema top"</CSharpValue>
           </InArgument>
         </uta:VerifyExpression.OutputMessageFormat>
       </uta:VerifyExpression>

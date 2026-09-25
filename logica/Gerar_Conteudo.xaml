@@ -70,11 +70,14 @@
         </scg:Dictionary>
       </ui:InvokeWorkflowFile.Arguments>
     </ui:InvokeWorkflowFile>
-    <ui:InvokeCode Language="CSharp" Code="var gerado = clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(resposta);&#xA;conteudo = JObject.FromObject(gerado);" DisplayName="Parsear ConteudoGerado (E5)" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
+    <ui:InvokeCode Language="CSharp" Code="var gerado = clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(resposta);&#xA;conteudo = JObject.FromObject(gerado);&#xA;var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;conteudo[&quot;Formato&quot;] = data[&quot;Formato&quot;] == null ? &quot;&quot; : data[&quot;Formato&quot;].ToString();&#xA;conteudo[&quot;Tema&quot;] = data[&quot;Tema&quot;] == null ? &quot;&quot; : data[&quot;Tema&quot;].ToString();" DisplayName="Parsear ConteudoGerado (E5)" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="x:String" x:Key="resposta">
             <CSharpValue x:TypeArguments="x:String">RespostaLLM</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:Object" x:Key="inData">
+            <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
           </InArgument>
           <OutArgument x:TypeArguments="nsjl:JObject" x:Key="conteudo">
             <CSharpReference x:TypeArguments="nsjl:JObject">out_Conteudo</CSharpReference>
