@@ -41,6 +41,7 @@
       <Variable x:TypeArguments="x:String" Name="MediaPrompt" />
       <Variable x:TypeArguments="x:String" Name="Modelo" />
       <Variable x:TypeArguments="x:String" Name="Tamanho" />
+      <Variable x:TypeArguments="x:String" Name="Qualidade" />
       <Variable x:TypeArguments="x:String" Name="NomeArquivo" />
       <Variable x:TypeArguments="x:String" Name="CaminhoLocal" />
       <Variable x:TypeArguments="x:String" Name="ErroImagem" />
@@ -50,7 +51,7 @@
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;habilitada = cfg[&quot;gerar_imagem&quot;] != null &amp;&amp; cfg[&quot;gerar_imagem&quot;].ToObject&lt;bool&gt;();&#xA;modelo = cfg[&quot;imagem_modelo&quot;] == null ? &quot;dall-e-3&quot; : cfg[&quot;imagem_modelo&quot;].ToString();&#xA;tamanho = cfg[&quot;imagem_tamanho&quot;] == null ? &quot;1024x1024&quot; : cfg[&quot;imagem_tamanho&quot;].ToString();&#xA;var mediaJaInformada = inData != null &amp;&amp; JObject.FromObject(inData)[&quot;MediaUrl&quot;] != null &amp;&amp; !string.IsNullOrWhiteSpace(JObject.FromObject(inData)[&quot;MediaUrl&quot;].ToString());&#xA;prompt = conteudo == null || conteudo[&quot;MediaPrompt&quot;] == null ? &quot;&quot; : conteudo[&quot;MediaPrompt&quot;].ToString();&#xA;if (mediaJaInformada || string.IsNullOrWhiteSpace(prompt)) habilitada = false;" DisplayName="Config + decide se gera imagem" sap2010:WorkflowViewState.IdRef="InvokeCode_cfg">
+    <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;habilitada = cfg[&quot;gerar_imagem&quot;] != null &amp;&amp; cfg[&quot;gerar_imagem&quot;].ToObject&lt;bool&gt;();&#xA;modelo = cfg[&quot;imagem_modelo&quot;] == null ? &quot;gpt-image-1&quot; : cfg[&quot;imagem_modelo&quot;].ToString();&#xA;tamanho = cfg[&quot;imagem_tamanho&quot;] == null ? &quot;1024x1024&quot; : cfg[&quot;imagem_tamanho&quot;].ToString();&#xA;qualidade = cfg[&quot;imagem_qualidade&quot;] == null ? &quot;high&quot; : cfg[&quot;imagem_qualidade&quot;].ToString();&#xA;var mediaJaInformada = inData != null &amp;&amp; JObject.FromObject(inData)[&quot;MediaUrl&quot;] != null &amp;&amp; !string.IsNullOrWhiteSpace(JObject.FromObject(inData)[&quot;MediaUrl&quot;].ToString());&#xA;prompt = conteudo == null || conteudo[&quot;MediaPrompt&quot;] == null ? &quot;&quot; : conteudo[&quot;MediaPrompt&quot;].ToString();&#xA;if (mediaJaInformada || string.IsNullOrWhiteSpace(prompt)) habilitada = false;" DisplayName="Config + decide se gera imagem" sap2010:WorkflowViewState.IdRef="InvokeCode_cfg">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="x:Object" x:Key="inData">
@@ -74,6 +75,9 @@
           <OutArgument x:TypeArguments="x:String" x:Key="prompt">
             <CSharpReference x:TypeArguments="x:String">MediaPrompt</CSharpReference>
           </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="qualidade">
+            <CSharpReference x:TypeArguments="x:String">Qualidade</CSharpReference>
+          </OutArgument>
         </scg:Dictionary>
       </ui:InvokeCode.Arguments>
     </ui:InvokeCode>
@@ -95,7 +99,7 @@
               </OutArgument>
             </ui:GetRobotCredential.Password>
           </ui:GetRobotCredential>
-          <ui:InvokeCode Language="CSharp" Code="erro = null;&#xA;try&#xA;{&#xA;    nomeArquivo = &quot;img-&quot; + DateTime.UtcNow.Ticks + &quot;.png&quot;;&#xA;    var bytes = clarituz_agente_social_midia.ImagemService.GerarImagemAsync(apiKey, prompt, modelo, tamanho).GetAwaiter().GetResult();&#xA;    caminho = Path.Combine(Path.GetTempPath(), nomeArquivo);&#xA;    File.WriteAllBytes(caminho, bytes);&#xA;}&#xA;catch (Exception ex) { erro = ex.Message; }" DisplayName="OpenAI Images → arquivo temp" sap2010:WorkflowViewState.IdRef="InvokeCode_gen">
+          <ui:InvokeCode Language="CSharp" Code="erro = null;&#xA;try&#xA;{&#xA;    nomeArquivo = &quot;img-&quot; + DateTime.UtcNow.Ticks + &quot;.png&quot;;&#xA;    var bytes = clarituz_agente_social_midia.ImagemService.GerarImagemAsync(apiKey, prompt, modelo, tamanho, qualidade).GetAwaiter().GetResult();&#xA;    caminho = Path.Combine(Path.GetTempPath(), nomeArquivo);&#xA;    File.WriteAllBytes(caminho, bytes);&#xA;}&#xA;catch (Exception ex) { erro = ex.Message; }" DisplayName="OpenAI Images → arquivo temp" sap2010:WorkflowViewState.IdRef="InvokeCode_gen">
             <ui:InvokeCode.Arguments>
               <scg:Dictionary x:TypeArguments="x:String, Argument">
                 <InArgument x:TypeArguments="sec:SecureString" x:Key="apiKey">
@@ -109,6 +113,9 @@
                 </InArgument>
                 <InArgument x:TypeArguments="x:String" x:Key="tamanho">
                   <CSharpValue x:TypeArguments="x:String">Tamanho</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="qualidade">
+                  <CSharpValue x:TypeArguments="x:String">Qualidade</CSharpValue>
                 </InArgument>
                 <OutArgument x:TypeArguments="x:String" x:Key="nomeArquivo">
                   <CSharpReference x:TypeArguments="x:String">NomeArquivo</CSharpReference>

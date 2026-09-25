@@ -15,26 +15,40 @@ namespace clarituz_agente_social_midia
         private const string EndpointGeracao = "https://api.openai.com/v1/images/generations";
 
         // Gera uma imagem e retorna os bytes PNG.
-        // modelos suportados: dall-e-3, dall-e-2, gpt-image-1 (b64_json no retorno).
+        // modelos suportados: gpt-image-1 (default, alta qualidade), dall-e-3, dall-e-2.
         public static async Task<byte[]> GerarImagemAsync(
             System.Security.SecureString apiKey,
             string prompt,
             string modelo,
-            string tamanho)
+            string tamanho,
+            string qualidade)
         {
             if (string.IsNullOrWhiteSpace(prompt))
                 throw new ArgumentException("mediaPrompt vazio — nada a gerar");
 
+            var model = string.IsNullOrWhiteSpace(modelo) ? "gpt-image-1" : modelo;
             var corpo = new JObject
             {
-                ["model"] = string.IsNullOrWhiteSpace(modelo) ? "dall-e-3" : modelo,
+                ["model"] = model,
                 ["prompt"] = prompt,
                 ["n"] = 1,
                 ["size"] = string.IsNullOrWhiteSpace(tamanho) ? "1024x1024" : tamanho
             };
-            // dall-e retorna URL por padrão; pedir b64 para uniformizar. gpt-image-1 já devolve b64.
-            if (corpo["model"].ToString().StartsWith("dall-e"))
+
+            if (model.StartsWith("dall-e"))
+            {
+                // dall-e retorna URL por padrão; pedir b64 para uniformizar. gpt-image-1 já devolve b64.
                 corpo["response_format"] = "b64_json";
+                // dall-e-3 aceita quality "standard"|"hd"
+                if (model == "dall-e-3")
+                    corpo["quality"] = qualidade == "standard" ? "standard" : "hd";
+            }
+            else if (model.StartsWith("gpt-image"))
+            {
+                // gpt-image aceita quality "low"|"medium"|"high"|"auto"
+                corpo["quality"] = qualidade == "low" || qualidade == "medium" || qualidade == "auto"
+                    ? qualidade : "high";
+            }
 
             using (var http = new HttpClient { Timeout = TimeSpan.FromSeconds(120) })
             {

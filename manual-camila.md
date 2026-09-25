@@ -1,6 +1,6 @@
 # Manual Completo — Camila, Agente de Social Mídia
 
-**Versão:** 1.0.5 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa (texto + imagem)
+**Versão:** 1.0.6 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa (texto + imagem)
 
 ---
 
@@ -141,13 +141,15 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 3. No asset `SM_Config`, ligue a feature:
    ```json
    "gerar_imagem": true,
-   "imagem_modelo": "dall-e-3",
-   "imagem_tamanho": "1024x1024"
+   "imagem_modelo": "gpt-image-1",
+   "imagem_tamanho": "1024x1024",
+   "imagem_qualidade": "high"
    ```
 
 **Detalhes:**
 
-- **Modelos suportados:** `dall-e-3` (padrão, ~US$0.04/imagem), `dall-e-2` (mais barato), `gpt-image-1` (melhor qualidade, mais caro). Troque em `imagem_modelo`.
+- **Modelos suportados:** `gpt-image-1` (padrão — melhor qualidade da OpenAI), `dall-e-3` (~US$0.04/imagem), `dall-e-2` (mais barato). Troque em `imagem_modelo`.
+- **Qualidade:** `imagem_qualidade` controla o parâmetro `quality` da API — `gpt-image-1` usa `high` (padrão)/`medium`/`low`; `dall-e-3` mapeia para `hd`/`standard`.
 - **Tamanhos:** `1024x1024` (feed quadrado), `1792x1024` (horizontal), `1024x1792` (stories/reels).
 - **Quando NÃO gera:** se o item já trouxer uma `MediaUrl` (mídia fornecida manualmente tem prioridade) ou se `gerar_imagem=false`.
 - **Se falhar** (sem key, sem crédito, timeout): o post segue o fluxo normal e o operador anexa a mídia manualmente na aprovação — o `mediaPrompt` continua visível como briefing.
@@ -165,8 +167,9 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 | `dias_calendario` | `SM_Config` | Horizonte do calendário editorial (padrão 7 dias) |
 | `llm_model` | `SM_Config` | Modelo de IA usado para texto (padrão gpt-4o) |
 | `gerar_imagem` | `SM_Config` | Liga/desliga geração automática de arte (padrão `false`) |
-| `imagem_modelo` | `SM_Config` | Modelo OpenAI de imagem: `dall-e-3` (padrão), `dall-e-2`, `gpt-image-1` |
+| `imagem_modelo` | `SM_Config` | Modelo OpenAI de imagem: `gpt-image-1` (padrão, alta qualidade), `dall-e-3`, `dall-e-2` |
 | `imagem_tamanho` | `SM_Config` | Resolução: `1024x1024` (feed), `1792x1024`, `1024x1792` (stories) |
+| `imagem_qualidade` | `SM_Config` | `high` (padrão)/`medium`/`low` no gpt-image-1; `hd`/`standard` no dall-e-3 |
 | Nicho / tom de voz | Argumento do processo | Define o contexto da campanha; pode variar por execução |
 
 ---
@@ -183,7 +186,7 @@ A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing 
 
 ## 7. Qualidade comprovada
 
-Suíte de testes automatizados executada na versão 1.0.5: **30/30 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
+Suíte de testes automatizados executada na versão 1.0.6: **30/30 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
 
 ---
 
