@@ -13,6 +13,69 @@ namespace clarituz_agente_social_midia
     {
         private const string HostPermitido = "api.openai.com";
         private const string EndpointGeracao = "https://api.openai.com/v1/images/generations";
+        private const string EndpointChat = "https://api.openai.com/v1/chat/completions";
+        private const string ModeloVisao = "gpt-4o-mini";
+
+        // QA visual: um modelo com visão avalia a arte gerada contra o briefing.
+        // Retorna { "aprovada": bool, "motivo": "..." }.
+        public static async Task<JObject> AvaliarImagemAsync(
+            System.Security.SecureString apiKey,
+            byte[] imagemBytes,
+            string briefing,
+            string termosProibidos)
+        {
+            var regras =
+                "Avalie se a imagem gerada serve para um post de social media. " +
+                "Reprove se: não corresponder ao briefing, tiver texto ilegivel ou embaralhado, " +
+                "artefatos visuais quebrados (rostos/maos deformados), marca d'agua, logo de marca famosa, " +
+                "ou conteudo que viole estes termos proibidos: " + (termosProibidos ?? "nenhum") + ". " +
+                "Briefing: " + briefing + ". " +
+                "Responda APENAS JSON: {\"aprovada\": true|false, \"motivo\": \"frase curta\"}";
+
+            var corpo = new JObject
+            {
+                ["model"] = ModeloVisao,
+                ["response_format"] = new JObject { ["type"] = "json_object" },
+                ["messages"] = new JArray
+                {
+                    new JObject
+                    {
+                        ["role"] = "user",
+                        ["content"] = new JArray
+                        {
+                            new JObject { ["type"] = "text", ["text"] = regras },
+                            new JObject
+                            {
+                                ["type"] = "image_url",
+                                ["image_url"] = new JObject
+                                {
+                                    ["url"] = "data:image/png;base64," + Convert.ToBase64String(imagemBytes)
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            using (var http = new HttpClient { Timeout = TimeSpan.FromSeconds(120) })
+            {
+                http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", SecureParaTexto(apiKey));
+                using (var req = new HttpRequestMessage(HttpMethod.Post, new Uri(EndpointChat)))
+                {
+                    req.Content = new StringContent(
+                        corpo.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
+                    var resp = await http.SendAsync(req).ConfigureAwait(false);
+                    var body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    if (!resp.IsSuccessStatusCode)
+                        throw new SocialApiException((int)resp.StatusCode,
+                            $"OpenAI visao falhou: {(int)resp.StatusCode} — {body?.Substring(0, Math.Min(body?.Length ?? 0, 300))}");
+
+                    var texto = JObject.Parse(body)?["choices"]?[0]?["message"]?["content"]?.ToString();
+                    return JObject.Parse(texto);
+                }
+            }
+        }
 
         // Gera uma imagem e retorna os bytes PNG.
         // modelos suportados: gpt-image-1 (default, alta qualidade), dall-e-3, dall-e-2.

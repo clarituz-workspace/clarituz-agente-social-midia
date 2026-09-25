@@ -1,7 +1,7 @@
 # Camila — Relatório de Testes de QA
 
 **Projeto:** clarituz-agente-social-midia
-**Versão testada:** 1.0.6 (publicada e ativa no Orchestrator, pasta Shared)
+**Versão testada:** 1.0.7 (publicada e ativa no Orchestrator, pasta Shared)
 **Data da execução:** 2026-02-10
 **Ferramenta:** UiPath `uip rpa run` / `uip rpa validate` / `uip rpa build`
 **Resultado geral:** ✅ **APROVADO — 6/6 testes, 0 erros de validação**
@@ -135,4 +135,4 @@ Os 100% medem a camada **determinística e testável** do projeto: validação d
 
 ## Conclusão
 
-A suíte de QA confirma que a Camila está funcionalmente íntegra na versão 1.0.6: geração de calendário editorial, curadoria de conteúdo, validação de compliance, aprovação humana obrigatória, moderação com priorização por sentimento, coleta de métricas e a garantia de **zero escrita** nas plataformas — todos verificados e passando.
+A suíte de QA confirma que a Camila está funcionalmente íntegra na versão 1.0.7: geração de calendário editorial, curadoria de conteúdo, validação de compliance, aprovação humana obrigatória, moderação com priorização por sentimento, coleta de métricas e a garantia de **zero escrita** nas plataformas — todos verificados e passando.
