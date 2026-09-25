@@ -72,6 +72,19 @@ Humano ─ Abre o Action Center → revisa → aprova/edita/rejeita → publica 
 06h00 ─ Relatório diário consolidado: o que foi gerado, aprovado, publicado e os resultados
 ```
 
+## Como o cliente acessa e opera
+
+A operação diária acontece em **um único lugar: o Action Center** do UiPath Automation Cloud (`cloud.uipath.com` → organização → Action Center → Actions). O acesso funciona de **qualquer navegador, inclusive no celular** — basta abrir o site, fazer login e salvar o atalho na tela inicial (Chrome/Safari → "Adicionar à tela inicial"). O tenant também pode notificar por e-mail quando chegam tarefas novas.
+
+**O que aparece para o operador:**
+
+| Tarefa | Quando chega | O que fazer |
+|---|---|---|
+| **Aprovar post** | Após cada conteúdo gerado | Revisar legenda, hashtags e mídia → editar se quiser → aprovar → publicar no Instagram/Facebook → colar a URL do post na tarefa |
+| **Moderar comentário** | A cada comentário novo (30min) | Ler comentário + resposta sugerida → responder na rede social (ou ocultar se spam) → concluir a tarefa |
+
+Comentários **Negativos/Crise** chegam com prioridade alta. Nenhuma ação técnica é exigida — os agendadores disparam sozinhos; o operador só revisa, decide e executa na rede social. Relatórios diários ficam arquivados em nuvem (bucket `SM_Metricas`) para consulta.
+
 ## Limites configuráveis
 
 - **Horizonte do calendário editorial** (padrão: 7 dias) — ajustável por configuração
