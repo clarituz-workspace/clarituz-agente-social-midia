@@ -1,0 +1,186 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="Tests.T_URL_Resolvers" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uta="clr-namespace:UiPath.Testing.Activities;assembly=UiPath.Testing.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+      <x:String>UiPath.Testing.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Testing.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="T-URL — resolvers de post_id (BR-14) + B9" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="ShortcodeP" />
+      <Variable x:TypeArguments="x:String" Name="ShortcodeReel" />
+      <Variable x:TypeArguments="x:String" Name="ShortcodeInvalido" />
+      <Variable x:TypeArguments="x:String" Name="FbId" />
+      <Variable x:TypeArguments="x:String" Name="FbIdPfbid" />
+      <Variable x:TypeArguments="x:String" Name="LiUrn" />
+      <Variable x:TypeArguments="x:Boolean" Name="FbThrow" />
+      <Variable x:TypeArguments="x:Boolean" Name="LiThrow" />
+      <Variable x:TypeArguments="x:Boolean" Name="IgNull" />
+    </Sequence.Variables>
+    <Sequence DisplayName="Resolvers — Given">
+      <ui:LogMessage DisplayName="Given: URLs de posts por plataforma" Level="Info" sap2010:WorkflowViewState.IdRef="LogMessage_given">
+        <ui:LogMessage.Message>
+          <InArgument x:TypeArguments="x:Object">
+            <CSharpValue x:TypeArguments="x:Object">"T-URL: parse de post_id a partir da URL colada pelo humano (BR-14/B9) — sem rede"</CSharpValue>
+          </InArgument>
+        </ui:LogMessage.Message>
+      </ui:LogMessage>
+    </Sequence>
+    <Sequence DisplayName="Resolvers — When">
+      <ui:InvokeCode Language="CSharp" Code="shortP = clarituz_agente_social_midia.SocialApiClient.ExtrairShortcodeInstagram(&quot;https://www.instagram.com/p/Cx9AbC_12/?img_index=1&quot;);&#xA;shortReel = clarituz_agente_social_midia.SocialApiClient.ExtrairShortcodeInstagram(&quot;https://www.instagram.com/reel/DfGhi_J34/&quot;);&#xA;shortInv = clarituz_agente_social_midia.SocialApiClient.ExtrairShortcodeInstagram(&quot;https://www.instagram.com/usuario/perfil&quot;);&#xA;igNull = shortInv == null;&#xA;&#xA;using (var api = new clarituz_agente_social_midia.SocialApiClient(&quot;fake&quot;, &quot;fake&quot;))&#xA;{&#xA;    fbId = api.ResolverPostIdFacebook(&quot;https://www.facebook.com/minhapagina/posts/123456789&quot;);&#xA;    fbPfbid = api.ResolverPostIdFacebook(&quot;https://www.facebook.com/minhapagina/posts/pfbid0abcDEF123&quot;);&#xA;    liUrn = api.ResolverUrnLinkedIn(&quot;https://www.linkedin.com/feed/update/urn:li:activity:7123456789/&quot;);&#xA;    try { api.ResolverPostIdFacebook(&quot;https://www.facebook.com/minhapagina&quot;); fbThrow = false; }&#xA;    catch (clarituz_agente_social_midia.SocialApiException) { fbThrow = true; }&#xA;    try { api.ResolverUrnLinkedIn(&quot;https://www.linkedin.com/company/minha&quot;); liThrow = false; }&#xA;    catch (clarituz_agente_social_midia.SocialApiException) { liThrow = true; }&#xA;}" DisplayName="Resolver post_ids (sem rede)" sap2010:WorkflowViewState.IdRef="InvokeCode_run">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <OutArgument x:TypeArguments="x:String" x:Key="shortP">
+              <CSharpReference x:TypeArguments="x:String">ShortcodeP</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="shortReel">
+              <CSharpReference x:TypeArguments="x:String">ShortcodeReel</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="shortInv">
+              <CSharpReference x:TypeArguments="x:String">ShortcodeInvalido</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Boolean" x:Key="igNull">
+              <CSharpReference x:TypeArguments="x:Boolean">IgNull</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="fbId">
+              <CSharpReference x:TypeArguments="x:String">FbId</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="fbPfbid">
+              <CSharpReference x:TypeArguments="x:String">FbIdPfbid</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="liUrn">
+              <CSharpReference x:TypeArguments="x:String">LiUrn</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Boolean" x:Key="fbThrow">
+              <CSharpReference x:TypeArguments="x:Boolean">FbThrow</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Boolean" x:Key="liThrow">
+              <CSharpReference x:TypeArguments="x:Boolean">LiThrow</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+    </Sequence>
+    <Sequence DisplayName="Resolvers — Then">
+      <uta:VerifyExpression DisplayName="IG /p/ → shortcode" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_igp">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">ShortcodeP == "Cx9AbC_12"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"URL /p/ deveria extrair shortcode Cx9AbC_12"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="IG /reel/ → shortcode" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_igreel">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">ShortcodeReel == "DfGhi_J34"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"URL /reel/ deveria extrair shortcode"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="IG sem shortcode → null (B9 path)" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_ignull">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">IgNull</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"URL IG sem /p|reel/ deveria retornar null"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="FB posts/ → id" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_fbid">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">FbId == "123456789"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"URL posts/NNN deveria extrair id"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="FB pfbid → id" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_fbpfbid">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">FbIdPfbid == "pfbid0abcDEF123"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"URL pfbid deveria extrair identificador"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="LI activity → urn" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_liurn">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">LiUrn == "urn:li:activity:7123456789"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"URL activity deveria virar urn:li:activity:NNN"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="B9: FB inválida lança" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_fbthrow">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">FbThrow</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"URL FB sem id deveria lançar SocialApiException"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="B9: LI inválida lança" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_lithrow">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">LiThrow</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"URL LI sem urn deveria lançar SocialApiException"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+    </Sequence>
+  </Sequence>
+</Activity>

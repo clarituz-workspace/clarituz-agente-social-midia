@@ -95,6 +95,10 @@ namespace clarituz_agente_social_midia
         public async Task<JToken> ObterEstatisticasLinkedInAsync(string organizationalEntityUrn)
             => await GetLinkedInAsync($"/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity={Uri.EscapeDataString(organizationalEntityUrn)}");
 
+        // Stats de um post específico (share/ugcPost URN) dentro da org — Coletar_Metricas.
+        public async Task<JToken> ObterEstatisticasPostLinkedInAsync(string organizationalEntityUrn, string shareUrn)
+            => await GetLinkedInAsync($"/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity={Uri.EscapeDataString(organizationalEntityUrn)}&shares=List({Uri.EscapeDataString(shareUrn)})");
+
         // ── Resolução de post_id a partir da URL colada pelo humano (B9) ──
 
         // Instagram: extrai o shortcode de /p/ ou /reel/ e casa com o permalink no feed do ig_user.

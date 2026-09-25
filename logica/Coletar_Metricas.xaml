@@ -1,0 +1,198 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Coletar_Metricas" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_Metricas" Type="OutArgument(nsjl:JObject)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="ColetarMetricas — insights read-only → normalizar → SM_Metricas" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="PostId" />
+      <Variable x:TypeArguments="x:String" Name="Plataforma" />
+      <Variable x:TypeArguments="x:String" Name="PostUrl" />
+      <Variable x:TypeArguments="x:String" Name="LinhaJsonl" />
+      <Variable x:TypeArguments="x:String" Name="NomeArquivo" />
+      <Variable x:TypeArguments="x:String" Name="JsonlAtual" />
+      <Variable x:TypeArguments="x:String" Name="JsonlNovo" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode Language="CSharp" Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;postId = data[&quot;PostId&quot;] == null ? &quot;&quot; : data[&quot;PostId&quot;].ToString();&#xA;plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString();&#xA;postUrl = data[&quot;PostUrl&quot;] == null ? &quot;&quot; : data[&quot;PostUrl&quot;].ToString();&#xA;if (string.IsNullOrWhiteSpace(postId)) throw new UiPath.Core.BusinessRuleException(&quot;BR-14: item ColetarMetricas sem PostId — descartando&quot;);&#xA;nomeArquivo = clarituz_agente_social_midia.MetricasService.NomeArquivoDiario();" DisplayName="Extrair PostId/Plataforma" sap2010:WorkflowViewState.IdRef="InvokeCode_extract">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:Object" x:Key="inData">
+            <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="postId">
+            <CSharpReference x:TypeArguments="x:String">PostId</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="plataforma">
+            <CSharpReference x:TypeArguments="x:String">Plataforma</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="postUrl">
+            <CSharpReference x:TypeArguments="x:String">PostUrl</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="nomeArquivo">
+            <CSharpReference x:TypeArguments="x:String">NomeArquivo</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <Sequence DisplayName="Coletar insights (credenciais no escopo)" sap2010:WorkflowViewState.IdRef="Sequence_insights">
+      <Sequence.Variables>
+        <Variable x:TypeArguments="sec:SecureString" Name="MetaSecure" />
+        <Variable x:TypeArguments="sec:SecureString" Name="LinkedInSecure" />
+      </Sequence.Variables>
+      <ui:GetRobotCredential AssetName="Meta_SystemUserToken" CacheStrategy="None" DisplayName="Credencial Meta" sap2010:WorkflowViewState.IdRef="GetRobotCredential_meta">
+        <ui:GetRobotCredential.Password>
+          <OutArgument x:TypeArguments="sec:SecureString">
+            <CSharpReference x:TypeArguments="sec:SecureString">MetaSecure</CSharpReference>
+          </OutArgument>
+        </ui:GetRobotCredential.Password>
+      </ui:GetRobotCredential>
+      <ui:GetRobotCredential AssetName="LinkedIn_AccessToken" CacheStrategy="None" DisplayName="Credencial LinkedIn" sap2010:WorkflowViewState.IdRef="GetRobotCredential_li">
+        <ui:GetRobotCredential.Password>
+          <OutArgument x:TypeArguments="sec:SecureString">
+            <CSharpReference x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpReference>
+          </OutArgument>
+        </ui:GetRobotCredential.Password>
+      </ui:GetRobotCredential>
+      <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;JToken dados = null;&#xA;using (var api = new clarituz_agente_social_midia.SocialApiClient(metaSecure, linkedInSecure))&#xA;{&#xA;    if (plataforma == &quot;Instagram&quot;)&#xA;    {&#xA;        dados = api.ObterInsightsInstagramAsync(postId).GetAwaiter().GetResult();&#xA;    }&#xA;    else if (plataforma == &quot;Facebook&quot;)&#xA;    {&#xA;        dados = api.ObterInsightsFacebookAsync(postId).GetAwaiter().GetResult();&#xA;    }&#xA;    else if (plataforma == &quot;LinkedIn&quot;)&#xA;    {&#xA;        var orgUrn = cfg[&quot;linkedin_org_urn&quot;] != null ? cfg[&quot;linkedin_org_urn&quot;].ToString() : null;&#xA;        if (string.IsNullOrEmpty(orgUrn)) throw new clarituz_agente_social_midia.SocialApiException(0, &quot;linkedin_org_urn não configurado em SM_Config&quot;);&#xA;        dados = api.ObterEstatisticasPostLinkedInAsync(orgUrn, postId).GetAwaiter().GetResult();&#xA;    }&#xA;    else&#xA;    {&#xA;        throw new UiPath.Core.BusinessRuleException(&quot;BR-14: plataforma desconhecida para métricas: &quot; + plataforma);&#xA;    }&#xA;}&#xA;var metricas = clarituz_agente_social_midia.MetricasService.Normalizar(plataforma, postId, dados);&#xA;metricasJson = JObject.FromObject(metricas);&#xA;linha = clarituz_agente_social_midia.MetricasService.Serializar(metricas);" DisplayName="GET insights → MetricasPost (read-only)" sap2010:WorkflowViewState.IdRef="InvokeCode_insights">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <InArgument x:TypeArguments="sec:SecureString" x:Key="metaSecure">
+              <CSharpValue x:TypeArguments="sec:SecureString">MetaSecure</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="sec:SecureString" x:Key="linkedInSecure">
+              <CSharpValue x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+              <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="x:String" x:Key="postId">
+              <CSharpValue x:TypeArguments="x:String">PostId</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="x:String" x:Key="plataforma">
+              <CSharpValue x:TypeArguments="x:String">Plataforma</CSharpValue>
+            </InArgument>
+            <OutArgument x:TypeArguments="nsjl:JObject" x:Key="metricasJson">
+              <CSharpReference x:TypeArguments="nsjl:JObject">out_Metricas</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="linha">
+              <CSharpReference x:TypeArguments="x:String">LinhaJsonl</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+    </Sequence>
+    <TryCatch DisplayName="Ler arquivo diário" sap2010:WorkflowViewState.IdRef="TryCatch_read">
+      <TryCatch.Try>
+        <Sequence DisplayName="Read bucket" sap2010:WorkflowViewState.IdRef="Sequence_read">
+          <uist:ReadStorageText DisplayName="SM_Metricas arquivo diário" sap2010:WorkflowViewState.IdRef="ReadStorageText_1" StorageBucketName="SM_Metricas">
+            <uist:ReadStorageText.Path>
+              <InArgument x:TypeArguments="x:String">
+                <CSharpValue x:TypeArguments="x:String">NomeArquivo</CSharpValue>
+              </InArgument>
+            </uist:ReadStorageText.Path>
+            <uist:ReadStorageText.Result>
+              <OutArgument x:TypeArguments="x:String">
+                <CSharpReference x:TypeArguments="x:String">JsonlAtual</CSharpReference>
+              </OutArgument>
+            </uist:ReadStorageText.Result>
+          </uist:ReadStorageText>
+        </Sequence>
+      </TryCatch.Try>
+      <TryCatch.Catches>
+        <Catch x:TypeArguments="s:Exception">
+          <ActivityAction x:TypeArguments="s:Exception">
+            <ActivityAction.Argument>
+              <DelegateInArgument x:TypeArguments="s:Exception" Name="readEx" />
+            </ActivityAction.Argument>
+            <Sequence DisplayName="Primeiro registro do dia" sap2010:WorkflowViewState.IdRef="Sequence_catch_read">
+              <Assign DisplayName="Jsonl vazio" sap2010:WorkflowViewState.IdRef="Assign_empty">
+                <Assign.To>
+                  <OutArgument x:TypeArguments="x:String">
+                    <CSharpReference x:TypeArguments="x:String">JsonlAtual</CSharpReference>
+                  </OutArgument>
+                </Assign.To>
+                <Assign.Value>
+                  <InArgument x:TypeArguments="x:String">
+                    <CSharpValue x:TypeArguments="x:String">""</CSharpValue>
+                  </InArgument>
+                </Assign.Value>
+              </Assign>
+            </Sequence>
+          </ActivityAction>
+        </Catch>
+      </TryCatch.Catches>
+    </TryCatch>
+    <ui:InvokeCode Language="CSharp" Code="var sb = new System.Text.StringBuilder();&#xA;foreach (var l in (jsonl ?? &quot;&quot;).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))&#xA;{&#xA;    var t = l.Trim();&#xA;    if (t.Length == 0) continue;&#xA;    try&#xA;    {&#xA;        var o = JObject.Parse(t);&#xA;        if (o[&quot;PostId&quot;] != null &amp;&amp; o[&quot;PostId&quot;].ToString() == postId) continue;&#xA;    }&#xA;    catch { }&#xA;    sb.AppendLine(t);&#xA;}&#xA;sb.AppendLine(linha);&#xA;jsonlNovo = sb.ToString();" DisplayName="Upsert por postId (BR-13)" sap2010:WorkflowViewState.IdRef="InvokeCode_upsert">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="jsonl">
+            <CSharpValue x:TypeArguments="x:String">JsonlAtual</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="linha">
+            <CSharpValue x:TypeArguments="x:String">LinhaJsonl</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="postId">
+            <CSharpValue x:TypeArguments="x:String">PostId</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="jsonlNovo">
+            <CSharpReference x:TypeArguments="x:String">JsonlNovo</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <uist:WriteStorageText DisplayName="Gravar arquivo diário" sap2010:WorkflowViewState.IdRef="WriteStorageText_1" StorageBucketName="SM_Metricas">
+      <uist:WriteStorageText.Path>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">NomeArquivo</CSharpValue>
+        </InArgument>
+      </uist:WriteStorageText.Path>
+      <uist:WriteStorageText.Text>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">JsonlNovo</CSharpValue>
+        </InArgument>
+      </uist:WriteStorageText.Text>
+    </uist:WriteStorageText>
+    <ui:LogMessage DisplayName="Métricas persistidas" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"ColetarMetricas " + PostId + " (" + Plataforma + "): alcance=" + (out_Metricas["Alcance"] == null ? 0 : out_Metricas["Alcance"]) + " curtidas=" + (out_Metricas["Curtidas"] == null ? 0 : out_Metricas["Curtidas"]) + " → " + NomeArquivo</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

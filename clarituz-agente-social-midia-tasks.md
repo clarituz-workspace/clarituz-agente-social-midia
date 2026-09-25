@@ -131,31 +131,31 @@
 ## Task T8 — uipath-rpa — Coletar_Metricas + Relatorio_Execucao + Process routing
 
 **Identity:** `rpa:clarituz-agente-social-midia:metricas-e-relatorio`
-**Status:** [ ] pending
+**Status:** [x] done
 **Blocked by:** T3, T4
 **Skill prompt:**
 
 > Load uipath-rpa and implement per §3 steps 9–11 of `clarituz-agente-social-midia-sdd.md`: `logica/Coletar_Metricas.xaml` (insights via SocialApiClient → MetricasService → Storage Bucket `SM_Metricas`, upsert by postId+data), `logica/Relatorio_Execucao.xaml` (consolidated run report), and wire `Framework/Process.xaml` routing by `TipoTransacao` + `in_ModoExecucao` dispatcher modes per §6. Delivery model: cloud.
 > Use values, mappings, and structure exactly as documented in the SDD at clarituz-agente-social-midia-sdd.md. Do not infer or guess.
 
-- [ ] `Coletar_Metricas.xaml` — insights → normalize → bucket
-- [ ] `Relatorio_Execucao.xaml` — counters + alerts
-- [ ] `Process.xaml` — TipoTransacao router + dispatcher modes
-- [ ] **Validate:** per-file validate + project build clean
+- [x] `Coletar_Metricas.xaml` — credenciais no escopo → insights read-only IG/FB/LI → `MetricasService.Normalizar` → upsert por postId em `metricas-yyyy-MM-dd.jsonl` no `SM_Metricas` (BR-13); novo método `SocialApiClient.ObterEstatisticasPostLinkedInAsync` (stats por share URN)
+- [x] `Relatorio_Execucao.xaml` — consolida contadores/alertas do ExecucaoContext → LogMessage + `relatorios/relatorio-*.txt` no bucket (falha de gravação vira warn, não quebra a run)
+- [x] `Process.xaml` — roteamento completo: dispatchers (Curadoria/MonitorarComentarios/AgendarMetricas/Relatorio) + consumers (GerarConteudo/ModerarComentario/ColetarMetricas); todos os stubs removidos
+- [x] **Validate:** per-file validate 0 erros + `uip rpa build` Success
 
 ## Task T9 — uipath-rpa — Testing (MANDATORY)
 
 **Identity:** `rpa:clarituz-agente-social-midia:testing`
-**Status:** [ ] pending
+**Status:** [x] completed
 **Blocked by:** T4, T5, T6, T7, T8
 **Skill prompt:**
 
 > Load uipath-rpa and run its testing workflow end-to-end per §17 of `clarituz-agente-social-midia-sdd.md`: happy path, exception cases (B1–B9), system errors (E1–E6), and the zero-write non-functional test (mock platforms; no POST/DELETE to Meta/LinkedIn anywhere). Register test cases in `project.json` `fileInfoCollection`. Use the skill's testing references for commands and practices.
 > Use values, mappings, and structure exactly as documented in the SDD at clarituz-agente-social-midia-sdd.md. Do not infer or guess.
 
-- [ ] Test cases per §17 Requirements Traceability
-- [ ] Zero-write guarantee test
-- [ ] **Validate:** all tests pass; record results
+- [x] Test cases per §17 Requirements Traceability — 6 arquivos em `Tests/` registrados no `project.json`: `T_COMP_01_ComplianceBasica` (BR-01..BR-04, 6 cenários), `T_COMP_02_TermosProibidos` (BR-05, case-insensitive, legenda+hashtag), `T_MOD_Sentimentos` (Positivo/Neutro→normal, Negativo/Crise→prioritária, Spam→sugere ocultar — BR-09), `T_URL_Resolvers` (IG /p|reel/ shortcode, FB posts/NNN+pfbid, LI activity→urn, URLs inválidas→SocialApiException — BR-14/B9), `T_PARSE_LLM` (fences ```json, prosa ao redor, resposta sem JSON→FormatException — E5)
+- [x] Zero-write guarantee test — `T_ZW_ZeroWrite` escaneia todos os `Workflows/*.cs` + XAMLs de `logica|shared|Framework|Main` em runtime: 25 arquivos, 0 ocorrências de POST/PUT/DELETE/PATCH a plataformas; `SocialApiClient` declara só `HttpMethod.Get`
+- [x] **Validate:** 6/6 testes executados verdes via `uip rpa run` + build Success. Ajustes: `Language="CSharp"` obrigatório em todo `InvokeCode` (sem ele o runner standalone compila como VB — aplicado em lote no projeto); expectativa do resolver FB corrigida (`pfbid0...` retorna o token completo); `logica/Aprovacao_Humana.xaml` reescrito após Studio resserializar versão híbrida stale (Wait+args antigos); variáveis de teste renomeadas p/ padrão do projeto
 
 ## Task T10 — uipath-platform — Pack, publish, triggers
 

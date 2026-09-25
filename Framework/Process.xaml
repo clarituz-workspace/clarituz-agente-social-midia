@@ -55,6 +55,13 @@
       </If.Condition>
       <If.Then>
         <Sequence DisplayName="Dispatchers (execução única)" sap2010:WorkflowViewState.IdRef="Sequence_dispatchers">
+          <ui:LogMessage DisplayName="Roteando dispatcher" sap2010:WorkflowViewState.IdRef="LogMessage_route" Level="Info">
+            <ui:LogMessage.Message>
+              <InArgument x:TypeArguments="x:Object">
+                <CSharpValue x:TypeArguments="x:Object">"Modo dispatcher: " + in_ModoExecucao</CSharpValue>
+              </InArgument>
+            </ui:LogMessage.Message>
+          </ui:LogMessage>
           <Switch x:TypeArguments="x:String" DisplayName="Switch modo" sap2010:WorkflowViewState.IdRef="Switch_modo">
             <Switch.Expression>
               <InArgument x:TypeArguments="x:String">
@@ -115,13 +122,15 @@
               </ui:InvokeWorkflowFile>
             </Sequence>
             <Sequence x:Key="Relatorio" DisplayName="Relatório de execução" sap2010:WorkflowViewState.IdRef="Sequence_relatorio">
-              <ui:LogMessage DisplayName="Relatorio pendente (T8)" sap2010:WorkflowViewState.IdRef="LogMessage_rel" Level="Warn">
-                <ui:LogMessage.Message>
-                  <InArgument x:TypeArguments="x:Object">
-                    <CSharpValue x:TypeArguments="x:Object">"Modo Relatorio: Relatorio_Execucao.xaml implementado na T8"</CSharpValue>
-                  </InArgument>
-                </ui:LogMessage.Message>
-              </ui:LogMessage>
+              <ui:InvokeWorkflowFile DisplayName="Relatorio_Execucao" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_relatorio" WorkflowFileName="logica/Relatorio_Execucao.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
             </Sequence>
           </Switch>
         </Sequence>
@@ -132,7 +141,7 @@
             <Variable x:TypeArguments="nsjl:JObject" Name="SpecData" />
             <Variable x:TypeArguments="x:String" Name="TipoTransacao" />
           </Sequence.Variables>
-          <ui:InvokeCode Code="specData = data == null ? new JObject() : JObject.FromObject(data);&#xA;tipo = specData[&quot;TipoTransacao&quot;] == null ? &quot;&quot; : specData[&quot;TipoTransacao&quot;].ToString();" DisplayName="Ler TipoTransacao do item" sap2010:WorkflowViewState.IdRef="InvokeCode_tipo">
+          <ui:InvokeCode Language="CSharp" Code="specData = data == null ? new JObject() : JObject.FromObject(data);&#xA;tipo = specData[&quot;TipoTransacao&quot;] == null ? &quot;&quot; : specData[&quot;TipoTransacao&quot;].ToString();" DisplayName="Ler TipoTransacao do item" sap2010:WorkflowViewState.IdRef="InvokeCode_tipo">
             <ui:InvokeCode.Arguments>
               <scg:Dictionary x:TypeArguments="x:String, Argument">
                 <InArgument x:TypeArguments="x:Object" x:Key="data">
@@ -249,14 +258,25 @@
                 </ui:InvokeWorkflowFile.Arguments>
               </ui:InvokeWorkflowFile>
             </Sequence>
-            <Sequence x:Key="ColetarMetricas" DisplayName="ColetarMetricas (T8)" sap2010:WorkflowViewState.IdRef="Case_metricas">
-              <ui:LogMessage DisplayName="ColetarMetricas pendente" sap2010:WorkflowViewState.IdRef="LogMessage_metricas" Level="Warn">
-                <ui:LogMessage.Message>
-                  <InArgument x:TypeArguments="x:Object">
-                    <CSharpValue x:TypeArguments="x:Object">"ColetarMetricas recebido — pipeline implementado na T8"</CSharpValue>
-                  </InArgument>
-                </ui:LogMessage.Message>
-              </ui:LogMessage>
+            <Sequence x:Key="ColetarMetricas" DisplayName="Pipeline ColetarMetricas" sap2010:WorkflowViewState.IdRef="Case_metricas">
+              <Sequence.Variables>
+                <Variable x:TypeArguments="nsjl:JObject" Name="Metricas" />
+              </Sequence.Variables>
+              <ui:InvokeWorkflowFile DisplayName="Insights → bucket SM_Metricas" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_metricas" WorkflowFileName="logica/Coletar_Metricas.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="x:Object" x:Key="in_TransactionData">
+                      <CSharpValue x:TypeArguments="x:Object">SpecData</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="nsjl:JObject" x:Key="out_Metricas">
+                      <CSharpReference x:TypeArguments="nsjl:JObject">Metricas</CSharpReference>
+                    </OutArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
             </Sequence>
           </Switch>
         </Sequence>

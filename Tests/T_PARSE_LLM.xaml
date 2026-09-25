@@ -1,0 +1,144 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="Tests.T_PARSE_LLM" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uta="clr-namespace:UiPath.Testing.Activities;assembly=UiPath.Testing.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+      <x:String>UiPath.Testing.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Testing.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="T-PARSE — parsers de resposta LLM (E5)" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="Legenda" />
+      <Variable x:TypeArguments="x:Int32" Name="NHashtags" />
+      <Variable x:TypeArguments="x:String" Name="MediaPrompt" />
+      <Variable x:TypeArguments="x:Int32" Name="NPautas" />
+      <Variable x:TypeArguments="x:String" Name="Pauta1" />
+      <Variable x:TypeArguments="x:Boolean" Name="ThrowVazio" />
+      <Variable x:TypeArguments="x:Boolean" Name="ThrowSemJson" />
+    </Sequence.Variables>
+    <Sequence DisplayName="Parsers — Given">
+      <ui:LogMessage DisplayName="Given: respostas LLM com e sem fences" Level="Info" sap2010:WorkflowViewState.IdRef="LogMessage_given">
+        <ui:LogMessage.Message>
+          <InArgument x:TypeArguments="x:Object">
+            <CSharpValue x:TypeArguments="x:Object">"T-PARSE: ParsearConteudoGerado/ParsearPautas toleram ```json fences; resposta inválida → FormatException"</CSharpValue>
+          </InArgument>
+        </ui:LogMessage.Message>
+      </ui:LogMessage>
+    </Sequence>
+    <Sequence DisplayName="Parsers — When">
+      <ui:InvokeCode Language="CSharp" Code="var respostaConteudo = &quot;```json\n{ \&quot;legenda\&quot;: \&quot;3 benefícios da limpeza de pele ✨\&quot;, \&quot;hashtags\&quot;: [\&quot;skincare\&quot;, \&quot;estetica\&quot;, \&quot;limpezadepele\&quot;], \&quot;mediaPrompt\&quot;: \&quot;foto clínica clean\&quot; }\n```&quot;;&#xA;var gerado = clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(respostaConteudo);&#xA;legenda = gerado.Legenda;&#xA;nHashtags = gerado.Hashtags == null ? -1 : gerado.Hashtags.Length;&#xA;mediaPrompt = gerado.MediaPrompt;&#xA;&#xA;var respostaPautas = &quot;Aqui estão as pautas:\n```json\n[{\&quot;tema\&quot;: \&quot;pauta um\&quot;, \&quot;mediaUrl\&quot;: null}, {\&quot;tema\&quot;: \&quot;pauta dois\&quot;, \&quot;mediaUrl\&quot;: null}, {\&quot;tema\&quot;: \&quot;pauta três\&quot;, \&quot;mediaUrl\&quot;: null}]\n```\nEspero que ajude!&quot;;&#xA;var pautas = clarituz_agente_social_midia.ConteudoService.ParsearPautas(respostaPautas);&#xA;nPautas = pautas == null ? -1 : pautas.Count;&#xA;pauta1 = nPautas &gt; 0 &amp;&amp; pautas[0][&quot;tema&quot;] != null ? pautas[0][&quot;tema&quot;].ToString() : &quot;&quot;;&#xA;&#xA;try { clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(&quot;   &quot;); throwVazio = false; }&#xA;catch (FormatException) { throwVazio = true; }&#xA;try { clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(&quot;texto sem json nenhum&quot;); throwSemJson = false; }&#xA;catch (FormatException) { throwSemJson = true; }" DisplayName="Executar parsers" sap2010:WorkflowViewState.IdRef="InvokeCode_run">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <OutArgument x:TypeArguments="x:String" x:Key="legenda">
+              <CSharpReference x:TypeArguments="x:String">Legenda</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Int32" x:Key="nHashtags">
+              <CSharpReference x:TypeArguments="x:Int32">NHashtags</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="mediaPrompt">
+              <CSharpReference x:TypeArguments="x:String">MediaPrompt</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Int32" x:Key="nPautas">
+              <CSharpReference x:TypeArguments="x:Int32">NPautas</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="pauta1">
+              <CSharpReference x:TypeArguments="x:String">Pauta1</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Boolean" x:Key="throwVazio">
+              <CSharpReference x:TypeArguments="x:Boolean">ThrowVazio</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Boolean" x:Key="throwSemJson">
+              <CSharpReference x:TypeArguments="x:Boolean">ThrowSemJson</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+    </Sequence>
+    <Sequence DisplayName="Parsers — Then">
+      <uta:VerifyExpression DisplayName="Legenda parseada" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_legenda">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">Legenda != null &amp;&amp; Legenda.Contains("limpeza de pele")</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Legenda deveria ser extraída do JSON com fences"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="3 hashtags" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_tags">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">NHashtags == 3</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Deveria ter parseado 3 hashtags"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="MediaPrompt parseado" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_media">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">MediaPrompt != null &amp;&amp; MediaPrompt.Contains("foto clínica")</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"MediaPrompt deveria ser parseado"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Pautas: 3 itens com texto ao redor" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_pautas">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">NPautas == 3 &amp;&amp; Pauta1 == "pauta um"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Array JSON cercado de prosa deveria parsear 3 pautas"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="E5: vazio lança FormatException" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_vazio">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">ThrowVazio &amp;&amp; ThrowSemJson</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Resposta vazia/sem JSON deveria lançar FormatException (E5)"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+    </Sequence>
+  </Sequence>
+</Activity>

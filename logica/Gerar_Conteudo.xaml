@@ -43,7 +43,7 @@
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:InvokeCode Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;var item = new clarituz_agente_social_midia.WorkItemData&#xA;{&#xA;    TipoTransacao = &quot;GerarConteudo&quot;,&#xA;    Plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString(),&#xA;    Nicho = data[&quot;Nicho&quot;] == null ? &quot;&quot; : data[&quot;Nicho&quot;].ToString(),&#xA;    TomDeVoz = data[&quot;TomDeVoz&quot;] == null ? &quot;&quot; : data[&quot;TomDeVoz&quot;].ToString(),&#xA;    Tema = data[&quot;Tema&quot;] == null ? &quot;&quot; : data[&quot;Tema&quot;].ToString(),&#xA;    MediaUrl = data[&quot;MediaUrl&quot;] == null ? &quot;&quot; : data[&quot;MediaUrl&quot;].ToString()&#xA;};&#xA;var janela = ctx.ContainsKey(&quot;JanelaPublicacao&quot;) ? ctx[&quot;JanelaPublicacao&quot;] as string : null;&#xA;prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptGeracao(item, janela ?? &quot;&quot;);" DisplayName="Montar prompt de geração" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
+    <ui:InvokeCode Language="CSharp" Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;var item = new clarituz_agente_social_midia.WorkItemData&#xA;{&#xA;    TipoTransacao = &quot;GerarConteudo&quot;,&#xA;    Plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString(),&#xA;    Nicho = data[&quot;Nicho&quot;] == null ? &quot;&quot; : data[&quot;Nicho&quot;].ToString(),&#xA;    TomDeVoz = data[&quot;TomDeVoz&quot;] == null ? &quot;&quot; : data[&quot;TomDeVoz&quot;].ToString(),&#xA;    Tema = data[&quot;Tema&quot;] == null ? &quot;&quot; : data[&quot;Tema&quot;].ToString(),&#xA;    MediaUrl = data[&quot;MediaUrl&quot;] == null ? &quot;&quot; : data[&quot;MediaUrl&quot;].ToString()&#xA;};&#xA;var janela = ctx.ContainsKey(&quot;JanelaPublicacao&quot;) ? ctx[&quot;JanelaPublicacao&quot;] as string : null;&#xA;prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptGeracao(item, janela ?? &quot;&quot;);" DisplayName="Montar prompt de geração" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="x:Object" x:Key="inData">
@@ -70,7 +70,7 @@
         </scg:Dictionary>
       </ui:InvokeWorkflowFile.Arguments>
     </ui:InvokeWorkflowFile>
-    <ui:InvokeCode Code="var gerado = clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(resposta);&#xA;conteudo = JObject.FromObject(gerado);" DisplayName="Parsear ConteudoGerado (E5)" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
+    <ui:InvokeCode Language="CSharp" Code="var gerado = clarituz_agente_social_midia.ConteudoService.ParsearConteudoGerado(resposta);&#xA;conteudo = JObject.FromObject(gerado);" DisplayName="Parsear ConteudoGerado (E5)" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="x:String" x:Key="resposta">

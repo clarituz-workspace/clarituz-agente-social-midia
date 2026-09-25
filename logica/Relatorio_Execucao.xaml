@@ -1,0 +1,98 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Relatorio_Execucao" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Relatório de execução — contadores consolidados" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="RelatorioTexto" />
+      <Variable x:TypeArguments="x:String" Name="NomeArquivo" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode Language="CSharp" Code="string Str(string k) =&gt; ctx != null &amp;&amp; ctx.ContainsKey(k) &amp;&amp; ctx[k] != null ? ctx[k].ToString() : &quot;&quot;;&#xA;int Num(string k) =&gt; ctx != null &amp;&amp; ctx.ContainsKey(k) &amp;&amp; ctx[k] != null ? Convert.ToInt32(ctx[k]) : 0;&#xA;var alertas = ctx != null &amp;&amp; ctx.ContainsKey(&quot;Alertas&quot;) ? ctx[&quot;Alertas&quot;] as System.Collections.IEnumerable : null;&#xA;var sb = new System.Text.StringBuilder();&#xA;sb.AppendLine(&quot;=== RELATÓRIO DE EXECUÇÃO — Camila (agente social mídia) ===&quot;);&#xA;sb.AppendLine(&quot;Gerado em (UTC): &quot; + DateTime.UtcNow.ToString(&quot;yyyy-MM-dd HH:mm:ss&quot;));&#xA;sb.AppendLine(&quot;Modo de execução: &quot; + Str(&quot;ModoExecucao&quot;));&#xA;var plats = ctx != null &amp;&amp; ctx.ContainsKey(&quot;Plataformas&quot;) ? ctx[&quot;Plataformas&quot;] as System.Collections.IEnumerable : null;&#xA;sb.AppendLine(&quot;Plataformas: &quot; + (plats == null ? &quot;-&quot; : string.Join(&quot;, &quot;, plats.Cast&lt;object&gt;().Select(p =&gt; p.ToString()))));&#xA;sb.AppendLine(&quot;Nicho: &quot; + Str(&quot;Nicho&quot;) + &quot; | Tom de voz: &quot; + Str(&quot;TomDeVoz&quot;));&#xA;sb.AppendLine(&quot;Janela sugerida: &quot; + Str(&quot;JanelaPublicacao&quot;));&#xA;sb.AppendLine(&quot;--- Contadores ---&quot;);&#xA;sb.AppendLine(&quot;Posts publicados hoje (humano): &quot; + Num(&quot;PostsPublicadosHoje&quot;) + &quot;/&quot; + Num(&quot;LimitePostsDia&quot;) + &quot; (informativo)&quot;);&#xA;sb.AppendLine(&quot;Itens processados: &quot; + Num(&quot;Processados&quot;));&#xA;sb.AppendLine(&quot;Itens falhos: &quot; + Num(&quot;Falhos&quot;));&#xA;var lista = alertas == null ? new List&lt;string&gt;() : alertas.Cast&lt;object&gt;().Select(a =&gt; a.ToString()).ToList();&#xA;sb.AppendLine(&quot;--- Alertas (&quot; + lista.Count + &quot;) ---&quot;);&#xA;foreach (var a in lista) sb.AppendLine(&quot;* &quot; + a);&#xA;if (lista.Count == 0) sb.AppendLine(&quot;(nenhum)&quot;);&#xA;relatorio = sb.ToString();&#xA;nomeArquivo = &quot;relatorios/relatorio-&quot; + DateTime.UtcNow.ToString(&quot;yyyy-MM-dd-HHmmss&quot;) + &quot;.txt&quot;;" DisplayName="Consolidar contadores" sap2010:WorkflowViewState.IdRef="InvokeCode_report">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="relatorio">
+            <CSharpReference x:TypeArguments="x:String">RelatorioTexto</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="nomeArquivo">
+            <CSharpReference x:TypeArguments="x:String">NomeArquivo</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <ui:LogMessage DisplayName="Relatório consolidado" sap2010:WorkflowViewState.IdRef="LogMessage_report" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">RelatorioTexto</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+    <TryCatch DisplayName="Persistir relatório no bucket" sap2010:WorkflowViewState.IdRef="TryCatch_write">
+      <TryCatch.Try>
+        <uist:WriteStorageText DisplayName="SM_Metricas relatório" sap2010:WorkflowViewState.IdRef="WriteStorageText_1" StorageBucketName="SM_Metricas">
+          <uist:WriteStorageText.Path>
+            <InArgument x:TypeArguments="x:String">
+              <CSharpValue x:TypeArguments="x:String">NomeArquivo</CSharpValue>
+            </InArgument>
+          </uist:WriteStorageText.Path>
+          <uist:WriteStorageText.Text>
+            <InArgument x:TypeArguments="x:String">
+              <CSharpValue x:TypeArguments="x:String">RelatorioTexto</CSharpValue>
+            </InArgument>
+          </uist:WriteStorageText.Text>
+        </uist:WriteStorageText>
+      </TryCatch.Try>
+      <TryCatch.Catches>
+        <Catch x:TypeArguments="s:Exception">
+          <ActivityAction x:TypeArguments="s:Exception">
+            <ActivityAction.Argument>
+              <DelegateInArgument x:TypeArguments="s:Exception" Name="writeEx" />
+            </ActivityAction.Argument>
+            <ui:LogMessage DisplayName="Falha ao gravar relatório" sap2010:WorkflowViewState.IdRef="LogMessage_warn" Level="Warn">
+              <ui:LogMessage.Message>
+                <InArgument x:TypeArguments="x:Object">
+                  <CSharpValue x:TypeArguments="x:Object">"Relatório gerado em log, mas falha ao gravar no bucket SM_Metricas: " + writeEx.Message</CSharpValue>
+                </InArgument>
+              </ui:LogMessage.Message>
+            </ui:LogMessage>
+          </ActivityAction>
+        </Catch>
+      </TryCatch.Catches>
+    </TryCatch>
+  </Sequence>
+</Activity>

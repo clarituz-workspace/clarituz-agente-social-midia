@@ -95,7 +95,7 @@
         </InArgument>
       </Assign.Value>
     </Assign>
-    <ui:InvokeCode Code="prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptPautas(nicho, tomDeVoz, 5);" DisplayName="Montar prompt de pautas" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
+    <ui:InvokeCode Language="CSharp" Code="prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptPautas(nicho, tomDeVoz, 5);" DisplayName="Montar prompt de pautas" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="x:String" x:Key="nicho">
@@ -122,7 +122,7 @@
         </scg:Dictionary>
       </ui:InvokeWorkflowFile.Arguments>
     </ui:InvokeWorkflowFile>
-    <ui:InvokeCode Code="pautas = clarituz_agente_social_midia.ConteudoService.ParsearPautas(resposta);" DisplayName="Parsear pautas" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
+    <ui:InvokeCode Language="CSharp" Code="pautas = clarituz_agente_social_midia.ConteudoService.ParsearPautas(resposta);" DisplayName="Parsear pautas" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
       <ui:InvokeCode.Arguments>
         <scg:Dictionary x:TypeArguments="x:String, Argument">
           <InArgument x:TypeArguments="x:String" x:Key="resposta">
@@ -172,7 +172,7 @@
                   <Variable x:TypeArguments="x:String" Name="Referencia" />
                   <Variable x:TypeArguments="scg:Dictionary(x:String, x:Object)" Name="ItemInfo" />
                 </Sequence.Variables>
-                <ui:InvokeCode Code="var tema = pauta[&quot;tema&quot;] == null ? &quot;&quot; : pauta[&quot;tema&quot;].ToString();&#xA;var slug = System.Text.RegularExpressions.Regex.Replace(tema.ToLowerInvariant(), &quot;[^a-z0-9]+&quot;, &quot;-&quot;).Trim('-');&#xA;referencia = &quot;GerarConteudo-&quot; + slug + &quot;-&quot; + DateTime.UtcNow.ToString(&quot;yyyyMMdd&quot;);&#xA;itemInfo = new Dictionary&lt;string, object&gt;();&#xA;itemInfo[&quot;TipoTransacao&quot;] = &quot;GerarConteudo&quot;;&#xA;itemInfo[&quot;Plataforma&quot;] = plataforma;&#xA;itemInfo[&quot;Nicho&quot;] = (object)nicho ?? &quot;&quot;;&#xA;itemInfo[&quot;TomDeVoz&quot;] = (object)tomDeVoz ?? &quot;&quot;;&#xA;itemInfo[&quot;Tema&quot;] = tema;&#xA;itemInfo[&quot;MediaUrl&quot;] = pauta[&quot;mediaUrl&quot;] == null ? &quot;&quot; : pauta[&quot;mediaUrl&quot;].ToString();" DisplayName="Montar item GerarConteudo" sap2010:WorkflowViewState.IdRef="InvokeCode_item">
+                <ui:InvokeCode Language="CSharp" Code="var tema = pauta[&quot;tema&quot;] == null ? &quot;&quot; : pauta[&quot;tema&quot;].ToString();&#xA;var slug = System.Text.RegularExpressions.Regex.Replace(tema.ToLowerInvariant(), &quot;[^a-z0-9]+&quot;, &quot;-&quot;).Trim('-');&#xA;referencia = &quot;GerarConteudo-&quot; + slug + &quot;-&quot; + DateTime.UtcNow.ToString(&quot;yyyyMMdd&quot;);&#xA;itemInfo = new Dictionary&lt;string, object&gt;();&#xA;itemInfo[&quot;TipoTransacao&quot;] = &quot;GerarConteudo&quot;;&#xA;itemInfo[&quot;Plataforma&quot;] = plataforma;&#xA;itemInfo[&quot;Nicho&quot;] = (object)nicho ?? &quot;&quot;;&#xA;itemInfo[&quot;TomDeVoz&quot;] = (object)tomDeVoz ?? &quot;&quot;;&#xA;itemInfo[&quot;Tema&quot;] = tema;&#xA;itemInfo[&quot;MediaUrl&quot;] = pauta[&quot;mediaUrl&quot;] == null ? &quot;&quot; : pauta[&quot;mediaUrl&quot;].ToString();" DisplayName="Montar item GerarConteudo" sap2010:WorkflowViewState.IdRef="InvokeCode_item">
                   <ui:InvokeCode.Arguments>
                     <scg:Dictionary x:TypeArguments="x:String, Argument">
                       <InArgument x:TypeArguments="nsjl:JToken" x:Key="pauta">

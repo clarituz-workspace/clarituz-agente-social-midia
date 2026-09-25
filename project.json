@@ -42,7 +42,56 @@
     "processOptions": {
       "ignoredFiles": []
     },
-    "fileInfoCollection": [],
+    "fileInfoCollection": [
+      {
+        "editingStatus": "InProgress",
+        "testCaseId": "66855eb3-c2a3-4f22-b266-130297a44e31",
+        "testCaseType": "TestCase",
+        "executionTemplateInvokeIsolated": false,
+        "fileName": "Tests\\T_COMP_01_ComplianceBasica.xaml",
+        "publishAsTestCase": true
+      },
+      {
+        "editingStatus": "InProgress",
+        "testCaseId": "f1d0ec21-3ec0-41f7-a9eb-9e1981a088c8",
+        "testCaseType": "TestCase",
+        "executionTemplateInvokeIsolated": false,
+        "fileName": "Tests\\T_COMP_02_TermosProibidos.xaml",
+        "publishAsTestCase": true
+      },
+      {
+        "editingStatus": "InProgress",
+        "testCaseId": "44d9be20-7b1c-48c2-b40b-480f12c2a54f",
+        "testCaseType": "TestCase",
+        "executionTemplateInvokeIsolated": false,
+        "fileName": "Tests\\T_MOD_Sentimentos.xaml",
+        "publishAsTestCase": true
+      },
+      {
+        "editingStatus": "InProgress",
+        "testCaseId": "7d9c9aaa-869d-4d52-b620-043bef918038",
+        "testCaseType": "TestCase",
+        "executionTemplateInvokeIsolated": false,
+        "fileName": "Tests\\T_URL_Resolvers.xaml",
+        "publishAsTestCase": true
+      },
+      {
+        "editingStatus": "InProgress",
+        "testCaseId": "296c8e7f-b03c-4208-ad1e-bd7af6effe9f",
+        "testCaseType": "TestCase",
+        "executionTemplateInvokeIsolated": false,
+        "fileName": "Tests\\T_PARSE_LLM.xaml",
+        "publishAsTestCase": true
+      },
+      {
+        "editingStatus": "InProgress",
+        "testCaseId": "4ce07a9d-0065-44db-b6e4-52a03cce7376",
+        "testCaseType": "TestCase",
+        "executionTemplateInvokeIsolated": false,
+        "fileName": "Tests\\T_ZW_ZeroWrite.xaml",
+        "publishAsTestCase": true
+      }
+    ],
     "saveToCloud": false
   },
   "expressionLanguage": "CSharp",

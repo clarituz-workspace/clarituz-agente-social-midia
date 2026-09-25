@@ -1,0 +1,136 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="Tests.T_MOD_Sentimentos" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uta="clr-namespace:UiPath.Testing.Activities;assembly=UiPath.Testing.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+      <x:String>UiPath.Testing.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Testing.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="T-MOD-01..05 — roteamento por sentimento (BR-09)" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="nsjl:JObject" Name="SPositivo" />
+      <Variable x:TypeArguments="nsjl:JObject" Name="SNeutro" />
+      <Variable x:TypeArguments="nsjl:JObject" Name="SNegativo" />
+      <Variable x:TypeArguments="nsjl:JObject" Name="SCrise" />
+      <Variable x:TypeArguments="nsjl:JObject" Name="SSpam" />
+    </Sequence.Variables>
+    <Sequence DisplayName="Sentimentos — Given">
+      <ui:LogMessage DisplayName="Given: respostas LLM por sentimento" Level="Info" sap2010:WorkflowViewState.IdRef="LogMessage_given">
+        <ui:LogMessage.Message>
+          <InArgument x:TypeArguments="x:Object">
+            <CSharpValue x:TypeArguments="x:Object">"T-MOD-01..05: Positivo/Neutro/Negativo/Crise/Spam → SugestaoModeracao"</CSharpValue>
+          </InArgument>
+        </ui:LogMessage.Message>
+      </ui:LogMessage>
+    </Sequence>
+    <Sequence DisplayName="Sentimentos — When">
+      <ui:InvokeCode Language="CSharp" Code="clarituz_agente_social_midia.SugestaoModeracao Parse(string sent)&#xA;{&#xA;    var json = &quot;{ \&quot;sentimento\&quot;: \&quot;&quot; + sent + &quot;\&quot;, \&quot;respostaSugerida\&quot;: \&quot;Obrigada pelo carinho!\&quot; }&quot;;&#xA;    return clarituz_agente_social_midia.ConteudoService.ParsearSugestao(json, &quot;cmt-1&quot;);&#xA;}&#xA;sPos = JObject.FromObject(Parse(&quot;Positivo&quot;));&#xA;sNeu = JObject.FromObject(Parse(&quot;Neutro&quot;));&#xA;sNeg = JObject.FromObject(Parse(&quot;Negativo&quot;));&#xA;sCri = JObject.FromObject(Parse(&quot;Crise&quot;));&#xA;sSpam = JObject.FromObject(Parse(&quot;Spam&quot;));" DisplayName="Parsear 5 sentimentos" sap2010:WorkflowViewState.IdRef="InvokeCode_run">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <OutArgument x:TypeArguments="nsjl:JObject" x:Key="sPos">
+              <CSharpReference x:TypeArguments="nsjl:JObject">SPositivo</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="nsjl:JObject" x:Key="sNeu">
+              <CSharpReference x:TypeArguments="nsjl:JObject">SNeutro</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="nsjl:JObject" x:Key="sNeg">
+              <CSharpReference x:TypeArguments="nsjl:JObject">SNegativo</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="nsjl:JObject" x:Key="sCri">
+              <CSharpReference x:TypeArguments="nsjl:JObject">SCrise</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="nsjl:JObject" x:Key="sSpam">
+              <CSharpReference x:TypeArguments="nsjl:JObject">SSpam</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+    </Sequence>
+    <Sequence DisplayName="Sentimentos — Then">
+      <uta:VerifyExpression DisplayName="T-MOD-01 Positivo → SugerirResposta" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_pos">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">SPositivo["PrioridadeAlta"].ToObject&lt;bool&gt;() == false &amp;&amp; SPositivo["SugereOcultar"].ToObject&lt;bool&gt;() == false &amp;&amp; SPositivo["RespostaSugerida"].ToString().Length &gt; 0</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Positivo: prioridade normal + resposta sugerida + sem ocultar"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="T-MOD-02 Neutro → SugerirResposta" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_neu">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">SNeutro["PrioridadeAlta"].ToObject&lt;bool&gt;() == false &amp;&amp; SNeutro["SugereOcultar"].ToObject&lt;bool&gt;() == false</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Neutro: prioridade normal + sem ocultar"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="T-MOD-03 Negativo → prioridade alta" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_neg">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">SNegativo["PrioridadeAlta"].ToObject&lt;bool&gt;() == true &amp;&amp; SNegativo["SugereOcultar"].ToObject&lt;bool&gt;() == false</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Negativo: task urgente (SugerirRespostaPrioritaria)"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="T-MOD-04 Crise → prioridade alta" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_cri">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">SCrise["PrioridadeAlta"].ToObject&lt;bool&gt;() == true</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Crise: prioridade alta + alerta imediato"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="T-MOD-05 Spam → SugereOcultar" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_spam">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">SSpam["SugereOcultar"].ToObject&lt;bool&gt;() == true</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Spam: task sugere ocultação (humano decide e executa)"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+    </Sequence>
+  </Sequence>
+</Activity>

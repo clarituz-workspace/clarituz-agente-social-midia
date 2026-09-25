@@ -1,0 +1,102 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="Tests.T_COMP_02_TermosProibidos" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uta="clr-namespace:UiPath.Testing.Activities;assembly=UiPath.Testing.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+      <x:String>UiPath.Testing.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Testing.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="T-COMP-02 — BR-05 termos proibidos" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="scg:List(x:String)" Name="VComTermo" />
+      <Variable x:TypeArguments="scg:List(x:String)" Name="VComTermoHashtag" />
+      <Variable x:TypeArguments="scg:List(x:String)" Name="VLimpo" />
+    </Sequence.Variables>
+    <Sequence DisplayName="BR-05 — Given">
+      <ui:LogMessage DisplayName="Given: lista de termos proibidos" Level="Info" sap2010:WorkflowViewState.IdRef="LogMessage_given">
+        <ui:LogMessage.Message>
+          <InArgument x:TypeArguments="x:Object">
+            <CSharpValue x:TypeArguments="x:Object">"T-COMP-02: termos proibidos = milagre, promoção falsa (case-insensitive)"</CSharpValue>
+          </InArgument>
+        </ui:LogMessage.Message>
+      </ui:LogMessage>
+    </Sequence>
+    <Sequence DisplayName="BR-05 — When">
+      <ui:InvokeCode Language="CSharp" Code="var termos = new[] { &quot;milagre&quot;, &quot;promoção falsa&quot; };&#xA;vComTermo = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;Resultado MILAGRE em 3 dias!&quot;, new[] { &quot;beleza&quot; }, &quot;foto.png&quot;, true, termos);&#xA;vComTermoHashtag = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;legenda ok&quot;, new[] { &quot;Promoção FALSA&quot;, &quot;beleza&quot; }, &quot;foto.png&quot;, true, termos);&#xA;vLimpo = clarituz_agente_social_midia.ConteudoService.ValidarCompliance(&quot;Instagram&quot;, &quot;Dicas de skincare para o dia a dia&quot;, new[] { &quot;beleza&quot;, &quot;skincare&quot; }, &quot;foto.png&quot;, true, termos);" DisplayName="Executar BR-05 (3 cenários)" sap2010:WorkflowViewState.IdRef="InvokeCode_run">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vComTermo">
+              <CSharpReference x:TypeArguments="scg:List(x:String)">VComTermo</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vComTermoHashtag">
+              <CSharpReference x:TypeArguments="scg:List(x:String)">VComTermoHashtag</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="scg:List(x:String)" x:Key="vLimpo">
+              <CSharpReference x:TypeArguments="scg:List(x:String)">VLimpo</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+    </Sequence>
+    <Sequence DisplayName="BR-05 — Then">
+      <uta:VerifyExpression DisplayName="Termo na legenda → BR-05" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_legenda">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">VComTermo.Any(v =&gt; v.StartsWith("BR-05"))</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"'MILAGRE' na legenda (case-insensitive) deveria violar BR-05"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Termo em hashtag → BR-05" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_hashtag">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">VComTermoHashtag.Any(v =&gt; v.StartsWith("BR-05"))</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"'Promoção FALSA' em hashtag deveria violar BR-05"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+      <uta:VerifyExpression DisplayName="Conteúdo limpo → 0 violações" TakeScreenshotInCaseOfFailingAssertion="False" TakeScreenshotInCaseOfSucceedingAssertion="False" sap2010:WorkflowViewState.IdRef="VerifyExpression_limpo">
+        <uta:VerifyExpression.Expression>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">VLimpo != null &amp;&amp; VLimpo.Count == 0</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.Expression>
+        <uta:VerifyExpression.OutputMessageFormat>
+          <InArgument x:TypeArguments="x:String">
+            <CSharpValue x:TypeArguments="x:String">"Conteúdo sem termos proibidos deveria ter 0 violações"</CSharpValue>
+          </InArgument>
+        </uta:VerifyExpression.OutputMessageFormat>
+      </uta:VerifyExpression>
+    </Sequence>
+  </Sequence>
+</Activity>
