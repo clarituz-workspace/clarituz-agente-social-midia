@@ -42,6 +42,8 @@
       <Variable x:TypeArguments="x:String" Name="NomeArquivo" />
       <Variable x:TypeArguments="x:String" Name="JsonlAtual" />
       <Variable x:TypeArguments="x:String" Name="JsonlNovo" />
+      <Variable x:TypeArguments="x:String" Name="PowerBiUrl" />
+      <Variable x:TypeArguments="x:String" Name="ErroPush" />
     </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
@@ -176,6 +178,76 @@
         </InArgument>
       </uist:WriteStorageText.Text>
     </uist:WriteStorageText>
+    <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;url = cfg[&quot;powerbi_push_url&quot;] == null ? &quot;&quot; : cfg[&quot;powerbi_push_url&quot;].ToString().Trim();" DisplayName="Ler powerbi_push_url" sap2010:WorkflowViewState.IdRef="InvokeCode_pbiurl">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="url">
+            <CSharpReference x:TypeArguments="x:String">PowerBiUrl</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <If DisplayName="Push Power BI configurado?" sap2010:WorkflowViewState.IdRef="If_pbi">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">!string.IsNullOrEmpty(PowerBiUrl)</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Push realtime ao Power BI" sap2010:WorkflowViewState.IdRef="Sequence_push">
+          <ui:InvokeCode Language="CSharp" Code="erro = null;&#xA;try&#xA;{&#xA;    var linha = clarituz_agente_social_midia.PowerBiService.MontarLinha(metricasJson.ToObject&lt;clarituz_agente_social_midia.MetricasPost&gt;());&#xA;    clarituz_agente_social_midia.PowerBiService.PushLinhaAsync(url, linha).GetAwaiter().GetResult();&#xA;}&#xA;catch (Exception ex) { erro = ex.Message; }" DisplayName="POST linha → streaming dataset" sap2010:WorkflowViewState.IdRef="InvokeCode_push">
+            <ui:InvokeCode.Arguments>
+              <scg:Dictionary x:TypeArguments="x:String, Argument">
+                <InArgument x:TypeArguments="x:String" x:Key="url">
+                  <CSharpValue x:TypeArguments="x:String">PowerBiUrl</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="nsjl:JObject" x:Key="metricasJson">
+                  <CSharpValue x:TypeArguments="nsjl:JObject">out_Metricas</CSharpValue>
+                </InArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="erro">
+                  <CSharpReference x:TypeArguments="x:String">ErroPush</CSharpReference>
+                </OutArgument>
+              </scg:Dictionary>
+            </ui:InvokeCode.Arguments>
+          </ui:InvokeCode>
+          <If DisplayName="Push falhou?" sap2010:WorkflowViewState.IdRef="If_pushfail">
+            <If.Condition>
+              <InArgument x:TypeArguments="x:Boolean">
+                <CSharpValue x:TypeArguments="x:Boolean">!string.IsNullOrEmpty(ErroPush)</CSharpValue>
+              </InArgument>
+            </If.Condition>
+            <If.Then>
+              <ui:LogMessage DisplayName="Push falhou (warn)" sap2010:WorkflowViewState.IdRef="LogMessage_pushfail" Level="Warn">
+                <ui:LogMessage.Message>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">"Power BI push falhou (não-bloqueante, métrica já persistida no bucket): " + ErroPush</CSharpValue>
+                  </InArgument>
+                </ui:LogMessage.Message>
+              </ui:LogMessage>
+            </If.Then>
+          </If>
+          <If DisplayName="Push ok?" sap2010:WorkflowViewState.IdRef="If_pushok">
+            <If.Condition>
+              <InArgument x:TypeArguments="x:Boolean">
+                <CSharpValue x:TypeArguments="x:Boolean">string.IsNullOrEmpty(ErroPush)</CSharpValue>
+              </InArgument>
+            </If.Condition>
+            <If.Then>
+              <ui:LogMessage DisplayName="Push ok" sap2010:WorkflowViewState.IdRef="LogMessage_pushok" Level="Info">
+                <ui:LogMessage.Message>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">"Power BI: métricas de " + PostId + " enviadas ao streaming dataset"</CSharpValue>
+                  </InArgument>
+                </ui:LogMessage.Message>
+              </ui:LogMessage>
+            </If.Then>
+          </If>
+        </Sequence>
+      </If.Then>
+    </If>
     <ui:LogMessage DisplayName="Métricas persistidas" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
       <ui:LogMessage.Message>
         <InArgument x:TypeArguments="x:Object">

@@ -7,6 +7,7 @@
   "termos_proibidos": [],
   "janelas_sugeridas": "09:00-12:00;18:00-21:00",
   "dias_calendario": 7,
+  "powerbi_push_url": "",
   "limite_posts_dia": 3,
   "queue_name": "SM_WorkItems",
   "bucket_midia": "SM_Midia",

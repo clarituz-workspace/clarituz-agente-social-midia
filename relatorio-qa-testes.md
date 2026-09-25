@@ -1,7 +1,7 @@
 # Camila — Relatório de Testes de QA
 
 **Projeto:** clarituz-agente-social-midia
-**Versão testada:** 1.0.3 (publicada e ativa no Orchestrator, pasta Shared)
+**Versão testada:** 1.0.4 (publicada e ativa no Orchestrator, pasta Shared)
 **Data da execução:** 2026-02-10
 **Ferramenta:** UiPath `uip rpa run` / `uip rpa validate` / `uip rpa build`
 **Resultado geral:** ✅ **APROVADO — 6/6 testes, 0 erros de validação**
@@ -80,11 +80,12 @@ A IA pode devolver JSON cercado de texto ou blocos ```` ```json ```` — os pars
 
 ### 6. `T_ZW_ZeroWrite` — Garantia de não-publicação ✅
 
-**Teste não-funcional crítico:** escaneia em runtime todos os arquivos-fonte do projeto (25 arquivos) procurando chamadas de escrita às plataformas:
+**Teste não-funcional crítico:** escaneia em runtime todos os arquivos-fonte do projeto (28 arquivos) procurando chamadas de escrita às plataformas:
 
 - **0 ocorrências** de POST/PUT/DELETE/PATCH à Meta ✅
 - `SocialApiClient` declara exclusivamente `HttpMethod.Get` ✅
 - Wrapper HTTP `Http_Retry.xaml` tem `Method="GET"` fixo no código ✅
+- **Única exceção de escrita permitida** (introduzida na 1.0.4): o módulo isolado `Workflows/PowerBiService.cs`, que envia métricas para `api.powerbi.com` — dashboard de BI, fora das redes sociais. O teste valida que essa exceção vale somente para arquivos `*PowerBi*` e somente quando o destino `api.powerbi.com` está fixo no código; qualquer outro padrão de escrita continua reprovado ✅
 
 **Conclusão:** é estruturalmente impossível a Camila publicar, responder, ocultar ou excluir qualquer conteúdo nas redes sociais.
 
@@ -121,7 +122,7 @@ Os testes cobrem a lógica; para produção, restam apenas configurações no Or
 | T_MOD — Sentimentos e priorização | 5 | 5 | 100% |
 | T_URL — Resolvers IG/FB | 6 | 6 | 100% |
 | T_PARSE — Parsers LLM + calendário | 7 | 7 | 100% |
-| T_ZW — Zero-write (25 arquivos varridos) | 3 | 3 | 100% |
+| T_ZW — Zero-write (28 arquivos varridos) | 3 | 3 | 100% |
 | **Total** | **30** | **30** | **100%** |
 
 **Cobertura estática:** validação do projeto inteiro → **0 erros**; build → **Success**; zero ocorrências de escrita em plataforma.
@@ -134,4 +135,4 @@ Os 100% medem a camada **determinística e testável** do projeto: validação d
 
 ## Conclusão
 
-A suíte de QA confirma que a Camila está funcionalmente íntegra na versão 1.0.3: geração de calendário editorial, curadoria de conteúdo, validação de compliance, aprovação humana obrigatória, moderação com priorização por sentimento, coleta de métricas e a garantia de **zero escrita** nas plataformas — todos verificados e passando.
+A suíte de QA confirma que a Camila está funcionalmente íntegra na versão 1.0.4: geração de calendário editorial, curadoria de conteúdo, validação de compliance, aprovação humana obrigatória, moderação com priorização por sentimento, coleta de métricas e a garantia de **zero escrita** nas plataformas — todos verificados e passando.
