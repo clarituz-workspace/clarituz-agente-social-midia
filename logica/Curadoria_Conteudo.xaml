@@ -1,0 +1,282 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Curadoria_Conteudo" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_PautasGeradas" Type="OutArgument(x:Int32)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>System.Text.RegularExpressions</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Curadoria — pautas LLM → enqueue GerarConteudo" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="nsjl:JObject" Name="Config" />
+      <Variable x:TypeArguments="x:String" Name="Nicho" />
+      <Variable x:TypeArguments="x:String" Name="TomDeVoz" />
+      <Variable x:TypeArguments="scg:List(x:String)" Name="Plataformas" />
+      <Variable x:TypeArguments="x:String" Name="Prompt" />
+      <Variable x:TypeArguments="x:String" Name="RespostaLLM" />
+      <Variable x:TypeArguments="nsjl:JArray" Name="Pautas" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <Assign DisplayName="Config do contexto" sap2010:WorkflowViewState.IdRef="Assign_cfg">
+      <Assign.To>
+        <OutArgument x:TypeArguments="nsjl:JObject">
+          <CSharpReference x:TypeArguments="nsjl:JObject">Config</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="nsjl:JObject">
+          <CSharpValue x:TypeArguments="nsjl:JObject">in_ExecucaoContext["Config"] as JObject</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <Assign DisplayName="Nicho (arg &gt; config)" sap2010:WorkflowViewState.IdRef="Assign_nicho">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">
+          <CSharpReference x:TypeArguments="x:String">Nicho</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">string.IsNullOrEmpty(in_ExecucaoContext["Nicho"] as string) ? Convert.ToString(Config["nicho"]) : in_ExecucaoContext["Nicho"] as string</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <Assign DisplayName="Tom de voz" sap2010:WorkflowViewState.IdRef="Assign_tom">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">
+          <CSharpReference x:TypeArguments="x:String">TomDeVoz</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">string.IsNullOrEmpty(in_ExecucaoContext["TomDeVoz"] as string) ? Convert.ToString(Config["tom_de_voz"]) : in_ExecucaoContext["TomDeVoz"] as string</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <Assign DisplayName="Plataformas" sap2010:WorkflowViewState.IdRef="Assign_plats">
+      <Assign.To>
+        <OutArgument x:TypeArguments="scg:List(x:String)">
+          <CSharpReference x:TypeArguments="scg:List(x:String)">Plataformas</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="scg:List(x:String)">
+          <CSharpValue x:TypeArguments="scg:List(x:String)">in_ExecucaoContext["Plataformas"] as List&lt;string&gt; ?? new List&lt;string&gt; { "Instagram", "Facebook" }</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <ui:InvokeCode Code="prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptPautas(nicho, tomDeVoz, 5);" DisplayName="Montar prompt de pautas" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="nicho">
+            <CSharpValue x:TypeArguments="x:String">Nicho</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="x:String" x:Key="tomDeVoz">
+            <CSharpValue x:TypeArguments="x:String">TomDeVoz</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="prompt">
+            <CSharpReference x:TypeArguments="x:String">Prompt</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <ui:InvokeWorkflowFile DisplayName="LLM: gerar pautas" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_llm" WorkflowFileName="shared/LLM_Completion.xaml">
+      <ui:InvokeWorkflowFile.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="in_Prompt">
+            <CSharpValue x:TypeArguments="x:String">Prompt</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="out_Texto">
+            <CSharpReference x:TypeArguments="x:String">RespostaLLM</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeWorkflowFile.Arguments>
+    </ui:InvokeWorkflowFile>
+    <ui:InvokeCode Code="pautas = clarituz_agente_social_midia.ConteudoService.ParsearPautas(resposta);" DisplayName="Parsear pautas" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="resposta">
+            <CSharpValue x:TypeArguments="x:String">RespostaLLM</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="nsjl:JArray" x:Key="pautas">
+            <CSharpReference x:TypeArguments="nsjl:JArray">Pautas</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <Assign DisplayName="Contador" sap2010:WorkflowViewState.IdRef="Assign_count0">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">
+          <CSharpReference x:TypeArguments="x:Int32">out_PautasGeradas</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">
+          <CSharpValue x:TypeArguments="x:Int32">0</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <ForEach x:TypeArguments="nsjl:JToken" DisplayName="Para cada pauta" sap2010:WorkflowViewState.IdRef="ForEach_pautas">
+      <ForEach.Values>
+        <InArgument x:TypeArguments="scg:IEnumerable(nsjl:JToken)">
+          <CSharpValue x:TypeArguments="scg:IEnumerable(nsjl:JToken)">Pautas</CSharpValue>
+        </InArgument>
+      </ForEach.Values>
+      <ActivityAction x:TypeArguments="nsjl:JToken">
+        <ActivityAction.Argument>
+          <DelegateInArgument x:TypeArguments="nsjl:JToken" Name="pauta" />
+        </ActivityAction.Argument>
+        <Sequence DisplayName="Pauta → plataformas" sap2010:WorkflowViewState.IdRef="Sequence_pauta">
+          <ForEach x:TypeArguments="x:String" DisplayName="Para cada plataforma" sap2010:WorkflowViewState.IdRef="ForEach_plats">
+            <ForEach.Values>
+              <InArgument x:TypeArguments="scg:IEnumerable(x:String)">
+                <CSharpValue x:TypeArguments="scg:IEnumerable(x:String)">Plataformas</CSharpValue>
+              </InArgument>
+            </ForEach.Values>
+            <ActivityAction x:TypeArguments="x:String">
+              <ActivityAction.Argument>
+                <DelegateInArgument x:TypeArguments="x:String" Name="plataforma" />
+              </ActivityAction.Argument>
+              <Sequence DisplayName="Enqueue item" sap2010:WorkflowViewState.IdRef="Sequence_enqueue">
+                <Sequence.Variables>
+                  <Variable x:TypeArguments="x:String" Name="Referencia" />
+                  <Variable x:TypeArguments="scg:Dictionary(x:String, x:Object)" Name="ItemInfo" />
+                </Sequence.Variables>
+                <ui:InvokeCode Code="var tema = pauta[&quot;tema&quot;] == null ? &quot;&quot; : pauta[&quot;tema&quot;].ToString();&#xA;var slug = System.Text.RegularExpressions.Regex.Replace(tema.ToLowerInvariant(), &quot;[^a-z0-9]+&quot;, &quot;-&quot;).Trim('-');&#xA;referencia = &quot;GerarConteudo-&quot; + slug + &quot;-&quot; + DateTime.UtcNow.ToString(&quot;yyyyMMdd&quot;);&#xA;itemInfo = new Dictionary&lt;string, object&gt;();&#xA;itemInfo[&quot;TipoTransacao&quot;] = &quot;GerarConteudo&quot;;&#xA;itemInfo[&quot;Plataforma&quot;] = plataforma;&#xA;itemInfo[&quot;Nicho&quot;] = (object)nicho ?? &quot;&quot;;&#xA;itemInfo[&quot;TomDeVoz&quot;] = (object)tomDeVoz ?? &quot;&quot;;&#xA;itemInfo[&quot;Tema&quot;] = tema;&#xA;itemInfo[&quot;MediaUrl&quot;] = pauta[&quot;mediaUrl&quot;] == null ? &quot;&quot; : pauta[&quot;mediaUrl&quot;].ToString();" DisplayName="Montar item GerarConteudo" sap2010:WorkflowViewState.IdRef="InvokeCode_item">
+                  <ui:InvokeCode.Arguments>
+                    <scg:Dictionary x:TypeArguments="x:String, Argument">
+                      <InArgument x:TypeArguments="nsjl:JToken" x:Key="pauta">
+                        <CSharpValue x:TypeArguments="nsjl:JToken">pauta</CSharpValue>
+                      </InArgument>
+                      <InArgument x:TypeArguments="x:String" x:Key="plataforma">
+                        <CSharpValue x:TypeArguments="x:String">plataforma</CSharpValue>
+                      </InArgument>
+                      <InArgument x:TypeArguments="x:String" x:Key="nicho">
+                        <CSharpValue x:TypeArguments="x:String">Nicho</CSharpValue>
+                      </InArgument>
+                      <InArgument x:TypeArguments="x:String" x:Key="tomDeVoz">
+                        <CSharpValue x:TypeArguments="x:String">TomDeVoz</CSharpValue>
+                      </InArgument>
+                      <OutArgument x:TypeArguments="x:String" x:Key="referencia">
+                        <CSharpReference x:TypeArguments="x:String">Referencia</CSharpReference>
+                      </OutArgument>
+                      <OutArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="itemInfo">
+                        <CSharpReference x:TypeArguments="scg:Dictionary(x:String, x:Object)">ItemInfo</CSharpReference>
+                      </OutArgument>
+                    </scg:Dictionary>
+                  </ui:InvokeCode.Arguments>
+                </ui:InvokeCode>
+                <TryCatch DisplayName="Enqueue com dedup por reference" sap2010:WorkflowViewState.IdRef="TryCatch_enq">
+                  <TryCatch.Try>
+                    <Sequence DisplayName="Try enqueue" sap2010:WorkflowViewState.IdRef="Sequence_try_enq">
+                      <ui:RetryScope DisplayName="Retry enqueue ×3 (E3)" sap2010:WorkflowViewState.IdRef="RetryScope_enq">
+                        <ui:RetryScope.NumberOfRetries>
+                          <InArgument x:TypeArguments="x:Int32">
+                            <CSharpValue x:TypeArguments="x:Int32">3</CSharpValue>
+                          </InArgument>
+                        </ui:RetryScope.NumberOfRetries>
+                        <ui:RetryScope.RetryInterval>
+                          <InArgument x:TypeArguments="s:TimeSpan">
+                            <CSharpValue x:TypeArguments="s:TimeSpan">TimeSpan.FromSeconds(2)</CSharpValue>
+                          </InArgument>
+                        </ui:RetryScope.RetryInterval>
+                        <ui:RetryScope.ActivityBody>
+                          <ActivityAction>
+                            <Sequence DisplayName="AddQueueItem" sap2010:WorkflowViewState.IdRef="Sequence_addq">
+                              <ui:AddQueueItem DisplayName="Enqueue GerarConteudo" Priority="Normal" QueueType="SM_WorkItems" sap2010:WorkflowViewState.IdRef="AddQueueItem_1">
+                                <ui:AddQueueItem.Reference>
+                                  <InArgument x:TypeArguments="x:String">
+                                    <CSharpValue x:TypeArguments="x:String">Referencia</CSharpValue>
+                                  </InArgument>
+                                </ui:AddQueueItem.Reference>
+                                <ui:AddQueueItem.ItemInformationCollection>
+                                  <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)">
+                                    <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">ItemInfo</CSharpValue>
+                                  </InArgument>
+                                </ui:AddQueueItem.ItemInformationCollection>
+                              </ui:AddQueueItem>
+                            </Sequence>
+                          </ActivityAction>
+                        </ui:RetryScope.ActivityBody>
+                        <ui:RetryScope.Condition>
+                          <ActivityFunc x:TypeArguments="x:Boolean" />
+                        </ui:RetryScope.Condition>
+                      </ui:RetryScope>
+                      <Assign DisplayName="Pautas++" sap2010:WorkflowViewState.IdRef="Assign_inc">
+                        <Assign.To>
+                          <OutArgument x:TypeArguments="x:Int32">
+                            <CSharpReference x:TypeArguments="x:Int32">out_PautasGeradas</CSharpReference>
+                          </OutArgument>
+                        </Assign.To>
+                        <Assign.Value>
+                          <InArgument x:TypeArguments="x:Int32">
+                            <CSharpValue x:TypeArguments="x:Int32">out_PautasGeradas + 1</CSharpValue>
+                          </InArgument>
+                        </Assign.Value>
+                      </Assign>
+                    </Sequence>
+                  </TryCatch.Try>
+                  <TryCatch.Catches>
+                    <Catch x:TypeArguments="s:Exception">
+                      <ActivityAction x:TypeArguments="s:Exception">
+                        <ActivityAction.Argument>
+                          <DelegateInArgument x:TypeArguments="s:Exception" Name="enqEx" />
+                        </ActivityAction.Argument>
+                        <Sequence DisplayName="Catch enqueue" sap2010:WorkflowViewState.IdRef="Sequence_catch_enq">
+                          <ui:LogMessage DisplayName="Item rejeitado/duplicado" sap2010:WorkflowViewState.IdRef="LogMessage_dup" Level="Warn">
+                            <ui:LogMessage.Message>
+                              <InArgument x:TypeArguments="x:Object">
+                                <CSharpValue x:TypeArguments="x:Object">"Enqueue falhou (provável duplicata por unique reference — BR-11/B8): " + enqEx.Message</CSharpValue>
+                              </InArgument>
+                            </ui:LogMessage.Message>
+                          </ui:LogMessage>
+                        </Sequence>
+                      </ActivityAction>
+                    </Catch>
+                  </TryCatch.Catches>
+                </TryCatch>
+              </Sequence>
+            </ActivityAction>
+          </ForEach>
+        </Sequence>
+      </ActivityAction>
+    </ForEach>
+    <ui:LogMessage DisplayName="Curadoria concluída" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"Curadoria: " + out_PautasGeradas + " itens GerarConteudo enfileirados (" + Pautas.Count + " pautas × " + Plataformas.Count + " plataformas)"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

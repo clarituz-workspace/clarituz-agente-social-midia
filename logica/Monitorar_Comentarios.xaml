@@ -1,0 +1,261 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Monitorar_Comentarios" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_Enqueued" Type="OutArgument(x:Int32)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="MonitorarComentarios — polling read-only → enqueue ModerarComentario" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="nsjl:JArray" Name="Comentarios" />
+      <Variable x:TypeArguments="x:String" Name="NovoPoll" />
+      <Variable x:TypeArguments="x:String" Name="Nicho" />
+      <Variable x:TypeArguments="x:String" Name="TomDeVoz" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <Assign DisplayName="Nicho/Tom do contexto" sap2010:WorkflowViewState.IdRef="Assign_ctx">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">
+          <CSharpReference x:TypeArguments="x:String">Nicho</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">in_ExecucaoContext["Nicho"] as string</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <Assign DisplayName="TomDeVoz" sap2010:WorkflowViewState.IdRef="Assign_tom">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">
+          <CSharpReference x:TypeArguments="x:String">TomDeVoz</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">
+          <CSharpValue x:TypeArguments="x:String">in_ExecucaoContext["TomDeVoz"] as string</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <Sequence DisplayName="Polling (credenciais no escopo de uso)" sap2010:WorkflowViewState.IdRef="Sequence_poll">
+      <Sequence.Variables>
+        <Variable x:TypeArguments="sec:SecureString" Name="MetaSecure" />
+        <Variable x:TypeArguments="sec:SecureString" Name="LinkedInSecure" />
+      </Sequence.Variables>
+      <ui:GetRobotCredential AssetName="Meta_SystemUserToken" CacheStrategy="None" DisplayName="Credencial Meta" sap2010:WorkflowViewState.IdRef="GetRobotCredential_meta">
+        <ui:GetRobotCredential.Password>
+          <OutArgument x:TypeArguments="sec:SecureString">
+            <CSharpReference x:TypeArguments="sec:SecureString">MetaSecure</CSharpReference>
+          </OutArgument>
+        </ui:GetRobotCredential.Password>
+      </ui:GetRobotCredential>
+      <ui:GetRobotCredential AssetName="LinkedIn_AccessToken" CacheStrategy="None" DisplayName="Credencial LinkedIn" sap2010:WorkflowViewState.IdRef="GetRobotCredential_li">
+        <ui:GetRobotCredential.Password>
+          <OutArgument x:TypeArguments="sec:SecureString">
+            <CSharpReference x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpReference>
+          </OutArgument>
+        </ui:GetRobotCredential.Password>
+      </ui:GetRobotCredential>
+      <ui:InvokeCode Code="comentarios = new JArray();&#xA;var agora = DateTime.UtcNow;&#xA;var novo = new JObject();&#xA;var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;JObject ultimo;&#xA;try { ultimo = string.IsNullOrEmpty(ultimoRaw) ? new JObject() : JObject.Parse(ultimoRaw); } catch { ultimo = new JObject(); }&#xA;&#xA;using (var api = new clarituz_agente_social_midia.SocialApiClient(metaSecure, linkedInSecure))&#xA;{&#xA;    // Instagram: mídias recentes → comentários após último poll&#xA;    var igUser = cfg[&quot;ig_user_id&quot;] != null ? cfg[&quot;ig_user_id&quot;].ToString() : null;&#xA;    if (!string.IsNullOrEmpty(igUser))&#xA;    {&#xA;        var desdeIg = ultimo[&quot;instagram&quot;] == null ? agora.AddDays(-1) : DateTime.Parse(ultimo[&quot;instagram&quot;].ToString());&#xA;        var midias = api.ObterMidiasRecentesInstagramAsync(igUser).GetAwaiter().GetResult();&#xA;        foreach (var m in midias[&quot;data&quot;] ?? new JArray())&#xA;        {&#xA;            var mid = m[&quot;id&quot;].ToString();&#xA;            var com = api.ObterComentariosMetaAsync(mid).GetAwaiter().GetResult();&#xA;            foreach (var c in com[&quot;data&quot;] ?? new JArray())&#xA;            {&#xA;                DateTime ts;&#xA;                if (!DateTime.TryParse(c[&quot;timestamp&quot;] != null ? c[&quot;timestamp&quot;].ToString() : &quot;&quot;, out ts)) continue;&#xA;                if (ts &gt; desdeIg)&#xA;                    comentarios.Add(new JObject { [&quot;commentId&quot;] = c[&quot;id&quot;].ToString(), [&quot;texto&quot;] = c[&quot;text&quot;] == null ? &quot;&quot; : c[&quot;text&quot;].ToString(), [&quot;autor&quot;] = c[&quot;username&quot;] == null ? &quot;&quot; : c[&quot;username&quot;].ToString(), [&quot;plataforma&quot;] = &quot;Instagram&quot;, [&quot;postId&quot;] = mid });&#xA;            }&#xA;        }&#xA;        novo[&quot;instagram&quot;] = agora.ToString(&quot;o&quot;);&#xA;    }&#xA;&#xA;    // Facebook: feed da página → comentários após último poll&#xA;    var fbPage = cfg[&quot;fb_page_id&quot;] != null ? cfg[&quot;fb_page_id&quot;].ToString() : null;&#xA;    if (!string.IsNullOrEmpty(fbPage))&#xA;    {&#xA;        var desdeFb = ultimo[&quot;facebook&quot;] == null ? agora.AddDays(-1) : DateTime.Parse(ultimo[&quot;facebook&quot;].ToString());&#xA;        var feed = api.ObterFeedFacebookAsync(fbPage).GetAwaiter().GetResult();&#xA;        foreach (var p in feed[&quot;data&quot;] ?? new JArray())&#xA;        {&#xA;            var pid = p[&quot;id&quot;].ToString();&#xA;            var com = api.ObterComentariosMetaAsync(pid).GetAwaiter().GetResult();&#xA;            foreach (var c in com[&quot;data&quot;] ?? new JArray())&#xA;            {&#xA;                DateTime ts;&#xA;                if (!DateTime.TryParse(c[&quot;created_time&quot;] != null ? c[&quot;created_time&quot;].ToString() : &quot;&quot;, out ts)) continue;&#xA;                if (ts &gt; desdeFb)&#xA;                    comentarios.Add(new JObject { [&quot;commentId&quot;] = c[&quot;id&quot;].ToString(), [&quot;texto&quot;] = c[&quot;message&quot;] == null ? &quot;&quot; : c[&quot;message&quot;].ToString(), [&quot;autor&quot;] = c[&quot;from&quot;] != null &amp;&amp; c[&quot;from&quot;][&quot;name&quot;] != null ? c[&quot;from&quot;][&quot;name&quot;].ToString() : &quot;&quot;, [&quot;plataforma&quot;] = &quot;Facebook&quot;, [&quot;postId&quot;] = pid });&#xA;            }&#xA;        }&#xA;        novo[&quot;facebook&quot;] = agora.ToString(&quot;o&quot;);&#xA;    }&#xA;&#xA;    // LinkedIn: posts da org → comentários (created.time em ms epoch)&#xA;    var liOrg = cfg[&quot;linkedin_org_urn&quot;] != null ? cfg[&quot;linkedin_org_urn&quot;].ToString() : null;&#xA;    if (!string.IsNullOrEmpty(liOrg))&#xA;    {&#xA;        var desdeLi = ultimo[&quot;linkedin&quot;] == null ? agora.AddDays(-1) : DateTime.Parse(ultimo[&quot;linkedin&quot;].ToString());&#xA;        var posts = api.ObterPostsLinkedInAsync(liOrg).GetAwaiter().GetResult();&#xA;        foreach (var p in posts[&quot;elements&quot;] ?? new JArray())&#xA;        {&#xA;            var urn = p[&quot;id&quot;] != null ? p[&quot;id&quot;].ToString() : p[&quot;shareUrn&quot;] != null ? p[&quot;shareUrn&quot;].ToString() : null;&#xA;            if (urn == null) continue;&#xA;            var com = api.ObterComentariosLinkedInAsync(urn).GetAwaiter().GetResult();&#xA;            foreach (var c in com[&quot;elements&quot;] ?? new JArray())&#xA;            {&#xA;                long ms;&#xA;                var msTok = c[&quot;created&quot;] != null &amp;&amp; c[&quot;created&quot;][&quot;time&quot;] != null ? c[&quot;created&quot;][&quot;time&quot;] : null;&#xA;                if (msTok == null || !long.TryParse(msTok.ToString(), out ms)) continue;&#xA;                var ts = DateTimeOffset.FromUnixTimeMilliseconds(ms).UtcDateTime;&#xA;                if (ts &gt; desdeLi)&#xA;                    comentarios.Add(new JObject { [&quot;commentId&quot;] = c[&quot;id&quot;] != null ? c[&quot;id&quot;].ToString() : urn + &quot;:&quot; + ms, [&quot;texto&quot;] = c[&quot;message&quot;] != null &amp;&amp; c[&quot;message&quot;][&quot;text&quot;] != null ? c[&quot;message&quot;][&quot;text&quot;].ToString() : (c[&quot;text&quot;] != null &amp;&amp; c[&quot;text&quot;][&quot;text&quot;] != null ? c[&quot;text&quot;][&quot;text&quot;].ToString() : &quot;&quot;), [&quot;autor&quot;] = c[&quot;actor&quot;] != null ? c[&quot;actor&quot;].ToString() : &quot;&quot;, [&quot;plataforma&quot;] = &quot;LinkedIn&quot;, [&quot;postId&quot;] = urn });&#xA;            }&#xA;        }&#xA;        novo[&quot;linkedin&quot;] = agora.ToString(&quot;o&quot;);&#xA;    }&#xA;}&#xA;novoPoll = novo.ToString();" DisplayName="Poll comentários IG/FB/LI (read-only)" sap2010:WorkflowViewState.IdRef="InvokeCode_poll">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <InArgument x:TypeArguments="sec:SecureString" x:Key="metaSecure">
+              <CSharpValue x:TypeArguments="sec:SecureString">MetaSecure</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="sec:SecureString" x:Key="linkedInSecure">
+              <CSharpValue x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+              <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+            </InArgument>
+            <InArgument x:TypeArguments="x:String" x:Key="ultimoRaw">
+              <CSharpValue x:TypeArguments="x:String">in_ExecucaoContext.ContainsKey("UltimoPollComentarios") ? in_ExecucaoContext["UltimoPollComentarios"] as string : null</CSharpValue>
+            </InArgument>
+            <OutArgument x:TypeArguments="nsjl:JArray" x:Key="comentarios">
+              <CSharpReference x:TypeArguments="nsjl:JArray">Comentarios</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="novoPoll">
+              <CSharpReference x:TypeArguments="x:String">NovoPoll</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+      <If DisplayName="Atualizar último poll?" sap2010:WorkflowViewState.IdRef="If_poll">
+        <If.Condition>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">!string.IsNullOrEmpty(NovoPoll) &amp;&amp; NovoPoll != "{}"</CSharpValue>
+          </InArgument>
+        </If.Condition>
+        <If.Then>
+          <Sequence DisplayName="Persistir timestamp" sap2010:WorkflowViewState.IdRef="Sequence_setasset">
+            <ui:SetAsset AssetName="SM_UltimoPollComentarios" DisplayName="SM_UltimoPollComentarios ← agora" sap2010:WorkflowViewState.IdRef="SetAsset_poll">
+              <ui:SetAsset.Value>
+                <InArgument x:TypeArguments="x:Object">
+                  <CSharpValue x:TypeArguments="x:Object">NovoPoll</CSharpValue>
+                </InArgument>
+              </ui:SetAsset.Value>
+            </ui:SetAsset>
+          </Sequence>
+        </If.Then>
+      </If>
+    </Sequence>
+    <Assign DisplayName="Enqueued = 0" sap2010:WorkflowViewState.IdRef="Assign_enq0">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">
+          <CSharpReference x:TypeArguments="x:Int32">out_Enqueued</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">
+          <CSharpValue x:TypeArguments="x:Int32">0</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <ForEach x:TypeArguments="nsjl:JToken" DisplayName="Para cada comentário novo" sap2010:WorkflowViewState.IdRef="ForEach_comments">
+      <ForEach.Values>
+        <InArgument x:TypeArguments="scg:IEnumerable(nsjl:JToken)">
+          <CSharpValue x:TypeArguments="scg:IEnumerable(nsjl:JToken)">Comentarios ?? new JArray()</CSharpValue>
+        </InArgument>
+      </ForEach.Values>
+      <ActivityAction x:TypeArguments="nsjl:JToken">
+        <ActivityAction.Argument>
+          <DelegateInArgument x:TypeArguments="nsjl:JToken" Name="comentario" />
+        </ActivityAction.Argument>
+        <Sequence DisplayName="Enqueue ModerarComentario" sap2010:WorkflowViewState.IdRef="Sequence_enqueue_c">
+          <Sequence.Variables>
+            <Variable x:TypeArguments="x:String" Name="Referencia" />
+            <Variable x:TypeArguments="scg:Dictionary(x:String, x:Object)" Name="ItemInfo" />
+          </Sequence.Variables>
+          <ui:InvokeCode Code="var cid = comentario[&quot;commentId&quot;] == null ? &quot;&quot; : comentario[&quot;commentId&quot;].ToString();&#xA;referencia = &quot;ModerarComentario-&quot; + cid;&#xA;itemInfo = new Dictionary&lt;string, object&gt;();&#xA;itemInfo[&quot;TipoTransacao&quot;] = &quot;ModerarComentario&quot;;&#xA;itemInfo[&quot;Plataforma&quot;] = comentario[&quot;plataforma&quot;] == null ? &quot;&quot; : comentario[&quot;plataforma&quot;].ToString();&#xA;itemInfo[&quot;CommentId&quot;] = cid;&#xA;itemInfo[&quot;CommentTexto&quot;] = comentario[&quot;texto&quot;] == null ? &quot;&quot; : comentario[&quot;texto&quot;].ToString();&#xA;itemInfo[&quot;CommentAutor&quot;] = comentario[&quot;autor&quot;] == null ? &quot;&quot; : comentario[&quot;autor&quot;].ToString();&#xA;itemInfo[&quot;PostId&quot;] = comentario[&quot;postId&quot;] == null ? &quot;&quot; : comentario[&quot;postId&quot;].ToString();&#xA;itemInfo[&quot;Nicho&quot;] = (object)nicho ?? &quot;&quot;;&#xA;itemInfo[&quot;TomDeVoz&quot;] = (object)tomDeVoz ?? &quot;&quot;;" DisplayName="Montar item ModerarComentario" sap2010:WorkflowViewState.IdRef="InvokeCode_item">
+            <ui:InvokeCode.Arguments>
+              <scg:Dictionary x:TypeArguments="x:String, Argument">
+                <InArgument x:TypeArguments="nsjl:JToken" x:Key="comentario">
+                  <CSharpValue x:TypeArguments="nsjl:JToken">comentario</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="nicho">
+                  <CSharpValue x:TypeArguments="x:String">Nicho</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="tomDeVoz">
+                  <CSharpValue x:TypeArguments="x:String">TomDeVoz</CSharpValue>
+                </InArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="referencia">
+                  <CSharpReference x:TypeArguments="x:String">Referencia</CSharpReference>
+                </OutArgument>
+                <OutArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="itemInfo">
+                  <CSharpReference x:TypeArguments="scg:Dictionary(x:String, x:Object)">ItemInfo</CSharpReference>
+                </OutArgument>
+              </scg:Dictionary>
+            </ui:InvokeCode.Arguments>
+          </ui:InvokeCode>
+          <TryCatch DisplayName="Enqueue com dedup" sap2010:WorkflowViewState.IdRef="TryCatch_enq">
+            <TryCatch.Try>
+              <Sequence DisplayName="Try enqueue" sap2010:WorkflowViewState.IdRef="Sequence_try_enq">
+                <ui:RetryScope DisplayName="Retry enqueue ×3 (E3)" sap2010:WorkflowViewState.IdRef="RetryScope_enq">
+                  <ui:RetryScope.NumberOfRetries>
+                    <InArgument x:TypeArguments="x:Int32">
+                      <CSharpValue x:TypeArguments="x:Int32">3</CSharpValue>
+                    </InArgument>
+                  </ui:RetryScope.NumberOfRetries>
+                  <ui:RetryScope.RetryInterval>
+                    <InArgument x:TypeArguments="s:TimeSpan">
+                      <CSharpValue x:TypeArguments="s:TimeSpan">TimeSpan.FromSeconds(2)</CSharpValue>
+                    </InArgument>
+                  </ui:RetryScope.RetryInterval>
+                  <ui:RetryScope.ActivityBody>
+                    <ActivityAction>
+                      <Sequence DisplayName="AddQueueItem" sap2010:WorkflowViewState.IdRef="Sequence_addq">
+                        <ui:AddQueueItem DisplayName="Enqueue ModerarComentario" Priority="Normal" QueueType="SM_WorkItems" sap2010:WorkflowViewState.IdRef="AddQueueItem_1">
+                          <ui:AddQueueItem.Reference>
+                            <InArgument x:TypeArguments="x:String">
+                              <CSharpValue x:TypeArguments="x:String">Referencia</CSharpValue>
+                            </InArgument>
+                          </ui:AddQueueItem.Reference>
+                          <ui:AddQueueItem.ItemInformationCollection>
+                            <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)">
+                              <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">ItemInfo</CSharpValue>
+                            </InArgument>
+                          </ui:AddQueueItem.ItemInformationCollection>
+                        </ui:AddQueueItem>
+                      </Sequence>
+                    </ActivityAction>
+                  </ui:RetryScope.ActivityBody>
+                  <ui:RetryScope.Condition>
+                    <ActivityFunc x:TypeArguments="x:Boolean" />
+                  </ui:RetryScope.Condition>
+                </ui:RetryScope>
+                <Assign DisplayName="Enqueued++" sap2010:WorkflowViewState.IdRef="Assign_inc">
+                  <Assign.To>
+                    <OutArgument x:TypeArguments="x:Int32">
+                      <CSharpReference x:TypeArguments="x:Int32">out_Enqueued</CSharpReference>
+                    </OutArgument>
+                  </Assign.To>
+                  <Assign.Value>
+                    <InArgument x:TypeArguments="x:Int32">
+                      <CSharpValue x:TypeArguments="x:Int32">out_Enqueued + 1</CSharpValue>
+                    </InArgument>
+                  </Assign.Value>
+                </Assign>
+              </Sequence>
+            </TryCatch.Try>
+            <TryCatch.Catches>
+              <Catch x:TypeArguments="s:Exception">
+                <ActivityAction x:TypeArguments="s:Exception">
+                  <ActivityAction.Argument>
+                    <DelegateInArgument x:TypeArguments="s:Exception" Name="enqEx" />
+                  </ActivityAction.Argument>
+                  <Sequence DisplayName="Catch enqueue" sap2010:WorkflowViewState.IdRef="Sequence_catch_enq">
+                    <ui:LogMessage DisplayName="Comentário duplicado/erro" sap2010:WorkflowViewState.IdRef="LogMessage_dup" Level="Warn">
+                      <ui:LogMessage.Message>
+                        <InArgument x:TypeArguments="x:Object">
+                          <CSharpValue x:TypeArguments="x:Object">"Enqueue falhou (provável duplicata — BR-12/B8): " + enqEx.Message</CSharpValue>
+                        </InArgument>
+                      </ui:LogMessage.Message>
+                    </ui:LogMessage>
+                  </Sequence>
+                </ActivityAction>
+              </Catch>
+            </TryCatch.Catches>
+          </TryCatch>
+        </Sequence>
+      </ActivityAction>
+    </ForEach>
+    <ui:LogMessage DisplayName="Monitoramento concluído" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"MonitorarComentarios: " + out_Enqueued + " itens ModerarComentario enfileirados"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

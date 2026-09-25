@@ -77,17 +77,27 @@
 ## Task T5 — uipath-rpa — Dispatchers (Curadoria, Monitorar_Comentarios, Agendar_Metricas)
 
 **Identity:** `rpa:clarituz-agente-social-midia:dispatchers`
-**Status:** [ ] pending
+**Status:** [x] done
 **Blocked by:** T3, T4
 **Skill prompt:**
 
 > Load uipath-rpa and implement the dispatcher workflows per §3 steps 2/7/9 and §11 of `clarituz-agente-social-midia-sdd.md`: `logica/Curadoria_Conteudo.xaml` (LLM pautas → enqueue GerarConteudo, dedup BR-11), `logica/Monitorar_Comentarios.xaml` (poll comments via SocialApiClient → enqueue ModerarComentario, dedup BR-12 + `SM_UltimoPollComentarios`), `logica/Agendar_Metricas.xaml` (enqueue ColetarMetricas for registered posts). These run via scheduled triggers with `in_ModoExecucao`. Delivery model: cloud.
 > Use values, mappings, and structure exactly as documented in the SDD at clarituz-agente-social-midia-sdd.md. Do not infer or guess.
 
-- [ ] `Curadoria_Conteudo.xaml` — LLM topics → enqueue (unique reference)
-- [ ] `Monitorar_Comentarios.xaml` — poll → dedup → enqueue
-- [ ] `Agendar_Metricas.xaml` — enqueue pending metric collections
-- [ ] **Validate:** per-file validate + project build clean
+- [x] `Curadoria_Conteudo.xaml` — LLM topics → enqueue (unique reference `GerarConteudo-{slug}-{data}`, BR-11)
+- [x] `Monitorar_Comentarios.xaml` — poll IG/FB/LI via SocialApiClient → dedup por commentId → enqueue `ModerarComentario-{id}` (BR-12) + `SM_UltimoPollComentarios` atualizado só em sucesso
+- [x] `Agendar_Metricas.xaml` — lê `posts-monitorados.jsonl` (bucket `SM_Metricas`) → enqueue `ColetarMetricas-{postId}-{data}` vencidos (BR-13)
+- [x] **Validate:** per-file validate 0 erros (4 arquivos: 3 dispatchers + `shared/LLM_Completion.xaml`) + `uip rpa build` → **Success**
+- [x] Roteador `Framework/Process.xaml` implementado — dispatcher modes (Curadoria/MonitorarComentarios/AgendarMetricas/Relatorio) + consumer modes (TipoTransacao stub até T6–T8)
+
+**Decisões técnicas T5:**
+- `shared/LLM_Completion.xaml` criado como fronteira GenAI: RetryScope ×2 (E5) encapsulando Throw — a chamada real via conexão IS `uipath-uipath-airdk` substitui o Throw quando a conexão for criada na pasta Shared (pendente manual T1).
+- `ConteudoService` ganhou `MontarPromptPautas` + `ParsearPautas`; `SocialApiClient` ganhou `ObterMidiasRecentesInstagramAsync`, `ObterFeedFacebookAsync`, `ObterPostsLinkedInAsync` (todos GET-only).
+- `ItemInformationCollection` montada via `InvokeCode` + variável `Dictionary<string,object>` — dictionary initializer é rejeitado por expression-tree em C# XAML (CS8074).
+- Chamadas a `ConteudoService`/`SocialApiClient` só via `InvokeCode` — o namespace do projeto não resolve em `CSharpValue`/`CSharpReference` (CS0246, mesmo issue do Http_Retry).
+- Credenciais Meta/LinkedIn lidas e consumidas no mesmo escopo em `Monitorar_Comentarios` (ST-SEC-007/008/009 — mesmo padrão de T4).
+- Duplicata de unique reference (B8) → Log Warn + continua; nunca fatal.
+- Zero-write garantido mantido: nenhum POST/DELETE nas plataformas em nenhum dispatcher.
 
 ## Task T6 — uipath-rpa — GerarConteudo pipeline (generate → validate → approve → register)
 

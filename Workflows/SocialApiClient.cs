@@ -65,6 +65,17 @@ namespace clarituz_agente_social_midia
         public async Task<JToken> ObterComentariosLinkedInAsync(string shareUrn)
             => await GetLinkedInAsync($"/socialActions/{Uri.EscapeDataString(shareUrn)}/comments");
 
+        // ── Fontes para polling de comentários (Monitorar_Comentarios) ──
+
+        public async Task<JToken> ObterMidiasRecentesInstagramAsync(string igUserId, int limite = 25)
+            => await GetMetaAsync($"/{igUserId}/media?fields=id,timestamp&limit={limite}");
+
+        public async Task<JToken> ObterFeedFacebookAsync(string pageId, int limite = 25)
+            => await GetMetaAsync($"/{pageId}/feed?fields=id,created_time&limit={limite}");
+
+        public async Task<JToken> ObterPostsLinkedInAsync(string organizationalUrn, int limite = 25)
+            => await GetLinkedInAsync($"/ugcPosts?q=authors&authors=List({Uri.EscapeDataString(organizationalUrn)})&count={limite}");
+
         // ── Métricas (Coletar_Metricas — somente leitura) ──
 
         public async Task<JToken> ObterInsightsInstagramAsync(string mediaId)

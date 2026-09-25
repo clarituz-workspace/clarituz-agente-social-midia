@@ -1,0 +1,222 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Agendar_Metricas" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_Enqueued" Type="OutArgument(x:Int32)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="AgendarMetricas — posts registrados vencidos → enqueue ColetarMetricas" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="JsonlPosts" />
+      <Variable x:TypeArguments="nsjl:JArray" Name="Pendentes" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <TryCatch DisplayName="Ler posts-monitorados.jsonl" sap2010:WorkflowViewState.IdRef="TryCatch_read">
+      <TryCatch.Try>
+        <Sequence DisplayName="Read bucket" sap2010:WorkflowViewState.IdRef="Sequence_read">
+          <uist:ReadStorageText DisplayName="SM_Metricas/posts-monitorados.jsonl" Path="posts-monitorados.jsonl" sap2010:WorkflowViewState.IdRef="ReadStorageText_1" StorageBucketName="SM_Metricas">
+            <uist:ReadStorageText.Result>
+              <OutArgument x:TypeArguments="x:String">
+                <CSharpReference x:TypeArguments="x:String">JsonlPosts</CSharpReference>
+              </OutArgument>
+            </uist:ReadStorageText.Result>
+          </uist:ReadStorageText>
+        </Sequence>
+      </TryCatch.Try>
+      <TryCatch.Catches>
+        <Catch x:TypeArguments="s:Exception">
+          <ActivityAction x:TypeArguments="s:Exception">
+            <ActivityAction.Argument>
+              <DelegateInArgument x:TypeArguments="s:Exception" Name="readEx" />
+            </ActivityAction.Argument>
+            <Sequence DisplayName="Arquivo ausente = sem posts" sap2010:WorkflowViewState.IdRef="Sequence_catch_read">
+              <ui:LogMessage DisplayName="posts-monitorados não encontrado" sap2010:WorkflowViewState.IdRef="LogMessage_read" Level="Warn">
+                <ui:LogMessage.Message>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">"posts-monitorados.jsonl ausente (nenhum post registrado ainda — T6): " + readEx.Message</CSharpValue>
+                  </InArgument>
+                </ui:LogMessage.Message>
+              </ui:LogMessage>
+              <Assign DisplayName="Jsonl vazio" sap2010:WorkflowViewState.IdRef="Assign_empty">
+                <Assign.To>
+                  <OutArgument x:TypeArguments="x:String">
+                    <CSharpReference x:TypeArguments="x:String">JsonlPosts</CSharpReference>
+                  </OutArgument>
+                </Assign.To>
+                <Assign.Value>
+                  <InArgument x:TypeArguments="x:String">
+                    <CSharpValue x:TypeArguments="x:String">""</CSharpValue>
+                  </InArgument>
+                </Assign.Value>
+              </Assign>
+            </Sequence>
+          </ActivityAction>
+        </Catch>
+      </TryCatch.Catches>
+    </TryCatch>
+    <ui:InvokeCode Code="pendentes = new JArray();&#xA;if (!string.IsNullOrEmpty(texto))&#xA;{&#xA;    var agora = DateTime.UtcNow;&#xA;    foreach (var linha in texto.Split(new[]{ &quot;\r\n&quot;, &quot;\n&quot; }, StringSplitOptions.RemoveEmptyEntries))&#xA;    {&#xA;        JObject item = null;&#xA;        try { item = JObject.Parse(linha.Trim()); } catch { continue; }&#xA;        var proximaTok = item[&quot;proximaColetaEm&quot;];&#xA;        DateTime proxima;&#xA;        if (proximaTok == null || !DateTime.TryParse(proximaTok.ToString(), out proxima)) continue;&#xA;        if (proxima &lt;= agora) pendentes.Add(item);&#xA;    }&#xA;}" DisplayName="Filtrar posts com coleta vencida" sap2010:WorkflowViewState.IdRef="InvokeCode_filter">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:String" x:Key="texto">
+            <CSharpValue x:TypeArguments="x:String">JsonlPosts</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="nsjl:JArray" x:Key="pendentes">
+            <CSharpReference x:TypeArguments="nsjl:JArray">Pendentes</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <Assign DisplayName="Enqueued = 0" sap2010:WorkflowViewState.IdRef="Assign_enq0">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">
+          <CSharpReference x:TypeArguments="x:Int32">out_Enqueued</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">
+          <CSharpValue x:TypeArguments="x:Int32">0</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <ForEach x:TypeArguments="nsjl:JToken" DisplayName="Para cada post vencido" sap2010:WorkflowViewState.IdRef="ForEach_posts">
+      <ForEach.Values>
+        <InArgument x:TypeArguments="scg:IEnumerable(nsjl:JToken)">
+          <CSharpValue x:TypeArguments="scg:IEnumerable(nsjl:JToken)">Pendentes ?? new JArray()</CSharpValue>
+        </InArgument>
+      </ForEach.Values>
+      <ActivityAction x:TypeArguments="nsjl:JToken">
+        <ActivityAction.Argument>
+          <DelegateInArgument x:TypeArguments="nsjl:JToken" Name="post" />
+        </ActivityAction.Argument>
+        <Sequence DisplayName="Enqueue ColetarMetricas" sap2010:WorkflowViewState.IdRef="Sequence_enqueue_m">
+          <Sequence.Variables>
+            <Variable x:TypeArguments="x:String" Name="Referencia" />
+            <Variable x:TypeArguments="scg:Dictionary(x:String, x:Object)" Name="ItemInfo" />
+          </Sequence.Variables>
+          <ui:InvokeCode Code="var pid = post[&quot;postId&quot;] == null ? &quot;&quot; : post[&quot;postId&quot;].ToString();&#xA;referencia = &quot;ColetarMetricas-&quot; + pid + &quot;-&quot; + DateTime.UtcNow.ToString(&quot;yyyyMMdd&quot;);&#xA;itemInfo = new Dictionary&lt;string, object&gt;();&#xA;itemInfo[&quot;TipoTransacao&quot;] = &quot;ColetarMetricas&quot;;&#xA;itemInfo[&quot;Plataforma&quot;] = post[&quot;plataforma&quot;] == null ? &quot;&quot; : post[&quot;plataforma&quot;].ToString();&#xA;itemInfo[&quot;PostId&quot;] = pid;&#xA;itemInfo[&quot;PostUrl&quot;] = post[&quot;postUrl&quot;] == null ? &quot;&quot; : post[&quot;postUrl&quot;].ToString();&#xA;itemInfo[&quot;PostPermalink&quot;] = post[&quot;postPermalink&quot;] == null ? &quot;&quot; : post[&quot;postPermalink&quot;].ToString();&#xA;itemInfo[&quot;DataReferencia&quot;] = DateTime.UtcNow.ToString(&quot;o&quot;);" DisplayName="Montar item ColetarMetricas" sap2010:WorkflowViewState.IdRef="InvokeCode_item">
+            <ui:InvokeCode.Arguments>
+              <scg:Dictionary x:TypeArguments="x:String, Argument">
+                <InArgument x:TypeArguments="nsjl:JToken" x:Key="post">
+                  <CSharpValue x:TypeArguments="nsjl:JToken">post</CSharpValue>
+                </InArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="referencia">
+                  <CSharpReference x:TypeArguments="x:String">Referencia</CSharpReference>
+                </OutArgument>
+                <OutArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="itemInfo">
+                  <CSharpReference x:TypeArguments="scg:Dictionary(x:String, x:Object)">ItemInfo</CSharpReference>
+                </OutArgument>
+              </scg:Dictionary>
+            </ui:InvokeCode.Arguments>
+          </ui:InvokeCode>
+          <TryCatch DisplayName="Enqueue com dedup" sap2010:WorkflowViewState.IdRef="TryCatch_enq">
+            <TryCatch.Try>
+              <Sequence DisplayName="Try enqueue" sap2010:WorkflowViewState.IdRef="Sequence_try_enq">
+                <ui:RetryScope DisplayName="Retry enqueue ×3 (E3)" sap2010:WorkflowViewState.IdRef="RetryScope_enq">
+                  <ui:RetryScope.NumberOfRetries>
+                    <InArgument x:TypeArguments="x:Int32">
+                      <CSharpValue x:TypeArguments="x:Int32">3</CSharpValue>
+                    </InArgument>
+                  </ui:RetryScope.NumberOfRetries>
+                  <ui:RetryScope.RetryInterval>
+                    <InArgument x:TypeArguments="s:TimeSpan">
+                      <CSharpValue x:TypeArguments="s:TimeSpan">TimeSpan.FromSeconds(2)</CSharpValue>
+                    </InArgument>
+                  </ui:RetryScope.RetryInterval>
+                  <ui:RetryScope.ActivityBody>
+                    <ActivityAction>
+                      <Sequence DisplayName="AddQueueItem" sap2010:WorkflowViewState.IdRef="Sequence_addq">
+                        <ui:AddQueueItem DisplayName="Enqueue ColetarMetricas" Priority="Normal" QueueType="SM_WorkItems" sap2010:WorkflowViewState.IdRef="AddQueueItem_1">
+                          <ui:AddQueueItem.Reference>
+                            <InArgument x:TypeArguments="x:String">
+                              <CSharpValue x:TypeArguments="x:String">Referencia</CSharpValue>
+                            </InArgument>
+                          </ui:AddQueueItem.Reference>
+                          <ui:AddQueueItem.ItemInformationCollection>
+                            <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)">
+                              <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">ItemInfo</CSharpValue>
+                            </InArgument>
+                          </ui:AddQueueItem.ItemInformationCollection>
+                        </ui:AddQueueItem>
+                      </Sequence>
+                    </ActivityAction>
+                  </ui:RetryScope.ActivityBody>
+                  <ui:RetryScope.Condition>
+                    <ActivityFunc x:TypeArguments="x:Boolean" />
+                  </ui:RetryScope.Condition>
+                </ui:RetryScope>
+                <Assign DisplayName="Enqueued++" sap2010:WorkflowViewState.IdRef="Assign_inc">
+                  <Assign.To>
+                    <OutArgument x:TypeArguments="x:Int32">
+                      <CSharpReference x:TypeArguments="x:Int32">out_Enqueued</CSharpReference>
+                    </OutArgument>
+                  </Assign.To>
+                  <Assign.Value>
+                    <InArgument x:TypeArguments="x:Int32">
+                      <CSharpValue x:TypeArguments="x:Int32">out_Enqueued + 1</CSharpValue>
+                    </InArgument>
+                  </Assign.Value>
+                </Assign>
+              </Sequence>
+            </TryCatch.Try>
+            <TryCatch.Catches>
+              <Catch x:TypeArguments="s:Exception">
+                <ActivityAction x:TypeArguments="s:Exception">
+                  <ActivityAction.Argument>
+                    <DelegateInArgument x:TypeArguments="s:Exception" Name="enqEx" />
+                  </ActivityAction.Argument>
+                  <Sequence DisplayName="Catch enqueue" sap2010:WorkflowViewState.IdRef="Sequence_catch_enq">
+                    <ui:LogMessage DisplayName="Post duplicado/erro" sap2010:WorkflowViewState.IdRef="LogMessage_dup" Level="Warn">
+                      <ui:LogMessage.Message>
+                        <InArgument x:TypeArguments="x:Object">
+                          <CSharpValue x:TypeArguments="x:Object">"Enqueue falhou (provável duplicata — BR-13/B8): " + enqEx.Message</CSharpValue>
+                        </InArgument>
+                      </ui:LogMessage.Message>
+                    </ui:LogMessage>
+                  </Sequence>
+                </ActivityAction>
+              </Catch>
+            </TryCatch.Catches>
+          </TryCatch>
+        </Sequence>
+      </ActivityAction>
+    </ForEach>
+    <ui:LogMessage DisplayName="Agendamento concluído" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"AgendarMetricas: " + out_Enqueued + " itens ColetarMetricas enfileirados"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>

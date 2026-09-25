@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="Framework_Process" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="Framework_Process" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_TransactionItem" Type="InArgument(x:Object)" />
     <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
@@ -13,9 +13,12 @@
       <x:String>GlobalConstantsNamespace</x:String>
       <x:String>GlobalVariablesNamespace</x:String>
       <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
       <x:String>System.Collections.Generic</x:String>
       <x:String>System.Collections.ObjectModel</x:String>
       <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
     </sco:Collection>
@@ -26,22 +29,168 @@
       <AssemblyReference>System.Private.CoreLib</AssemblyReference>
       <AssemblyReference>UiPath.System.Activities</AssemblyReference>
       <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
       <AssemblyReference>System.ObjectModel</AssemblyReference>
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="Process" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="Process — roteador por modo" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:Int32" Name="PautasGeradas" />
+      <Variable x:TypeArguments="x:Int32" Name="ItensEnfileirados" />
+    </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:LogMessage DisplayName="Stub Process router" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info">
-      <ui:LogMessage.Message>
-        <InArgument x:TypeArguments="x:Object">
-          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">"Process stub — roteador por TipoTransacao + in_ModoExecucao implementado em T8"</CSharpValue>
+    <If DisplayName="Modo dispatcher?" sap2010:WorkflowViewState.IdRef="If_modo">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">in_ModoExecucao != "ConsumirFila"</CSharpValue>
         </InArgument>
-      </ui:LogMessage.Message>
-    </ui:LogMessage>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Dispatchers (execução única)" sap2010:WorkflowViewState.IdRef="Sequence_dispatchers">
+          <Switch x:TypeArguments="x:String" DisplayName="Switch modo" sap2010:WorkflowViewState.IdRef="Switch_modo">
+            <Switch.Expression>
+              <InArgument x:TypeArguments="x:String">
+                <CSharpValue x:TypeArguments="x:String">in_ModoExecucao</CSharpValue>
+              </InArgument>
+            </Switch.Expression>
+            <Switch.Default>
+              <Sequence DisplayName="Modo desconhecido" sap2010:WorkflowViewState.IdRef="Sequence_default">
+                <Throw DisplayName="Modo inválido" sap2010:WorkflowViewState.IdRef="Throw_modo">
+                  <Throw.Exception>
+                    <InArgument x:TypeArguments="s:Exception">
+                      <CSharpValue x:TypeArguments="s:Exception">new BusinessRuleException("ModoExecucao desconhecido: " + in_ModoExecucao)</CSharpValue>
+                    </InArgument>
+                  </Throw.Exception>
+                </Throw>
+              </Sequence>
+            </Switch.Default>
+            <Sequence x:Key="Curadoria" DisplayName="Curadoria de conteúdo" sap2010:WorkflowViewState.IdRef="Sequence_curadoria">
+              <ui:InvokeWorkflowFile DisplayName="Curadoria_Conteudo" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_curadoria" WorkflowFileName="logica/Curadoria_Conteudo.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="x:Int32" x:Key="out_PautasGeradas">
+                      <CSharpReference x:TypeArguments="x:Int32">PautasGeradas</CSharpReference>
+                    </OutArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+            </Sequence>
+            <Sequence x:Key="MonitorarComentarios" DisplayName="Monitorar comentários" sap2010:WorkflowViewState.IdRef="Sequence_monitorar">
+              <ui:InvokeWorkflowFile DisplayName="Monitorar_Comentarios" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_monitorar" WorkflowFileName="logica/Monitorar_Comentarios.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="x:Int32" x:Key="out_Enqueued">
+                      <CSharpReference x:TypeArguments="x:Int32">ItensEnfileirados</CSharpReference>
+                    </OutArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+            </Sequence>
+            <Sequence x:Key="AgendarMetricas" DisplayName="Agendar métricas" sap2010:WorkflowViewState.IdRef="Sequence_metricas">
+              <ui:InvokeWorkflowFile DisplayName="Agendar_Metricas" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_metricas" WorkflowFileName="logica/Agendar_Metricas.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="x:Int32" x:Key="out_Enqueued">
+                      <CSharpReference x:TypeArguments="x:Int32">ItensEnfileirados</CSharpReference>
+                    </OutArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+            </Sequence>
+            <Sequence x:Key="Relatorio" DisplayName="Relatório de execução" sap2010:WorkflowViewState.IdRef="Sequence_relatorio">
+              <ui:LogMessage DisplayName="Relatorio pendente (T8)" sap2010:WorkflowViewState.IdRef="LogMessage_rel" Level="Warn">
+                <ui:LogMessage.Message>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">"Modo Relatorio: Relatorio_Execucao.xaml implementado na T8"</CSharpValue>
+                  </InArgument>
+                </ui:LogMessage.Message>
+              </ui:LogMessage>
+            </Sequence>
+          </Switch>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="ConsumirFila — roteador por TipoTransacao" sap2010:WorkflowViewState.IdRef="Sequence_consumer">
+          <Sequence.Variables>
+            <Variable x:TypeArguments="nsjl:JObject" Name="SpecData" />
+            <Variable x:TypeArguments="x:String" Name="TipoTransacao" />
+          </Sequence.Variables>
+          <ui:InvokeCode Code="specData = data == null ? new JObject() : JObject.FromObject(data);&#xA;tipo = specData[&quot;TipoTransacao&quot;] == null ? &quot;&quot; : specData[&quot;TipoTransacao&quot;].ToString();" DisplayName="Ler TipoTransacao do item" sap2010:WorkflowViewState.IdRef="InvokeCode_tipo">
+            <ui:InvokeCode.Arguments>
+              <scg:Dictionary x:TypeArguments="x:String, Argument">
+                <InArgument x:TypeArguments="x:Object" x:Key="data">
+                  <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
+                </InArgument>
+                <OutArgument x:TypeArguments="nsjl:JObject" x:Key="specData">
+                  <CSharpReference x:TypeArguments="nsjl:JObject">SpecData</CSharpReference>
+                </OutArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="tipo">
+                  <CSharpReference x:TypeArguments="x:String">TipoTransacao</CSharpReference>
+                </OutArgument>
+              </scg:Dictionary>
+            </ui:InvokeCode.Arguments>
+          </ui:InvokeCode>
+          <Switch x:TypeArguments="x:String" DisplayName="Switch TipoTransacao" sap2010:WorkflowViewState.IdRef="Switch_tipo">
+            <Switch.Expression>
+              <InArgument x:TypeArguments="x:String">
+                <CSharpValue x:TypeArguments="x:String">TipoTransacao</CSharpValue>
+              </InArgument>
+            </Switch.Expression>
+            <Switch.Default>
+              <Sequence DisplayName="Tipo desconhecido" sap2010:WorkflowViewState.IdRef="Sequence_default_tipo">
+                <Throw DisplayName="TipoTransacao inválido" sap2010:WorkflowViewState.IdRef="Throw_tipo">
+                  <Throw.Exception>
+                    <InArgument x:TypeArguments="s:Exception">
+                      <CSharpValue x:TypeArguments="s:Exception">new BusinessRuleException("TipoTransacao desconhecido ou ausente: '" + TipoTransacao + "'")</CSharpValue>
+                    </InArgument>
+                  </Throw.Exception>
+                </Throw>
+              </Sequence>
+            </Switch.Default>
+            <Sequence x:Key="GerarConteudo" DisplayName="GerarConteudo (T6)" sap2010:WorkflowViewState.IdRef="Case_gerar">
+              <ui:LogMessage DisplayName="GerarConteudo pendente" sap2010:WorkflowViewState.IdRef="LogMessage_gerar" Level="Warn">
+                <ui:LogMessage.Message>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">"GerarConteudo recebido — pipeline implementado na T6"</CSharpValue>
+                  </InArgument>
+                </ui:LogMessage.Message>
+              </ui:LogMessage>
+            </Sequence>
+            <Sequence x:Key="ModerarComentario" DisplayName="ModerarComentario (T7)" sap2010:WorkflowViewState.IdRef="Case_moderar">
+              <ui:LogMessage DisplayName="ModerarComentario pendente" sap2010:WorkflowViewState.IdRef="LogMessage_moderar" Level="Warn">
+                <ui:LogMessage.Message>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">"ModerarComentario recebido — pipeline implementado na T7"</CSharpValue>
+                  </InArgument>
+                </ui:LogMessage.Message>
+              </ui:LogMessage>
+            </Sequence>
+            <Sequence x:Key="ColetarMetricas" DisplayName="ColetarMetricas (T8)" sap2010:WorkflowViewState.IdRef="Case_metricas">
+              <ui:LogMessage DisplayName="ColetarMetricas pendente" sap2010:WorkflowViewState.IdRef="LogMessage_metricas" Level="Warn">
+                <ui:LogMessage.Message>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">"ColetarMetricas recebido — pipeline implementado na T8"</CSharpValue>
+                  </InArgument>
+                </ui:LogMessage.Message>
+              </ui:LogMessage>
+            </Sequence>
+          </Switch>
+        </Sequence>
+      </If.Else>
+    </If>
   </Sequence>
 </Activity>

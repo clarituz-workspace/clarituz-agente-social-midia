@@ -5,11 +5,8 @@ using Newtonsoft.Json.Linq;
 
 namespace clarituz_agente_social_midia
 {
-    // Montagem de prompts LLM + parse das respostas (SDD §3 steps 2/3/8, §6).
-    // Camada pura/testável: não chama LLM nem HTTP — a chamada ao GenAI fica no workflow.
     public static class ConteudoService
     {
-        // Limites de legenda por plataforma (BR-01).
         public static readonly Dictionary<string, int> LimiteLegenda = new Dictionary<string, int>
         {
             ["Instagram"] = 2200,
