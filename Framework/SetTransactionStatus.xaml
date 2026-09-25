@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="Framework_SetTransactionStatus" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="Framework_SetTransactionStatus" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uocm="clr-namespace:UiPath.Core;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_TransactionItem" Type="InArgument(x:Object)" />
     <x:Property Name="in_TransactionStatus" Type="InArgument(x:String)" />
@@ -12,11 +12,14 @@
       <x:String>GlobalConstantsNamespace</x:String>
       <x:String>GlobalVariablesNamespace</x:String>
       <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
       <x:String>System.Collections.Generic</x:String>
       <x:String>System.Collections.ObjectModel</x:String>
       <x:String>System.Linq</x:String>
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
+      <x:String>UiPath.Orchestrator.Client.Models</x:String>
     </sco:Collection>
   </TextExpression.NamespacesForImplementation>
   <TextExpression.ReferencesForImplementation>
@@ -24,23 +27,161 @@
       <AssemblyReference>System</AssemblyReference>
       <AssemblyReference>System.Private.CoreLib</AssemblyReference>
       <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.OrchestratorClient</AssemblyReference>
       <AssemblyReference>System.Linq</AssemblyReference>
       <AssemblyReference>System.ObjectModel</AssemblyReference>
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
   <Sequence DisplayName="SetTransactionStatus" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="uocm:QueueItem" Name="QueueItemVar" />
+    </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:LogMessage DisplayName="Stub SetTransactionStatus" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info">
-      <ui:LogMessage.Message>
-        <InArgument x:TypeArguments="x:Object">
-          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">"SetTransactionStatus stub — status=" + (in_TransactionStatus ?? "?") + " (implementar em T4: guard is QueueItem + analytics §12)"</CSharpValue>
+    <If DisplayName="Item é QueueItem?" sap2010:WorkflowViewState.IdRef="If_1">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">in_TransactionItem is QueueItem</CSharpValue>
         </InArgument>
-      </ui:LogMessage.Message>
-    </ui:LogMessage>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Atualizar status da transação" sap2010:WorkflowViewState.IdRef="Sequence_status">
+          <Assign DisplayName="Cast QueueItem" sap2010:WorkflowViewState.IdRef="Assign_1">
+            <Assign.To>
+              <OutArgument x:TypeArguments="uocm:QueueItem">
+                <CSharpReference x:TypeArguments="uocm:QueueItem">QueueItemVar</CSharpReference>
+              </OutArgument>
+            </Assign.To>
+            <Assign.Value>
+              <InArgument x:TypeArguments="uocm:QueueItem">
+                <CSharpValue x:TypeArguments="uocm:QueueItem">(QueueItem)in_TransactionItem</CSharpValue>
+              </InArgument>
+            </Assign.Value>
+          </Assign>
+          <Switch x:TypeArguments="x:String" DisplayName="Status" sap2010:WorkflowViewState.IdRef="Switch_1">
+            <Switch.Expression>
+              <InArgument x:TypeArguments="x:String">
+                <CSharpValue x:TypeArguments="x:String">in_TransactionStatus ?? "SystemException"</CSharpValue>
+              </InArgument>
+            </Switch.Expression>
+            <Sequence DisplayName="Successful" x:Key="Successful" sap2010:WorkflowViewState.IdRef="Sequence_ok">
+              <ui:SetTransactionStatus DisplayName="Successful" ErrorType="Business" sap2010:WorkflowViewState.IdRef="SetTransactionStatus_ok" Status="Successful">
+                <ui:SetTransactionStatus.TransactionItem>
+                  <InArgument x:TypeArguments="uocm:QueueItem">
+                    <CSharpValue x:TypeArguments="uocm:QueueItem">QueueItemVar</CSharpValue>
+                  </InArgument>
+                </ui:SetTransactionStatus.TransactionItem>
+                <ui:SetTransactionStatus.Analytics>
+                  <scg:Dictionary x:TypeArguments="x:String, InArgument">
+                    <InArgument x:TypeArguments="x:String" x:Key="TipoTransacao">
+                      <CSharpValue x:TypeArguments="x:String">QueueItemVar.SpecificContent.ContainsKey("TipoTransacao") ? Convert.ToString(QueueItemVar.SpecificContent["TipoTransacao"]) : ""</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="x:String" x:Key="Plataforma">
+                      <CSharpValue x:TypeArguments="x:String">QueueItemVar.SpecificContent.ContainsKey("Plataforma") ? Convert.ToString(QueueItemVar.SpecificContent["Plataforma"]) : ""</CSharpValue>
+                    </InArgument>
+                  </scg:Dictionary>
+                </ui:SetTransactionStatus.Analytics>
+              </ui:SetTransactionStatus>
+              <Assign DisplayName="Processados++" sap2010:WorkflowViewState.IdRef="Assign_proc">
+                <Assign.To>
+                  <OutArgument x:TypeArguments="x:Object">
+                    <CSharpReference x:TypeArguments="x:Object">in_ExecucaoContext["Processados"]</CSharpReference>
+                  </OutArgument>
+                </Assign.To>
+                <Assign.Value>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">Convert.ToInt32(in_ExecucaoContext["Processados"]) + 1</CSharpValue>
+                  </InArgument>
+                </Assign.Value>
+              </Assign>
+            </Sequence>
+            <Sequence DisplayName="BusinessException" x:Key="BusinessException" sap2010:WorkflowViewState.IdRef="Sequence_business">
+              <ui:SetTransactionStatus DisplayName="Failed (Business — sem retry)" ErrorType="Business" sap2010:WorkflowViewState.IdRef="SetTransactionStatus_business" Status="Failed">
+                <ui:SetTransactionStatus.TransactionItem>
+                  <InArgument x:TypeArguments="uocm:QueueItem">
+                    <CSharpValue x:TypeArguments="uocm:QueueItem">QueueItemVar</CSharpValue>
+                  </InArgument>
+                </ui:SetTransactionStatus.TransactionItem>
+                <ui:SetTransactionStatus.Reason>
+                  <InArgument x:TypeArguments="x:String">
+                    <CSharpValue x:TypeArguments="x:String">in_SystemError == null ? "Erro de negócio" : in_SystemError.Message</CSharpValue>
+                  </InArgument>
+                </ui:SetTransactionStatus.Reason>
+                <ui:SetTransactionStatus.Analytics>
+                  <scg:Dictionary x:TypeArguments="x:String, InArgument">
+                    <InArgument x:TypeArguments="x:String" x:Key="TipoTransacao">
+                      <CSharpValue x:TypeArguments="x:String">QueueItemVar.SpecificContent.ContainsKey("TipoTransacao") ? Convert.ToString(QueueItemVar.SpecificContent["TipoTransacao"]) : ""</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="x:String" x:Key="Plataforma">
+                      <CSharpValue x:TypeArguments="x:String">QueueItemVar.SpecificContent.ContainsKey("Plataforma") ? Convert.ToString(QueueItemVar.SpecificContent["Plataforma"]) : ""</CSharpValue>
+                    </InArgument>
+                  </scg:Dictionary>
+                </ui:SetTransactionStatus.Analytics>
+              </ui:SetTransactionStatus>
+              <Assign DisplayName="Falhos++ (business)" sap2010:WorkflowViewState.IdRef="Assign_falhos_b">
+                <Assign.To>
+                  <OutArgument x:TypeArguments="x:Object">
+                    <CSharpReference x:TypeArguments="x:Object">in_ExecucaoContext["Falhos"]</CSharpReference>
+                  </OutArgument>
+                </Assign.To>
+                <Assign.Value>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">Convert.ToInt32(in_ExecucaoContext["Falhos"]) + 1</CSharpValue>
+                  </InArgument>
+                </Assign.Value>
+              </Assign>
+            </Sequence>
+            <Switch.Default>
+              <Sequence DisplayName="SystemException (retry da fila)" sap2010:WorkflowViewState.IdRef="Sequence_system">
+                <ui:SetTransactionStatus DisplayName="Failed (Application — retry ×3)" ErrorType="Application" sap2010:WorkflowViewState.IdRef="SetTransactionStatus_system" Status="Failed">
+                  <ui:SetTransactionStatus.TransactionItem>
+                    <InArgument x:TypeArguments="uocm:QueueItem">
+                      <CSharpValue x:TypeArguments="uocm:QueueItem">QueueItemVar</CSharpValue>
+                    </InArgument>
+                  </ui:SetTransactionStatus.TransactionItem>
+                  <ui:SetTransactionStatus.Reason>
+                    <InArgument x:TypeArguments="x:String">
+                      <CSharpValue x:TypeArguments="x:String">in_SystemError == null ? "Erro de sistema" : in_SystemError.Message</CSharpValue>
+                    </InArgument>
+                  </ui:SetTransactionStatus.Reason>
+                  <ui:SetTransactionStatus.Details>
+                    <InArgument x:TypeArguments="x:String">
+                      <CSharpValue x:TypeArguments="x:String">in_SystemError == null ? null : in_SystemError.GetType().FullName</CSharpValue>
+                    </InArgument>
+                  </ui:SetTransactionStatus.Details>
+                </ui:SetTransactionStatus>
+                <Assign DisplayName="Falhos++ (system)" sap2010:WorkflowViewState.IdRef="Assign_falhos_s">
+                  <Assign.To>
+                    <OutArgument x:TypeArguments="x:Object">
+                      <CSharpReference x:TypeArguments="x:Object">in_ExecucaoContext["Falhos"]</CSharpReference>
+                    </OutArgument>
+                  </Assign.To>
+                  <Assign.Value>
+                    <InArgument x:TypeArguments="x:Object">
+                      <CSharpValue x:TypeArguments="x:Object">Convert.ToInt32(in_ExecucaoContext["Falhos"]) + 1</CSharpValue>
+                    </InArgument>
+                  </Assign.Value>
+                </Assign>
+              </Sequence>
+            </Switch.Default>
+          </Switch>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Sem QueueItem" sap2010:WorkflowViewState.IdRef="Sequence_skip">
+          <ui:LogMessage DisplayName="Sem QueueItem a atualizar" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info">
+            <ui:LogMessage.Message>
+              <InArgument x:TypeArguments="x:Object">
+                <CSharpValue x:TypeArguments="x:Object">"SetTransactionStatus: item não é QueueItem (modo dispatcher ou nulo) — status=" + (in_TransactionStatus ?? "?")</CSharpValue>
+              </InArgument>
+            </ui:LogMessage.Message>
+          </ui:LogMessage>
+        </Sequence>
+      </If.Else>
+    </If>
   </Sequence>
 </Activity>

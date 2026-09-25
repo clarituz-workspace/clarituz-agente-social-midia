@@ -61,18 +61,18 @@
 ## Task T4 — uipath-rpa — Framework workflows (Init, GetTransaction, SetStatus)
 
 **Identity:** `rpa:clarituz-agente-social-midia:framework`
-**Status:** [ ] pending
+**Status:** [x] done
 **Blocked by:** T2, T3
 **Skill prompt:**
 
 > Load uipath-rpa and implement the REFramework glue per §11 rows 1–4 of `clarituz-agente-social-midia-sdd.md`: `Framework/InitAllSettings.xaml` (assets → ExecucaoContext), `Framework/InitAllApplications.xaml` (health checks — fail-fast per BR-10/E4), `Framework/GetTransactionData.xaml` (dequeue `SM_WorkItems` → deserialize to `WorkItemData`), `Framework/SetTransactionStatus.xaml` (Success/Failed + analytics fields per §12). Delivery model: cloud.
 > Use values, mappings, and structure exactly as documented in the SDD at clarituz-agente-social-midia-sdd.md. Do not infer or guess.
 
-- [ ] `InitAllSettings.xaml` — assets + SM_Config parse → ExecucaoContext
-- [ ] `InitAllApplications.xaml` — health check Meta/LinkedIn/GenAI (BR-10)
-- [ ] `GetTransactionData.xaml` — dequeue + deserialize (B-fail on missing fields)
-- [ ] `SetTransactionStatus.xaml` — Output/Analytics fields per §12
-- [ ] **Validate:** per-file validate + project build clean
+- [x] `InitAllSettings.xaml` — `Data/Config.json` (defaults DEV) + assets `SM_Config`/`SM_ContadorDiario`/`SM_UltimoPollComentarios` → `ExecucaoContext` dict; credenciais NÃO ficam no contexto (ST-SEC)
+- [x] `InitAllApplications.xaml` — `GetRobotCredential` + `InvokeCode`→`SocialApiClient` (ctor SecureString) no mesmo escopo; health check GET /me Meta + /v2/me LinkedIn; skip com warning se token PENDING; fail-fast `InvalidOperationException` em não-2xx (BR-10/E4)
+- [x] `GetTransactionData.xaml` — `ui:GetQueueItem` `SM_WorkItems` → `QueueItem` (UiPath.Core) + SpecificData → out args; log de ref/tipo
+- [x] `SetTransactionStatus.xaml` — guard `is QueueItem`, Switch Successful/BusinessException/SystemException → ErrorType Business|Application + Analytics TipoTransacao/Plataforma + contadores Processados/Falhos no contexto
+- [x] **Validate:** per-file 0 erros + `uip rpa build` Success — workaround: org analyzer ST-SEC-007/008/009 proíbe SecureString fora do escopo de criação/conversão em XAML → credenciais lidas e consumidas via InvokeCode no mesmo escopo; `Workflows/~ConteudoService.cs` (shadow do designer) esvaziado para não duplicar tipos
 
 ## Task T5 — uipath-rpa — Dispatchers (Curadoria, Monitorar_Comentarios, Agendar_Metricas)
 

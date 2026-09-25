@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="Framework_InitAllSettings" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="Framework_InitAllSettings" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_ModoExecucao" Type="InArgument(x:String)" />
     <x:Property Name="in_Plataformas" Type="InArgument(scg:List(x:String))" />
@@ -19,7 +19,10 @@
       <x:String>System.Activities.Statements</x:String>
       <x:String>System.Collections.Generic</x:String>
       <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.IO</x:String>
       <x:String>System.Linq</x:String>
+      <x:String>System.Net</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
       <x:String>UiPath.Orchestrator.Client.Models</x:String>
@@ -30,33 +33,122 @@
       <AssemblyReference>System</AssemblyReference>
       <AssemblyReference>System.Private.CoreLib</AssemblyReference>
       <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>System.Net.Primitives</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
       <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.OrchestratorClient</AssemblyReference>
       <AssemblyReference>System.ObjectModel</AssemblyReference>
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="InitAllSettings" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="InitAllSettings — config local + assets + credenciais" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="nsjl:JObject" Name="ConfigLocal" />
+      <Variable x:TypeArguments="x:Object" Name="SMConfigRaw" />
+      <Variable x:TypeArguments="x:Object" Name="SMContadorRaw" />
+      <Variable x:TypeArguments="x:Object" Name="SMPollRaw" />
+      <Variable x:TypeArguments="nsjl:JObject" Name="Contador" />
+      <Variable x:TypeArguments="x:Int32" Name="PostsHoje" />
+    </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <Assign DisplayName="ExecucaoContext vazio (impl T4)" sap2010:WorkflowViewState.IdRef="Assign_1">
+    <Assign DisplayName="Config local (defaults DEV)" sap2010:WorkflowViewState.IdRef="Assign_config_local">
+      <Assign.To>
+        <OutArgument x:TypeArguments="nsjl:JObject">
+          <CSharpReference x:TypeArguments="nsjl:JObject">ConfigLocal</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="nsjl:JObject">
+          <CSharpValue x:TypeArguments="nsjl:JObject">File.Exists("Data\\Config.json") ? JObject.Parse(File.ReadAllText("Data\\Config.json")) : new JObject()</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <ui:GetRobotAsset AssetName="SM_Config" CacheStrategy="None" DisplayName="Asset SM_Config" sap2010:WorkflowViewState.IdRef="GetRobotAsset_1">
+      <ui:GetRobotAsset.Value>
+        <OutArgument x:TypeArguments="x:Object">
+          <CSharpReference x:TypeArguments="x:Object">SMConfigRaw</CSharpReference>
+        </OutArgument>
+      </ui:GetRobotAsset.Value>
+    </ui:GetRobotAsset>
+    <ui:GetRobotAsset AssetName="SM_ContadorDiario" CacheStrategy="None" DisplayName="Asset SM_ContadorDiario" sap2010:WorkflowViewState.IdRef="GetRobotAsset_2">
+      <ui:GetRobotAsset.Value>
+        <OutArgument x:TypeArguments="x:Object">
+          <CSharpReference x:TypeArguments="x:Object">SMContadorRaw</CSharpReference>
+        </OutArgument>
+      </ui:GetRobotAsset.Value>
+    </ui:GetRobotAsset>
+    <ui:GetRobotAsset AssetName="SM_UltimoPollComentarios" CacheStrategy="None" DisplayName="Asset SM_UltimoPollComentarios" sap2010:WorkflowViewState.IdRef="GetRobotAsset_3">
+      <ui:GetRobotAsset.Value>
+        <OutArgument x:TypeArguments="x:Object">
+          <CSharpReference x:TypeArguments="x:Object">SMPollRaw</CSharpReference>
+        </OutArgument>
+      </ui:GetRobotAsset.Value>
+    </ui:GetRobotAsset>
+    <ui:LogMessage DisplayName="Credenciais serão lidas no escopo de uso" sap2010:WorkflowViewState.IdRef="LogMessage_creds" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">"Assets de credencial lidos por InvokeCode no escopo de uso (ST-SEC-007/008/009)"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+    </ui:LogMessage>
+    <Assign DisplayName="Contador diário (reseta por data UTC)" sap2010:WorkflowViewState.IdRef="Assign_contador">
+      <Assign.To>
+        <OutArgument x:TypeArguments="nsjl:JObject">
+          <CSharpReference x:TypeArguments="nsjl:JObject">Contador</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="nsjl:JObject">
+          <CSharpValue x:TypeArguments="nsjl:JObject">SMContadorRaw != null ? JObject.Parse(SMContadorRaw.ToString()) : new JObject()</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <Assign DisplayName="Posts publicados hoje" sap2010:WorkflowViewState.IdRef="Assign_posts_hoje">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">
+          <CSharpReference x:TypeArguments="x:Int32">PostsHoje</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">
+          <CSharpValue x:TypeArguments="x:Int32">Contador["data"] == null ? 0 : (Contador["data"].ToString() == DateTime.UtcNow.ToString("yyyy-MM-dd") ? Convert.ToInt32(Contador["count"]) : 0)</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <Assign DisplayName="Montar ExecucaoContext" sap2010:WorkflowViewState.IdRef="Assign_context">
       <Assign.To>
         <OutArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)">
-          <CSharpReference x:TypeArguments="scg:Dictionary(x:String, x:Object)" sap2010:WorkflowViewState.IdRef="CSharpReference`1_1">out_ExecucaoContext</CSharpReference>
+          <CSharpReference x:TypeArguments="scg:Dictionary(x:String, x:Object)">out_ExecucaoContext</CSharpReference>
         </OutArgument>
       </Assign.To>
       <Assign.Value>
         <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)">
-          <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">new Dictionary&lt;string, object&gt;()</CSharpValue>
+          <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">new Dictionary&lt;string, object&gt; {
+  {"Config", SMConfigRaw != null ? JObject.Parse(SMConfigRaw.ToString()) : ConfigLocal},
+  {"ContadorDiario", Contador},
+  {"UltimoPollComentarios", SMPollRaw == null ? null : SMPollRaw.ToString()},
+  {"ModoExecucao", in_ModoExecucao ?? "ConsumirFila"},
+  {"Plataformas", in_Plataformas ?? new List&lt;string&gt; { "Instagram", "Facebook" }},
+  {"Nicho", in_NichoCampanha},
+  {"TomDeVoz", in_TomDeVoz},
+  {"JanelaPublicacao", in_JanelaPublicacao},
+  {"LimitePostsDia", in_LimitePostsDia},
+  {"PostsPublicadosHoje", PostsHoje},
+  {"Alertas", new List&lt;string&gt;()},
+  {"Processados", 0},
+  {"Falhos", 0}
+}</CSharpValue>
         </InArgument>
       </Assign.Value>
     </Assign>
-    <ui:LogMessage DisplayName="Stub InitAllSettings" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info">
+    <ui:LogMessage DisplayName="Init concluído" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info">
       <ui:LogMessage.Message>
         <InArgument x:TypeArguments="x:Object">
-          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_2">"InitAllSettings stub — implementar em T4 (assets + SM_Config)"</CSharpValue>
+          <CSharpValue x:TypeArguments="x:Object">"InitAllSettings OK — modo=" + (in_ModoExecucao ?? "ConsumirFila") + ", postsHoje=" + PostsHoje</CSharpValue>
         </InArgument>
       </ui:LogMessage.Message>
     </ui:LogMessage>

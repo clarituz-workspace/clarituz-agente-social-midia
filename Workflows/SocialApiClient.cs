@@ -40,6 +40,13 @@ namespace clarituz_agente_social_midia
             _http = new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSegundos) };
         }
 
+        // Overload para receber credenciais de Orchestrator sem materializar texto em XAML (ST-SEC-009).
+        public SocialApiClient(System.Security.SecureString metaToken, System.Security.SecureString linkedInToken, int timeoutSegundos = 30)
+            : this(SecureParaTexto(metaToken), SecureParaTexto(linkedInToken), timeoutSegundos) { }
+
+        private static string SecureParaTexto(System.Security.SecureString seguro)
+            => seguro == null ? null : new System.Net.NetworkCredential(string.Empty, seguro).Password;
+
         public void Dispose() => _http?.Dispose();
 
         // ── Health check (InitAllApplications — fail-fast BR-10/E4) ──

@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="Framework_InitAllApplications" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="Framework_InitAllApplications" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
   </x:Members>
@@ -9,9 +9,13 @@
       <x:String>GlobalConstantsNamespace</x:String>
       <x:String>GlobalVariablesNamespace</x:String>
       <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
       <x:String>System.Collections.Generic</x:String>
       <x:String>System.Collections.ObjectModel</x:String>
       <x:String>System.Linq</x:String>
+      <x:String>System.Net</x:String>
+      <x:String>System.Net.Http</x:String>
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
     </sco:Collection>
@@ -20,22 +24,172 @@
     <sco:Collection x:TypeArguments="AssemblyReference">
       <AssemblyReference>System</AssemblyReference>
       <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Net.Http</AssemblyReference>
+      <AssemblyReference>System.Net.Primitives</AssemblyReference>
       <AssemblyReference>UiPath.System.Activities</AssemblyReference>
       <AssemblyReference>System.Linq</AssemblyReference>
       <AssemblyReference>System.ObjectModel</AssemblyReference>
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="InitAllApplications" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="InitAllApplications — health check fail-fast (BR-10/E4)" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:Int32" Name="MetaStatus" />
+      <Variable x:TypeArguments="x:Int32" Name="LinkedInStatus" />
+      <Variable x:TypeArguments="x:Boolean" Name="MetaOk" />
+      <Variable x:TypeArguments="x:Boolean" Name="LinkedInOk" />
+      <Variable x:TypeArguments="x:String" Name="MetaBody" />
+      <Variable x:TypeArguments="x:String" Name="LinkedInBody" />
+    </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:LogMessage DisplayName="Stub InitAllApplications" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info">
+    <Sequence DisplayName="Health check Meta" sap2010:WorkflowViewState.IdRef="Sequence_meta">
+      <Sequence.Variables>
+        <Variable x:TypeArguments="sec:SecureString" Name="MetaSecure" />
+      </Sequence.Variables>
+      <ui:GetRobotCredential AssetName="Meta_SystemUserToken" CacheStrategy="None" DisplayName="Ler credencial Meta" sap2010:WorkflowViewState.IdRef="GetRobotCredential_meta">
+        <ui:GetRobotCredential.Password>
+          <OutArgument x:TypeArguments="sec:SecureString">
+            <CSharpReference x:TypeArguments="sec:SecureString">MetaSecure</CSharpReference>
+          </OutArgument>
+        </ui:GetRobotCredential.Password>
+      </ui:GetRobotCredential>
+      <ui:InvokeCode Code="ok = false;&#xA;try&#xA;{&#xA;    var texto = metaSecure == null ? null : new System.Net.NetworkCredential(string.Empty, metaSecure).Password;&#xA;    if (string.IsNullOrEmpty(texto) || texto.StartsWith(&quot;PENDING&quot;))&#xA;    {&#xA;        status = -2; body = &quot;token pendente&quot;; ok = true;&#xA;    }&#xA;    else&#xA;    {&#xA;        using (var api = new clarituz_agente_social_midia.SocialApiClient(metaSecure, null))&#xA;        {&#xA;            var r = api.HealthCheckMetaAsync().GetAwaiter().GetResult();&#xA;            status = 200; ok = true; body = r.ToString();&#xA;        }&#xA;    }&#xA;}&#xA;catch (clarituz_agente_social_midia.SocialApiException saex) { status = saex.StatusCode; body = saex.Message; }&#xA;catch (Exception ex) { status = -1; body = ex.Message; }" DisplayName="GET /me via SocialApiClient" sap2010:WorkflowViewState.IdRef="InvokeCode_meta">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <InArgument x:TypeArguments="sec:SecureString" x:Key="metaSecure">
+              <CSharpValue x:TypeArguments="sec:SecureString">MetaSecure</CSharpValue>
+            </InArgument>
+            <OutArgument x:TypeArguments="x:Int32" x:Key="status">
+              <CSharpReference x:TypeArguments="x:Int32">MetaStatus</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Boolean" x:Key="ok">
+              <CSharpReference x:TypeArguments="x:Boolean">MetaOk</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="body">
+              <CSharpReference x:TypeArguments="x:String">MetaBody</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+      <If DisplayName="Resultado Meta" sap2010:WorkflowViewState.IdRef="If_meta">
+        <If.Condition>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">MetaStatus == -2</CSharpValue>
+          </InArgument>
+        </If.Condition>
+        <If.Then>
+          <Sequence DisplayName="Token Meta pendente" sap2010:WorkflowViewState.IdRef="Sequence_meta_skip">
+            <ui:LogMessage DisplayName="Token Meta pendente — skip" sap2010:WorkflowViewState.IdRef="LogMessage_meta_skip" Level="Warn">
+              <ui:LogMessage.Message>
+                <InArgument x:TypeArguments="x:Object">
+                  <CSharpValue x:TypeArguments="x:Object">"Meta_SystemUserToken não configurado (PENDING) — health check Meta ignorado"</CSharpValue>
+                </InArgument>
+              </ui:LogMessage.Message>
+            </ui:LogMessage>
+          </Sequence>
+        </If.Then>
+        <If.Else>
+          <Sequence DisplayName="Avaliar Meta" sap2010:WorkflowViewState.IdRef="Sequence_meta_eval">
+            <If DisplayName="Meta OK?" sap2010:WorkflowViewState.IdRef="If_meta_ok">
+              <If.Condition>
+                <InArgument x:TypeArguments="x:Boolean">
+                  <CSharpValue x:TypeArguments="x:Boolean">!MetaOk</CSharpValue>
+                </InArgument>
+              </If.Condition>
+              <If.Then>
+                <Sequence DisplayName="Falha Meta" sap2010:WorkflowViewState.IdRef="Sequence_meta_fail">
+                  <Throw DisplayName="Health check Meta falhou — fail-fast" sap2010:WorkflowViewState.IdRef="Throw_meta">
+                    <Throw.Exception>
+                      <InArgument x:TypeArguments="s:Exception">
+                        <CSharpValue x:TypeArguments="s:Exception">new InvalidOperationException("Health check Meta falhou: HTTP " + MetaStatus + " — verifique Meta_SystemUserToken (expirado? escopos de leitura?)")</CSharpValue>
+                      </InArgument>
+                    </Throw.Exception>
+                  </Throw>
+                </Sequence>
+              </If.Then>
+            </If>
+          </Sequence>
+        </If.Else>
+      </If>
+    </Sequence>
+    <Sequence DisplayName="Health check LinkedIn" sap2010:WorkflowViewState.IdRef="Sequence_li">
+      <Sequence.Variables>
+        <Variable x:TypeArguments="sec:SecureString" Name="LinkedInSecure" />
+      </Sequence.Variables>
+      <ui:GetRobotCredential AssetName="LinkedIn_AccessToken" CacheStrategy="None" DisplayName="Ler credencial LinkedIn" sap2010:WorkflowViewState.IdRef="GetRobotCredential_li">
+        <ui:GetRobotCredential.Password>
+          <OutArgument x:TypeArguments="sec:SecureString">
+            <CSharpReference x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpReference>
+          </OutArgument>
+        </ui:GetRobotCredential.Password>
+      </ui:GetRobotCredential>
+      <ui:InvokeCode Code="ok = false;&#xA;try&#xA;{&#xA;    var texto = linkedInSecure == null ? null : new System.Net.NetworkCredential(string.Empty, linkedInSecure).Password;&#xA;    if (string.IsNullOrEmpty(texto) || texto.StartsWith(&quot;PENDING&quot;))&#xA;    {&#xA;        status = -2; body = &quot;token pendente&quot;; ok = true;&#xA;    }&#xA;    else&#xA;    {&#xA;        using (var api = new clarituz_agente_social_midia.SocialApiClient(null, linkedInSecure))&#xA;        {&#xA;            var r = api.HealthCheckLinkedInAsync().GetAwaiter().GetResult();&#xA;            status = 200; ok = true; body = r.ToString();&#xA;        }&#xA;    }&#xA;}&#xA;catch (clarituz_agente_social_midia.SocialApiException saex) { status = saex.StatusCode; body = saex.Message; }&#xA;catch (Exception ex) { status = -1; body = ex.Message; }" DisplayName="GET /v2/me via SocialApiClient" sap2010:WorkflowViewState.IdRef="InvokeCode_li">
+        <ui:InvokeCode.Arguments>
+          <scg:Dictionary x:TypeArguments="x:String, Argument">
+            <InArgument x:TypeArguments="sec:SecureString" x:Key="linkedInSecure">
+              <CSharpValue x:TypeArguments="sec:SecureString">LinkedInSecure</CSharpValue>
+            </InArgument>
+            <OutArgument x:TypeArguments="x:Int32" x:Key="status">
+              <CSharpReference x:TypeArguments="x:Int32">LinkedInStatus</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:Boolean" x:Key="ok">
+              <CSharpReference x:TypeArguments="x:Boolean">LinkedInOk</CSharpReference>
+            </OutArgument>
+            <OutArgument x:TypeArguments="x:String" x:Key="body">
+              <CSharpReference x:TypeArguments="x:String">LinkedInBody</CSharpReference>
+            </OutArgument>
+          </scg:Dictionary>
+        </ui:InvokeCode.Arguments>
+      </ui:InvokeCode>
+      <If DisplayName="Resultado LinkedIn" sap2010:WorkflowViewState.IdRef="If_li">
+        <If.Condition>
+          <InArgument x:TypeArguments="x:Boolean">
+            <CSharpValue x:TypeArguments="x:Boolean">LinkedInStatus == -2</CSharpValue>
+          </InArgument>
+        </If.Condition>
+        <If.Then>
+          <Sequence DisplayName="Token LinkedIn pendente" sap2010:WorkflowViewState.IdRef="Sequence_li_skip">
+            <ui:LogMessage DisplayName="Token LinkedIn pendente — skip" sap2010:WorkflowViewState.IdRef="LogMessage_li_skip" Level="Warn">
+              <ui:LogMessage.Message>
+                <InArgument x:TypeArguments="x:Object">
+                  <CSharpValue x:TypeArguments="x:Object">"LinkedIn_AccessToken não configurado (PENDING) — health check LinkedIn ignorado"</CSharpValue>
+                </InArgument>
+              </ui:LogMessage.Message>
+            </ui:LogMessage>
+          </Sequence>
+        </If.Then>
+        <If.Else>
+          <Sequence DisplayName="Avaliar LinkedIn" sap2010:WorkflowViewState.IdRef="Sequence_li_eval">
+            <If DisplayName="LinkedIn OK?" sap2010:WorkflowViewState.IdRef="If_li_ok">
+              <If.Condition>
+                <InArgument x:TypeArguments="x:Boolean">
+                  <CSharpValue x:TypeArguments="x:Boolean">!LinkedInOk</CSharpValue>
+                </InArgument>
+              </If.Condition>
+              <If.Then>
+                <Sequence DisplayName="Falha LinkedIn" sap2010:WorkflowViewState.IdRef="Sequence_li_fail">
+                  <Throw DisplayName="Health check LinkedIn falhou — fail-fast" sap2010:WorkflowViewState.IdRef="Throw_li">
+                    <Throw.Exception>
+                      <InArgument x:TypeArguments="s:Exception">
+                        <CSharpValue x:TypeArguments="s:Exception">new InvalidOperationException("Health check LinkedIn falhou: HTTP " + LinkedInStatus + " — verifique LinkedIn_AccessToken (expirado? r_organization_social?)")</CSharpValue>
+                      </InArgument>
+                    </Throw.Exception>
+                  </Throw>
+                </Sequence>
+              </If.Then>
+            </If>
+          </Sequence>
+        </If.Else>
+      </If>
+    </Sequence>
+    <ui:LogMessage DisplayName="Health check concluído" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
       <ui:LogMessage.Message>
         <InArgument x:TypeArguments="x:Object">
-          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">"InitAllApplications stub — implementar em T4 (health check Meta/LinkedIn/GenAI, fail-fast BR-10)"</CSharpValue>
+          <CSharpValue x:TypeArguments="x:Object">"InitAllApplications OK — Meta=" + MetaStatus + " LinkedIn=" + LinkedInStatus</CSharpValue>
         </InArgument>
       </ui:LogMessage.Message>
     </ui:LogMessage>

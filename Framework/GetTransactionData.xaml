@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="Framework_GetTransactionData" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="Framework_GetTransactionData" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uocm="clr-namespace:UiPath.Core;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
     <x:Property Name="out_TransactionItem" Type="OutArgument(x:Object)" />
@@ -11,11 +11,14 @@
       <x:String>GlobalConstantsNamespace</x:String>
       <x:String>GlobalVariablesNamespace</x:String>
       <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
       <x:String>System.Collections.Generic</x:String>
       <x:String>System.Collections.ObjectModel</x:String>
       <x:String>System.Linq</x:String>
       <x:String>UiPath.Core</x:String>
       <x:String>UiPath.Core.Activities</x:String>
+      <x:String>UiPath.Orchestrator.Client.Models</x:String>
     </sco:Collection>
   </TextExpression.NamespacesForImplementation>
   <TextExpression.ReferencesForImplementation>
@@ -23,33 +26,62 @@
       <AssemblyReference>System</AssemblyReference>
       <AssemblyReference>System.Private.CoreLib</AssemblyReference>
       <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.OrchestratorClient</AssemblyReference>
       <AssemblyReference>System.Linq</AssemblyReference>
       <AssemblyReference>System.ObjectModel</AssemblyReference>
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="GetTransactionData" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="GetTransactionData — dequeue SM_WorkItems" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="uocm:QueueItem" Name="QueueItemVar" />
+      <Variable x:TypeArguments="x:Object" Name="ItemData" />
+    </Sequence.Variables>
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <Assign DisplayName="Sem item (stub T4 — dequeue SM_WorkItems)" sap2010:WorkflowViewState.IdRef="Assign_1">
+    <ui:GetQueueItem DisplayName="Dequeue SM_WorkItems" FilterStrategy="StartsWith" QueueType="SM_WorkItems" sap2010:WorkflowViewState.IdRef="GetQueueItem_1">
+      <ui:GetQueueItem.TransactionItem>
+        <OutArgument x:TypeArguments="uocm:QueueItem">
+          <CSharpReference x:TypeArguments="uocm:QueueItem">QueueItemVar</CSharpReference>
+        </OutArgument>
+      </ui:GetQueueItem.TransactionItem>
+      <ui:GetQueueItem.SpecificData>
+        <OutArgument x:TypeArguments="x:Object">
+          <CSharpReference x:TypeArguments="x:Object">ItemData</CSharpReference>
+        </OutArgument>
+      </ui:GetQueueItem.SpecificData>
+    </ui:GetQueueItem>
+    <Assign DisplayName="TransactionItem" sap2010:WorkflowViewState.IdRef="Assign_1">
       <Assign.To>
         <OutArgument x:TypeArguments="x:Object">
-          <CSharpReference x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpReference`1_1">out_TransactionItem</CSharpReference>
+          <CSharpReference x:TypeArguments="x:Object">out_TransactionItem</CSharpReference>
         </OutArgument>
       </Assign.To>
       <Assign.Value>
         <InArgument x:TypeArguments="x:Object">
-          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">null</CSharpValue>
+          <CSharpValue x:TypeArguments="x:Object">QueueItemVar</CSharpValue>
         </InArgument>
       </Assign.Value>
     </Assign>
-    <ui:LogMessage DisplayName="Stub GetTransactionData" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info">
+    <Assign DisplayName="TransactionData (SpecificContent)" sap2010:WorkflowViewState.IdRef="Assign_2">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Object">
+          <CSharpReference x:TypeArguments="x:Object">out_TransactionData</CSharpReference>
+        </OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object">ItemData</CSharpValue>
+        </InArgument>
+      </Assign.Value>
+    </Assign>
+    <ui:LogMessage DisplayName="Item obtido" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info">
       <ui:LogMessage.Message>
         <InArgument x:TypeArguments="x:Object">
-          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_2">"GetTransactionData stub — implementar em T4 (dequeue SM_WorkItems → WorkItemData)"</CSharpValue>
+          <CSharpValue x:TypeArguments="x:Object">QueueItemVar == null ? "SM_WorkItems vazia — nenhuma transação" : "Dequeue: ref=" + QueueItemVar.Reference + " tipo=" + (QueueItemVar.SpecificContent.ContainsKey("TipoTransacao") ? Convert.ToString(QueueItemVar.SpecificContent["TipoTransacao"]) : "?")</CSharpValue>
         </InArgument>
       </ui:LogMessage.Message>
     </ui:LogMessage>
