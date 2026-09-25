@@ -229,14 +229,25 @@
                 </Assign.Value>
               </Assign>
             </Sequence>
-            <Sequence x:Key="ModerarComentario" DisplayName="ModerarComentario (T7)" sap2010:WorkflowViewState.IdRef="Case_moderar">
-              <ui:LogMessage DisplayName="ModerarComentario pendente" sap2010:WorkflowViewState.IdRef="LogMessage_moderar" Level="Warn">
-                <ui:LogMessage.Message>
-                  <InArgument x:TypeArguments="x:Object">
-                    <CSharpValue x:TypeArguments="x:Object">"ModerarComentario recebido — pipeline implementado na T7"</CSharpValue>
-                  </InArgument>
-                </ui:LogMessage.Message>
-              </ui:LogMessage>
+            <Sequence x:Key="ModerarComentario" DisplayName="Pipeline ModerarComentario" sap2010:WorkflowViewState.IdRef="Case_moderar">
+              <Sequence.Variables>
+                <Variable x:TypeArguments="nsjl:JObject" Name="Sugestao" />
+              </Sequence.Variables>
+              <ui:InvokeWorkflowFile DisplayName="Sentimento → task com sugestão" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_moderar" WorkflowFileName="logica/Moderar_Comentario.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="x:Object" x:Key="in_TransactionData">
+                      <CSharpValue x:TypeArguments="x:Object">SpecData</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="nsjl:JObject" x:Key="out_Sugestao">
+                      <CSharpReference x:TypeArguments="nsjl:JObject">Sugestao</CSharpReference>
+                    </OutArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
             </Sequence>
             <Sequence x:Key="ColetarMetricas" DisplayName="ColetarMetricas (T8)" sap2010:WorkflowViewState.IdRef="Case_metricas">
               <ui:LogMessage DisplayName="ColetarMetricas pendente" sap2010:WorkflowViewState.IdRef="LogMessage_metricas" Level="Warn">

@@ -117,16 +117,16 @@
 ## Task T7 — uipath-rpa — Moderar_Comentario (suggestion tasks only)
 
 **Identity:** `rpa:clarituz-agente-social-midia:moderar-comentario`
-**Status:** [ ] pending
+**Status:** [x] done
 **Blocked by:** T3, T4
 **Skill prompt:**
 
 > Load uipath-rpa and implement `logica/Moderar_Comentario.xaml` per §3 step 8 and BR-09 of `clarituz-agente-social-midia-sdd.md`: LLM sentiment classification → `SugestaoModeracao` → Form Task to the human with suggested reply (priority High for Negativo/Crise; SugereOcultar for Spam). The robot NEVER replies, hides, or deletes on the platform — human executes. Delivery model: cloud.
 > Use values, mappings, and structure exactly as documented in the SDD at clarituz-agente-social-midia-sdd.md. Do not infer or guess.
 
-- [ ] Sentiment classification via ConteudoService.cs
-- [ ] Suggestion task creation with priority per §6 mapping
-- [ ] **Validate:** per-file validate + project build clean
+- [x] Sentiment classification via `ConteudoService.MontarPromptSentimento`/`ParsearSugestao` + `shared/LLM_Completion.xaml`
+- [x] Suggestion task creation with priority per §6 mapping — `TaskPriority` é enum literal não-bindável → If/Else com dois `CreateFormTask` (High para Negativo/Crise, Medium demais); Crise também gera LogMessage Error (alerta imediato); task é fire-and-forget (sem wait — nada depende da ação do humano, evita ST-DBP-024); case `ModerarComentario` conectado no `Process.xaml`
+- [x] **Validate:** per-file validate 0 erros + `uip rpa build` Success
 
 ## Task T8 — uipath-rpa — Coletar_Metricas + Relatorio_Execucao + Process routing
 

@@ -1,0 +1,280 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Moderar_Comentario" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:njl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:upaf="clr-namespace:UiPath.Persistence.Activities.FormTask;assembly=UiPath.Persistence.Activities" xmlns:upat="clr-namespace:UiPath.Persistence.Activities.Tasks;assembly=UiPath.Persistence.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_Sugestao" Type="OutArgument(njl:JObject)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Persistence.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="ModerarComentario — LLM classifica → task com resposta sugerida (robô nunca escreve)" sap:VirtualizedContainerService.HintSize="1174,744" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="Prompt" />
+      <Variable x:TypeArguments="x:String" Name="RespostaLLM" />
+      <Variable x:TypeArguments="x:String" Name="CommentId" />
+      <Variable x:TypeArguments="x:String" Name="CommentTexto" />
+      <Variable x:TypeArguments="x:String" Name="CommentAutor" />
+      <Variable x:TypeArguments="x:String" Name="Plataforma" />
+      <Variable x:TypeArguments="x:String" Name="Sentimento" />
+      <Variable x:TypeArguments="x:String" Name="RespostaSugerida" />
+      <Variable x:TypeArguments="x:String" Name="AcaoTexto" />
+      <Variable x:TypeArguments="x:String" Name="Titulo" />
+      <Variable x:TypeArguments="x:Boolean" Name="PrioridadeAlta" />
+      <Variable x:TypeArguments="x:Boolean" Name="SugereOcultar" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode ContinueOnError="{x:Null}" Code="var data = inData == null ? new JObject() : JObject.FromObject(inData);&#xA;var item = new clarituz_agente_social_midia.WorkItemData&#xA;{&#xA;    TipoTransacao = &quot;ModerarComentario&quot;,&#xA;    Plataforma = data[&quot;Plataforma&quot;] == null ? &quot;&quot; : data[&quot;Plataforma&quot;].ToString(),&#xA;    TomDeVoz = data[&quot;TomDeVoz&quot;] == null ? &quot;&quot; : data[&quot;TomDeVoz&quot;].ToString(),&#xA;    CommentId = data[&quot;CommentId&quot;] == null ? &quot;&quot; : data[&quot;CommentId&quot;].ToString(),&#xA;    CommentTexto = data[&quot;CommentTexto&quot;] == null ? &quot;&quot; : data[&quot;CommentTexto&quot;].ToString(),&#xA;    CommentAutor = data[&quot;CommentAutor&quot;] == null ? &quot;&quot; : data[&quot;CommentAutor&quot;].ToString()&#xA;};&#xA;commentId = item.CommentId;&#xA;commentTexto = item.CommentTexto;&#xA;commentAutor = item.CommentAutor;&#xA;plataforma = item.Plataforma;&#xA;prompt = clarituz_agente_social_midia.ConteudoService.MontarPromptSentimento(item);" DisplayName="Montar prompt de sentimento" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="InvokeCode_prompt">
+      <ui:InvokeCode.Arguments>
+        <InArgument x:TypeArguments="x:Object" x:Key="inData">
+          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">in_TransactionData</CSharpValue>
+        </InArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="prompt">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_1">Prompt</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="commentId">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_2">CommentId</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="commentTexto">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_3">CommentTexto</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="commentAutor">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_4">CommentAutor</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="plataforma">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_5">Plataforma</CSharpReference>
+        </OutArgument>
+      </ui:InvokeCode.Arguments>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:InvokeCode>
+    <ui:InvokeWorkflowFile ArgumentsVariable="{x:Null}" DisplayName="LLM: classificar sentimento" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_llm" UnSafe="False" WorkflowFileName="shared/LLM_Completion.xaml">
+      <ui:InvokeWorkflowFile.Arguments>
+        <InArgument x:TypeArguments="x:String" x:Key="in_Prompt">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_2">Prompt</CSharpValue>
+        </InArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="out_Texto">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_6">RespostaLLM</CSharpReference>
+        </OutArgument>
+      </ui:InvokeWorkflowFile.Arguments>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:InvokeWorkflowFile>
+    <ui:InvokeCode ContinueOnError="{x:Null}" Code="var sugestao = clarituz_agente_social_midia.ConteudoService.ParsearSugestao(resposta, commentId);&#xA;sugestaoJson = JObject.FromObject(sugestao);&#xA;sentimento = sugestao.Sentimento ?? &quot;Neutro&quot;;&#xA;respostaSugerida = sugestao.RespostaSugerida ?? &quot;&quot;;&#xA;prioridadeAlta = sugestao.PrioridadeAlta;&#xA;sugereOcultar = sugestao.SugereOcultar;&#xA;acaoTexto = sugereOcultar ? &quot;SugereOcultar — avaliar ocultação do comentário (spam). O robô não oculta; você decide e executa.&quot; : (prioridadeAlta ? &quot;SugerirRespostaPrioritaria — responder com urgência usando a resposta sugerida.&quot; : &quot;SugerirResposta — responder usando a resposta sugerida (editável).&quot;);&#xA;titulo = &quot;Moderar comentário — &quot; + plataforma + &quot; — &quot; + sentimento + &quot; (&quot; + commentId + &quot;)&quot;;" DisplayName="Parsear SugestaoModeracao (E5)" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="InvokeCode_parse">
+      <ui:InvokeCode.Arguments>
+        <InArgument x:TypeArguments="x:String" x:Key="resposta">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_3">RespostaLLM</CSharpValue>
+        </InArgument>
+        <InArgument x:TypeArguments="x:String" x:Key="commentId">
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_4">CommentId</CSharpValue>
+        </InArgument>
+        <OutArgument x:TypeArguments="njl:JObject" x:Key="sugestaoJson">
+          <CSharpReference x:TypeArguments="njl:JObject" sap2010:WorkflowViewState.IdRef="CSharpReference`1_7">out_Sugestao</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="sentimento">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_8">Sentimento</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="respostaSugerida">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_9">RespostaSugerida</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:Boolean" x:Key="prioridadeAlta">
+          <CSharpReference x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpReference`1_10">PrioridadeAlta</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:Boolean" x:Key="sugereOcultar">
+          <CSharpReference x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpReference`1_11">SugereOcultar</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="acaoTexto">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_12">AcaoTexto</CSharpReference>
+        </OutArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="titulo">
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_13">Titulo</CSharpReference>
+        </OutArgument>
+      </ui:InvokeCode.Arguments>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:InvokeCode>
+    <If DisplayName="Crise? alerta imediato" sap:VirtualizedContainerService.HintSize="480,264" sap2010:WorkflowViewState.IdRef="If_crise">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_5">Sentimento == "Crise"</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Alerta de crise" sap:VirtualizedContainerService.HintSize="480,96" sap2010:WorkflowViewState.IdRef="Sequence_crise">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+          <ui:LogMessage DisplayName="ALERTA CRISE" sap:VirtualizedContainerService.HintSize="450,48" sap2010:WorkflowViewState.IdRef="LogMessage_crise" Level="Error">
+            <ui:LogMessage.Message>
+              <InArgument x:TypeArguments="x:Object">
+                <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_6">"CRISE: comentário " + CommentId + " em " + Plataforma + " exige escalonamento imediato — task crítica criada no Action Center"</CSharpValue>
+              </InArgument>
+            </ui:LogMessage.Message>
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+          </ui:LogMessage>
+        </Sequence>
+      </If.Then>
+    </If>
+    <If DisplayName="Prioridade alta? (Negativo/Crise)" sap:VirtualizedContainerService.HintSize="480,264" sap2010:WorkflowViewState.IdRef="If_prioridade">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean" sap2010:WorkflowViewState.IdRef="CSharpValue`1_7">PrioridadeAlta</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Task prioridade alta" sap:VirtualizedContainerService.HintSize="480,96" sap2010:WorkflowViewState.IdRef="Sequence_task_high">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+          <upaf:CreateFormTask AssignmentCriteria="{x:Reference __ReferenceID0}" AutoCompleteOutcome="{x:Null}" BucketFolderPath="{x:Null}" BucketName="{x:Null}" BulkFormLayout="{x:Null}" DynamicFormPath="{x:Null}" ExternalTag="{x:Null}" FormLayout="{x:Null}" Group="{x:Null}" Labels="{x:Null}" ReassignGroup="{x:Null}" ReassignUser="{x:Null}" TaskCatalog="{x:Null}" TaskOutput="{x:Null}" TimeoutMs="{x:Null}" TimerDuration="{x:Null}" UserNameOrEmail="{x:Null}" BulkFormLayoutGuid="1e844665-ddd9-4211-a57d-82bbfae6b086" DisplayName="Task moderação (High)" EnableBulkEdit="False" EnableDynamicForms="False" EnableV2="True" EndCriteria="TaskCompleted" FormLayoutGuid="8ccfb056-f852-464c-b203-0ab5325c9507" GenerateInputFields="True" sap:VirtualizedContainerService.HintSize="450,48" sap2010:WorkflowViewState.IdRef="CreateFormTask_high" Outcome="Notify" StartCriteria="TaskCreated" TaskPriority="High" TaskTimerEnabled="False">
+            <upaf:CreateFormTask.FormData>
+              <InArgument x:TypeArguments="x:String" x:Key="plataforma">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_8">Plataforma</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="comment_id">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_9">CommentId</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="comentario_autor">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_10">CommentAutor</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="comentario_texto">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_11">CommentTexto</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="sentimento">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_12">Sentimento</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="acao_sugerida">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_13">AcaoTexto</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="resposta_sugerida">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_14">RespostaSugerida</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="instrucao">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_15">"O robô NUNCA responde, oculta ou deleta. Revise a sugestão, edite se necessário e execute a ação diretamente na plataforma."</CSharpValue>
+              </InArgument>
+            </upaf:CreateFormTask.FormData>
+            <upaf:CreateFormTask.ReassignCriteria>
+              <upat:Criteria x:Name="__ReferenceID0" Description="SingleUserDescription" Id="SingleUser" Name="Activity_AssignTasks_AssignmentCriteria_SingleUserName" />
+            </upaf:CreateFormTask.ReassignCriteria>
+            <upaf:CreateFormTask.TaskTitle>
+              <InArgument x:TypeArguments="x:String">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_16">Titulo</CSharpValue>
+              </InArgument>
+            </upaf:CreateFormTask.TaskTitle>
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+          </upaf:CreateFormTask>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Task prioridade normal" sap:VirtualizedContainerService.HintSize="480,96" sap2010:WorkflowViewState.IdRef="Sequence_task_medium">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+          <upaf:CreateFormTask AssignmentCriteria="{x:Reference __ReferenceID0}" AutoCompleteOutcome="{x:Null}" BucketFolderPath="{x:Null}" BucketName="{x:Null}" BulkFormLayout="{x:Null}" DynamicFormPath="{x:Null}" ExternalTag="{x:Null}" FormLayout="{x:Null}" Group="{x:Null}" Labels="{x:Null}" ReassignCriteria="{x:Reference __ReferenceID0}" ReassignGroup="{x:Null}" ReassignUser="{x:Null}" TaskCatalog="{x:Null}" TaskOutput="{x:Null}" TimeoutMs="{x:Null}" TimerDuration="{x:Null}" UserNameOrEmail="{x:Null}" BulkFormLayoutGuid="5255f794-570b-46ac-941e-3317786b2834" DisplayName="Task moderação (Medium)" EnableBulkEdit="False" EnableDynamicForms="False" EnableV2="True" EndCriteria="TaskCompleted" FormLayoutGuid="8377689e-57a0-4a18-97ad-a432c73bb049" GenerateInputFields="True" sap:VirtualizedContainerService.HintSize="450,48" sap2010:WorkflowViewState.IdRef="CreateFormTask_medium" Outcome="Notify" StartCriteria="TaskCreated" TaskPriority="Medium" TaskTimerEnabled="False">
+            <upaf:CreateFormTask.FormData>
+              <InArgument x:TypeArguments="x:String" x:Key="plataforma">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_17">Plataforma</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="comment_id">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_18">CommentId</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="comentario_autor">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_19">CommentAutor</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="comentario_texto">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_20">CommentTexto</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="sentimento">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_21">Sentimento</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="acao_sugerida">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_22">AcaoTexto</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="resposta_sugerida">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_23">RespostaSugerida</CSharpValue>
+              </InArgument>
+              <InArgument x:TypeArguments="x:String" x:Key="instrucao">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_24">"O robô NUNCA responde, oculta ou deleta. Revise a sugestão, edite se necessário e execute a ação diretamente na plataforma."</CSharpValue>
+              </InArgument>
+            </upaf:CreateFormTask.FormData>
+            <upaf:CreateFormTask.TaskTitle>
+              <InArgument x:TypeArguments="x:String">
+                <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_25">Titulo</CSharpValue>
+              </InArgument>
+            </upaf:CreateFormTask.TaskTitle>
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+          </upaf:CreateFormTask>
+        </Sequence>
+      </If.Else>
+    </If>
+    <ui:LogMessage DisplayName="Task de moderação criada" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="LogMessage_done" Level="Info">
+      <ui:LogMessage.Message>
+        <InArgument x:TypeArguments="x:Object">
+          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_26">"ModerarComentario " + CommentId + ": sentimento=" + Sentimento + " prioridadeAlta=" + PrioridadeAlta + " sugereOcultar=" + SugereOcultar + " — task entregue ao humano (fire-and-forget, sem wait)"</CSharpValue>
+        </InArgument>
+      </ui:LogMessage.Message>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
+    </ui:LogMessage>
+  </Sequence>
+</Activity>
