@@ -13,7 +13,8 @@ A Camila é uma assistente automatizada que trabalha em três frentes do social 
 ### 1. Geração de conteúdo (todo dia, 07h)
 
 - **A própria Camila monta o calendário editorial**: toda segunda-feira às 06h30, a IA planeja os posts da semana inteira — distribuídos por dia e plataforma, alternando formatos (feed, reels, carrossel, stories) e objetivos (educar, engajar, converter, prova social, oferta)
-- Todo dia, ela pega **as pautas programadas para hoje** no calendário e produz o **pacote completo de publicação**: legenda otimizada, hashtags, sugestão de mídia e janela de horário recomendada
+- Todo dia, ela pega **as pautas programadas para hoje** no calendário e produz o **pacote completo de publicação**: legenda otimizada, hashtags e janela de horário recomendada
+- **Geração de arte por IA (opcional):** quando ativada, a Camila também cria a imagem do post automaticamente via OpenAI — a arte já chega anexada na aprovação. Se desligada ou se falhar, o operador anexa a mídia manualmente como antes
 - Se o calendário não existir ou o dia estiver livre, ela gera pautas sob demanda — o processo nunca fica parado
 - Antes de chegar ao humano, todo conteúdo passa por **validação automática de compliance**: tamanho da legenda, limite de hashtags, mídia presente, formato de arquivo válido e lista de **termos proibidos** (palavras que a marca não quer associadas)
 
@@ -23,7 +24,7 @@ Ponto central do design: **a Camila não publica nada automaticamente**.
 
 - Cada post vira uma **tarefa de aprovação** que aparece no Action Center (pode ser acessado pelo navegador ou celular)
 - A tarefa mostra o pacote completo: plataforma, tema, legenda, hashtags, link da mídia e o horário sugerido
-- O responsável pode **aprovar, editar a legenda ou rejeitar** (com motivo)
+- O responsável pode **aprovar, editar a legenda ou rejeitar** (com motivo) — e revisar a arte gerada pela IA antes de qualquer publicação
 - Se ninguém responder em **48 horas**, a tarefa expira e o item é descartado com segurança
 - Após aprovar, **o próprio humano publica** no Instagram/Facebook e cola a URL do post na tarefa — a Camila usa essa URL apenas para localizar o post e acompanhar as métricas
 

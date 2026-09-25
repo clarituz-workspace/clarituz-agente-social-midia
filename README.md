@@ -17,7 +17,8 @@ Main.xaml (StateMachine REFramework, suspend/resume)
           │    ├── AgendarMetricas    → logica/Agendar_Metricas.xaml     (posts vencidos → enqueue ColetarMetricas)
           │    └── Relatorio          → logica/Relatorio_Execucao.xaml   (contadores → log + bucket)
           └── Modo ConsumirFila (queue trigger, por TipoTransacao):
-               ├── GerarConteudo      → Gerar_Conteudo → Validar_Compliance (BR-01..05) → Aprovacao_Humana (cria task)
+               ├── GerarConteudo      → Gerar_Conteudo → Gerar_Imagem (opcional, OpenAI → SM_Midia)
+               │                         → Validar_Compliance (BR-01..05) → Aprovacao_Humana (cria task)
                │                         ↓ retorna ao Main
                │                      WaitForFormTaskAndResume (48h) → Pos_Aprovacao → Registrar_Post_Publicado
                │                         (humano publica, cola URL → resolve post_id → enqueue ColetarMetricas +24h)
@@ -35,6 +36,7 @@ ST-DBP-024: `WaitForFormTaskAndResume` existe **apenas** em `Main.xaml`; workflo
 | `SocialApiClient.cs` | Cliente Meta **GET-only** — comentários, mídias, insights, resolução de post_id por URL; retry 2s→8s→32s honrando `Retry-After`; `SocialApiException` tipada |
 | `ConteudoService.cs` | Prompts LLM + parsers tolerantes a ```json fences + `ValidarCompliance` (BR-01..05) |
 | `MetricasService.cs` | Normalização IG/FB → `MetricasPost`; arquivo diário `metricas-YYYY-MM-dd.jsonl` |
+| `ImagemService.cs` | Geração de arte via OpenAI Images — único ponto de escrita HTTP externa, destino fixo `api.openai.com`; desligado se `gerar_imagem=false`; falha não bloqueia (humano anexa mídia na aprovação) |
 
 ## Regras de negócio implementadas
 
@@ -59,7 +61,8 @@ ST-DBP-024: `WaitForFormTaskAndResume` existe **apenas** em `Main.xaml`; workflo
 |---|---|---|
 | Fila | `SM_WorkItems` | itens `GerarConteudo` / `ModerarComentario` / `ColetarMetricas` |
 | Asset Credential | `Meta_SystemUserToken` | token de System User da Meta (**escopos**: `instagram_basic`, `instagram_manage_comments`, `instagram_manage_insights`, `pages_read_engagement`, `pages_show_list`, `business_management`) |
-| Asset Text | `SM_Config` | `{"ig_user_id":"","fb_page_id":"","llm_model":"gpt-4o","calendario_editorial":{},"termos_proibidos":[],"janelas_sugeridas":"09:00-12:00;18:00-21:00","limite_posts_dia":3,"dias_calendario":7}` |
+| Asset Credential | `OpenAI_ApiKey` | chave `sk-...` da OpenAI para geração de imagem (só usada se `gerar_imagem=true`) |
+| Asset Text | `SM_Config` | `{"ig_user_id":"","fb_page_id":"","llm_model":"gpt-4o","calendario_editorial":{},"termos_proibidos":[],"janelas_sugeridas":"09:00-12:00;18:00-21:00","limite_posts_dia":3,"dias_calendario":7,"gerar_imagem":false,"imagem_modelo":"dall-e-3","imagem_tamanho":"1024x1024"}` |
 | Asset Text | `SM_ContadorDiario` | contador de posts/dia (reset por data UTC) |
 | Asset Text | `SM_UltimoPollComentarios` | `{"instagram":"","facebook":""}` — watermark do polling |
 | Bucket | `SM_Midia` | mídias aprovadas para publicação |
@@ -67,7 +70,7 @@ ST-DBP-024: `WaitForFormTaskAndResume` existe **apenas** em `Main.xaml`; workflo
 
 ## Deploy (T10 — já feito)
 
-- Pacote **1.0.3** publicado; processo `clarituz-agente-social-midia` na pasta `Shared` (release `729fd7ab-7ecf-46cb-a90a-1a67c3467748`)
+- Pacote **1.0.5** publicado; processo `clarituz-agente-social-midia` na pasta `Shared` (release `729fd7ab-7ecf-46cb-a90a-1a67c3467748`)
 - Triggers (TZ `E. South America Standard Time`, Unattended):
   - `SM_WorkItems_ConsumirFila` — queue trigger, threshold 1, máx 1 job
   - `SM_Calendario_Semanal` — `0 30 6 ? * MON` (segunda 06:30) → `in_ModoExecucao=CalendarioEditorial`

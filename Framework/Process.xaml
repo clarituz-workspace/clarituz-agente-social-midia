@@ -190,6 +190,7 @@
             <Sequence x:Key="GerarConteudo" DisplayName="Pipeline GerarConteudo" sap2010:WorkflowViewState.IdRef="Case_gerar">
               <Sequence.Variables>
                 <Variable x:TypeArguments="nsjl:JObject" Name="Conteudo" />
+                <Variable x:TypeArguments="x:String" Name="MediaUrlGerada" />
               </Sequence.Variables>
               <ui:InvokeWorkflowFile DisplayName="1. Gerar conteúdo (LLM)" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_gerar" WorkflowFileName="logica/Gerar_Conteudo.xaml">
                 <ui:InvokeWorkflowFile.Arguments>
@@ -206,6 +207,36 @@
                   </scg:Dictionary>
                 </ui:InvokeWorkflowFile.Arguments>
               </ui:InvokeWorkflowFile>
+              <ui:InvokeWorkflowFile DisplayName="1.5. Gerar imagem (OpenAI → SM_Midia)" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_imagem" WorkflowFileName="logica/Gerar_Imagem.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="x:Object" x:Key="in_TransactionData">
+                      <CSharpValue x:TypeArguments="x:Object">SpecData</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="nsjl:JObject" x:Key="in_Conteudo">
+                      <CSharpValue x:TypeArguments="nsjl:JObject">Conteudo</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="in_ExecucaoContext">
+                      <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+                    </InArgument>
+                    <OutArgument x:TypeArguments="x:String" x:Key="out_MediaUrl">
+                      <CSharpReference x:TypeArguments="x:String">MediaUrlGerada</CSharpReference>
+                    </OutArgument>
+                  </scg:Dictionary>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+              <ui:InvokeCode Language="CSharp" Code="if (!string.IsNullOrWhiteSpace(media)) specData[&quot;MediaUrl&quot;] = media;" DisplayName="MediaUrl gerada → SpecData" sap2010:WorkflowViewState.IdRef="InvokeCode_mediaurl">
+                <ui:InvokeCode.Arguments>
+                  <scg:Dictionary x:TypeArguments="x:String, Argument">
+                    <InArgument x:TypeArguments="nsjl:JObject" x:Key="specData">
+                      <CSharpValue x:TypeArguments="nsjl:JObject">SpecData</CSharpValue>
+                    </InArgument>
+                    <InArgument x:TypeArguments="x:String" x:Key="media">
+                      <CSharpValue x:TypeArguments="x:String">MediaUrlGerada</CSharpValue>
+                    </InArgument>
+                  </scg:Dictionary>
+                </ui:InvokeCode.Arguments>
+              </ui:InvokeCode>
               <ui:InvokeWorkflowFile DisplayName="2. Validar compliance" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_compliance" WorkflowFileName="logica/Validar_Compliance.xaml">
                 <ui:InvokeWorkflowFile.Arguments>
                   <scg:Dictionary x:TypeArguments="x:String, Argument">

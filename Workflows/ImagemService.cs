@@ -1,0 +1,77 @@
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+
+namespace clarituz_agente_social_midia
+{
+    // Integração OpenAI Images — gera a arte do post a partir do mediaPrompt do LLM.
+    // Único destino permitido: api.openai.com. Não escreve em nenhuma plataforma social.
+    public static class ImagemService
+    {
+        private const string HostPermitido = "api.openai.com";
+        private const string EndpointGeracao = "https://api.openai.com/v1/images/generations";
+
+        // Gera uma imagem e retorna os bytes PNG.
+        // modelos suportados: dall-e-3, dall-e-2, gpt-image-1 (b64_json no retorno).
+        public static async Task<byte[]> GerarImagemAsync(
+            System.Security.SecureString apiKey,
+            string prompt,
+            string modelo,
+            string tamanho)
+        {
+            if (string.IsNullOrWhiteSpace(prompt))
+                throw new ArgumentException("mediaPrompt vazio — nada a gerar");
+
+            var corpo = new JObject
+            {
+                ["model"] = string.IsNullOrWhiteSpace(modelo) ? "dall-e-3" : modelo,
+                ["prompt"] = prompt,
+                ["n"] = 1,
+                ["size"] = string.IsNullOrWhiteSpace(tamanho) ? "1024x1024" : tamanho
+            };
+            // dall-e retorna URL por padrão; pedir b64 para uniformizar. gpt-image-1 já devolve b64.
+            if (corpo["model"].ToString().StartsWith("dall-e"))
+                corpo["response_format"] = "b64_json";
+
+            using (var http = new HttpClient { Timeout = TimeSpan.FromSeconds(120) })
+            {
+                http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", SecureParaTexto(apiKey));
+
+                using (var req = new HttpRequestMessage(HttpMethod.Post, new Uri(EndpointGeracao)))
+                {
+                    req.Content = new StringContent(
+                        corpo.ToString(Newtonsoft.Json.Formatting.None), Encoding.UTF8, "application/json");
+                    var resp = await http.SendAsync(req).ConfigureAwait(false);
+                    var body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    if (!resp.IsSuccessStatusCode)
+                        throw new SocialApiException((int)resp.StatusCode,
+                            $"OpenAI images falhou: {(int)resp.StatusCode} — {body?.Substring(0, Math.Min(body?.Length ?? 0, 300))}");
+
+                    var dados = JObject.Parse(body)?["data"];
+                    var item = dados != null && dados.HasValues ? dados[0] : null;
+                    var b64 = item?["b64_json"]?.ToString();
+                    if (!string.IsNullOrEmpty(b64))
+                        return Convert.FromBase64String(b64);
+
+                    var url = item?["url"]?.ToString();
+                    if (!string.IsNullOrEmpty(url))
+                    {
+                        var uri = new Uri(url);
+                        if (!uri.Host.EndsWith("openai.com", StringComparison.OrdinalIgnoreCase)
+                            && !uri.Host.EndsWith("oaidalleapiprodscus.blob.core.windows.net", StringComparison.OrdinalIgnoreCase))
+                            throw new InvalidOperationException("URL de imagem fora dos hosts esperados — recusado");
+                        return await http.GetByteArrayAsync(uri).ConfigureAwait(false);
+                    }
+                    throw new FormatException("Resposta da OpenAI sem imagem (nem b64_json nem url)");
+                }
+            }
+        }
+
+        private static string SecureParaTexto(System.Security.SecureString seguro)
+            => seguro == null ? null : new System.Net.NetworkCredential(string.Empty, seguro).Password;
+    }
+}

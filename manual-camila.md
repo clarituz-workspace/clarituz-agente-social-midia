@@ -1,6 +1,6 @@
 # Manual Completo — Camila, Agente de Social Mídia
 
-**Versão:** 1.0.3 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa
+**Versão:** 1.0.5 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa (texto + imagem)
 
 ---
 
@@ -130,6 +130,29 @@ Editar o asset `SM_Config` (pasta Shared):
 - **Runtime:** pasta Shared usa robô **Serverless** (nuvem UiPath) — nenhuma máquina local necessária ✅
 - **Mídias:** imagens/vídeos aprovados vão no bucket `SM_Midia` (jpeg, jpg, png, mp4)
 
+### 4.5. Geração de imagem por IA (opcional)
+
+A Camila pode **gerar a arte do post automaticamente**: o LLM produz o briefing visual (`mediaPrompt`) e a OpenAI Images transforma em imagem real, que sobe para o bucket `SM_Midia` (pasta `geradas/`) e aparece pronta na tarefa de aprovação.
+
+**Como ativar (uma vez):**
+
+1. Crie uma API key na OpenAI: `platform.openai.com` → API keys → `sk-...` (requer conta com billing)
+2. No Orchestrator: pasta **Shared** → Assets → `OpenAI_ApiKey` → Edit → campo **Password** = a chave
+3. No asset `SM_Config`, ligue a feature:
+   ```json
+   "gerar_imagem": true,
+   "imagem_modelo": "dall-e-3",
+   "imagem_tamanho": "1024x1024"
+   ```
+
+**Detalhes:**
+
+- **Modelos suportados:** `dall-e-3` (padrão, ~US$0.04/imagem), `dall-e-2` (mais barato), `gpt-image-1` (melhor qualidade, mais caro). Troque em `imagem_modelo`.
+- **Tamanhos:** `1024x1024` (feed quadrado), `1792x1024` (horizontal), `1024x1792` (stories/reels).
+- **Quando NÃO gera:** se o item já trouxer uma `MediaUrl` (mídia fornecida manualmente tem prioridade) ou se `gerar_imagem=false`.
+- **Se falhar** (sem key, sem crédito, timeout): o post segue o fluxo normal e o operador anexa a mídia manualmente na aprovação — o `mediaPrompt` continua visível como briefing.
+- Custo: cada imagem gera uma cobrança na conta OpenAI — monitore o billing.
+
 ---
 
 ## 5. Personalização do comportamento
@@ -140,7 +163,10 @@ Editar o asset `SM_Config` (pasta Shared):
 | `janelas_sugeridas` | `SM_Config` | Horários recomendados exibidos na aprovação |
 | `termos_proibidos` | `SM_Config` | Palavras que bloqueiam o conteúdo antes da aprovação |
 | `dias_calendario` | `SM_Config` | Horizonte do calendário editorial (padrão 7 dias) |
-| `llm_model` | `SM_Config` | Modelo de IA usado (padrão gpt-4o) |
+| `llm_model` | `SM_Config` | Modelo de IA usado para texto (padrão gpt-4o) |
+| `gerar_imagem` | `SM_Config` | Liga/desliga geração automática de arte (padrão `false`) |
+| `imagem_modelo` | `SM_Config` | Modelo OpenAI de imagem: `dall-e-3` (padrão), `dall-e-2`, `gpt-image-1` |
+| `imagem_tamanho` | `SM_Config` | Resolução: `1024x1024` (feed), `1792x1024`, `1024x1792` (stories) |
 | Nicho / tom de voz | Argumento do processo | Define o contexto da campanha; pode variar por execução |
 
 ---
@@ -157,7 +183,7 @@ Editar o asset `SM_Config` (pasta Shared):
 
 ## 7. Qualidade comprovada
 
-Suíte de testes automatizados executada na versão 1.0.3: **30/30 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
+Suíte de testes automatizados executada na versão 1.0.5: **30/30 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
 
 ---
 

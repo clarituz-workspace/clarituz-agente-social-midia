@@ -1,0 +1,180 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="logica.Gerar_Imagem" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:nsjl="clr-namespace:Newtonsoft.Json.Linq;assembly=Newtonsoft.Json" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:sec="clr-namespace:System.Security;assembly=System.Security.SecureString" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uist="clr-namespace:UiPath.Core.Activities.Storage;assembly=UiPath.System.Activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_TransactionData" Type="InArgument(x:Object)" />
+    <x:Property Name="in_Conteudo" Type="InArgument(nsjl:JObject)" />
+    <x:Property Name="in_ExecucaoContext" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="out_MediaUrl" Type="OutArgument(x:String)" />
+  </x:Members>
+  <sap2010:ExpressionActivityEditor.ExpressionActivityEditor>C#</sap2010:ExpressionActivityEditor.ExpressionActivityEditor>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>GlobalConstantsNamespace</x:String>
+      <x:String>GlobalVariablesNamespace</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>System.IO</x:String>
+      <x:String>Newtonsoft.Json.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>Newtonsoft.Json</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>clarituz-agente-social-midia</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="GerarImagem — mediaPrompt → OpenAI Images → SM_Midia" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:Boolean" Name="Habilitada" />
+      <Variable x:TypeArguments="x:String" Name="MediaPrompt" />
+      <Variable x:TypeArguments="x:String" Name="Modelo" />
+      <Variable x:TypeArguments="x:String" Name="Tamanho" />
+      <Variable x:TypeArguments="x:String" Name="NomeArquivo" />
+      <Variable x:TypeArguments="x:String" Name="CaminhoLocal" />
+      <Variable x:TypeArguments="x:String" Name="ErroImagem" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeCode Language="CSharp" Code="var cfg = ctx.ContainsKey(&quot;Config&quot;) ? ctx[&quot;Config&quot;] as JObject : new JObject();&#xA;habilitada = cfg[&quot;gerar_imagem&quot;] != null &amp;&amp; cfg[&quot;gerar_imagem&quot;].ToObject&lt;bool&gt;();&#xA;modelo = cfg[&quot;imagem_modelo&quot;] == null ? &quot;dall-e-3&quot; : cfg[&quot;imagem_modelo&quot;].ToString();&#xA;tamanho = cfg[&quot;imagem_tamanho&quot;] == null ? &quot;1024x1024&quot; : cfg[&quot;imagem_tamanho&quot;].ToString();&#xA;var mediaJaInformada = inData != null &amp;&amp; JObject.FromObject(inData)[&quot;MediaUrl&quot;] != null &amp;&amp; !string.IsNullOrWhiteSpace(JObject.FromObject(inData)[&quot;MediaUrl&quot;].ToString());&#xA;prompt = conteudo == null || conteudo[&quot;MediaPrompt&quot;] == null ? &quot;&quot; : conteudo[&quot;MediaPrompt&quot;].ToString();&#xA;if (mediaJaInformada || string.IsNullOrWhiteSpace(prompt)) habilitada = false;" DisplayName="Config + decide se gera imagem" sap2010:WorkflowViewState.IdRef="InvokeCode_cfg">
+      <ui:InvokeCode.Arguments>
+        <scg:Dictionary x:TypeArguments="x:String, Argument">
+          <InArgument x:TypeArguments="x:Object" x:Key="inData">
+            <CSharpValue x:TypeArguments="x:Object">in_TransactionData</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="nsjl:JObject" x:Key="conteudo">
+            <CSharpValue x:TypeArguments="nsjl:JObject">in_Conteudo</CSharpValue>
+          </InArgument>
+          <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" x:Key="ctx">
+            <CSharpValue x:TypeArguments="scg:Dictionary(x:String, x:Object)">in_ExecucaoContext</CSharpValue>
+          </InArgument>
+          <OutArgument x:TypeArguments="x:Boolean" x:Key="habilitada">
+            <CSharpReference x:TypeArguments="x:Boolean">Habilitada</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="modelo">
+            <CSharpReference x:TypeArguments="x:String">Modelo</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="tamanho">
+            <CSharpReference x:TypeArguments="x:String">Tamanho</CSharpReference>
+          </OutArgument>
+          <OutArgument x:TypeArguments="x:String" x:Key="prompt">
+            <CSharpReference x:TypeArguments="x:String">MediaPrompt</CSharpReference>
+          </OutArgument>
+        </scg:Dictionary>
+      </ui:InvokeCode.Arguments>
+    </ui:InvokeCode>
+    <If DisplayName="Geração de imagem habilitada?" sap2010:WorkflowViewState.IdRef="If_habilitada">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">
+          <CSharpValue x:TypeArguments="x:Boolean">Habilitada</CSharpValue>
+        </InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Gerar e subir arte" sap2010:WorkflowViewState.IdRef="Sequence_gen">
+          <Sequence.Variables>
+            <Variable x:TypeArguments="sec:SecureString" Name="OpenAiSecure" />
+          </Sequence.Variables>
+          <ui:GetRobotCredential AssetName="OpenAI_ApiKey" CacheStrategy="None" DisplayName="Credencial OpenAI" sap2010:WorkflowViewState.IdRef="GetRobotCredential_openai">
+            <ui:GetRobotCredential.Password>
+              <OutArgument x:TypeArguments="sec:SecureString">
+                <CSharpReference x:TypeArguments="sec:SecureString">OpenAiSecure</CSharpReference>
+              </OutArgument>
+            </ui:GetRobotCredential.Password>
+          </ui:GetRobotCredential>
+          <ui:InvokeCode Language="CSharp" Code="erro = null;&#xA;try&#xA;{&#xA;    nomeArquivo = &quot;img-&quot; + DateTime.UtcNow.Ticks + &quot;.png&quot;;&#xA;    var bytes = clarituz_agente_social_midia.ImagemService.GerarImagemAsync(apiKey, prompt, modelo, tamanho).GetAwaiter().GetResult();&#xA;    caminho = Path.Combine(Path.GetTempPath(), nomeArquivo);&#xA;    File.WriteAllBytes(caminho, bytes);&#xA;}&#xA;catch (Exception ex) { erro = ex.Message; }" DisplayName="OpenAI Images → arquivo temp" sap2010:WorkflowViewState.IdRef="InvokeCode_gen">
+            <ui:InvokeCode.Arguments>
+              <scg:Dictionary x:TypeArguments="x:String, Argument">
+                <InArgument x:TypeArguments="sec:SecureString" x:Key="apiKey">
+                  <CSharpValue x:TypeArguments="sec:SecureString">OpenAiSecure</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="prompt">
+                  <CSharpValue x:TypeArguments="x:String">MediaPrompt</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="modelo">
+                  <CSharpValue x:TypeArguments="x:String">Modelo</CSharpValue>
+                </InArgument>
+                <InArgument x:TypeArguments="x:String" x:Key="tamanho">
+                  <CSharpValue x:TypeArguments="x:String">Tamanho</CSharpValue>
+                </InArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="nomeArquivo">
+                  <CSharpReference x:TypeArguments="x:String">NomeArquivo</CSharpReference>
+                </OutArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="caminho">
+                  <CSharpReference x:TypeArguments="x:String">CaminhoLocal</CSharpReference>
+                </OutArgument>
+                <OutArgument x:TypeArguments="x:String" x:Key="erro">
+                  <CSharpReference x:TypeArguments="x:String">ErroImagem</CSharpReference>
+                </OutArgument>
+              </scg:Dictionary>
+            </ui:InvokeCode.Arguments>
+          </ui:InvokeCode>
+          <If DisplayName="Imagem gerada?" sap2010:WorkflowViewState.IdRef="If_ok">
+            <If.Condition>
+              <InArgument x:TypeArguments="x:Boolean">
+                <CSharpValue x:TypeArguments="x:Boolean">string.IsNullOrEmpty(ErroImagem)</CSharpValue>
+              </InArgument>
+            </If.Condition>
+            <If.Then>
+              <Sequence DisplayName="Upload SM_Midia" sap2010:WorkflowViewState.IdRef="Sequence_upload">
+                <uist:UploadStorageFile DisplayName="Subir arte gerada" sap2010:WorkflowViewState.IdRef="UploadStorageFile_1" StorageBucketName="SM_Midia" Destination="geradas/">
+                  <uist:UploadStorageFile.Path>
+                    <InArgument x:TypeArguments="x:String">
+                      <CSharpValue x:TypeArguments="x:String">CaminhoLocal</CSharpValue>
+                    </InArgument>
+                  </uist:UploadStorageFile.Path>
+                  <uist:UploadStorageFile.FileName>
+                    <InArgument x:TypeArguments="x:String">
+                      <CSharpValue x:TypeArguments="x:String">NomeArquivo</CSharpValue>
+                    </InArgument>
+                  </uist:UploadStorageFile.FileName>
+                </uist:UploadStorageFile>
+                <ui:InvokeCode Language="CSharp" Code="mediaUrl = &quot;geradas/&quot; + nomeArquivo;" DisplayName="MediaUrl = geradas/nome" sap2010:WorkflowViewState.IdRef="InvokeCode_mediaurl">
+                  <ui:InvokeCode.Arguments>
+                    <scg:Dictionary x:TypeArguments="x:String, Argument">
+                      <InArgument x:TypeArguments="x:String" x:Key="nomeArquivo">
+                        <CSharpValue x:TypeArguments="x:String">NomeArquivo</CSharpValue>
+                      </InArgument>
+                      <OutArgument x:TypeArguments="x:String" x:Key="mediaUrl">
+                        <CSharpReference x:TypeArguments="x:String">out_MediaUrl</CSharpReference>
+                      </OutArgument>
+                    </scg:Dictionary>
+                  </ui:InvokeCode.Arguments>
+                </ui:InvokeCode>
+                <ui:LogMessage DisplayName="Arte gerada" Level="Info" sap2010:WorkflowViewState.IdRef="LogMessage_ok">
+                  <ui:LogMessage.Message>
+                    <InArgument x:TypeArguments="x:Object">
+                      <CSharpValue x:TypeArguments="x:Object">"Imagem gerada (" + Modelo + " " + Tamanho + ") → SM_Midia/" + out_MediaUrl</CSharpValue>
+                    </InArgument>
+                  </ui:LogMessage.Message>
+                </ui:LogMessage>
+              </Sequence>
+            </If.Then>
+            <If.Else>
+              <ui:LogMessage DisplayName="Geração falhou (warn)" Level="Warn" sap2010:WorkflowViewState.IdRef="LogMessage_fail">
+                <ui:LogMessage.Message>
+                  <InArgument x:TypeArguments="x:Object">
+                    <CSharpValue x:TypeArguments="x:Object">"Geração de imagem falhou (não-bloqueante — operador anexa mídia manual na aprovação): " + ErroImagem</CSharpValue>
+                  </InArgument>
+                </ui:LogMessage.Message>
+              </ui:LogMessage>
+            </If.Else>
+          </If>
+        </Sequence>
+      </If.Then>
+    </If>
+  </Sequence>
+</Activity>
