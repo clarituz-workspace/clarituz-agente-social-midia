@@ -1,4 +1,4 @@
-<Activity mc:Ignorable="sap sap2010" x:Class="shared.LLM_Completion" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Activity mc:Ignorable="sap sap2010" x:Class="shared_LLM_Completion" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <x:Members>
     <x:Property Name="in_Prompt" Type="InArgument(x:String)">
       <x:Property.Attributes>
@@ -33,39 +33,42 @@
       <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="LLM_Completion — fronteira GenAI (E5: retry ×2)" sap2010:WorkflowViewState.IdRef="Sequence_1">
+  <Sequence DisplayName="LLM_Completion — fronteira GenAI (E5: retry ×2)" sap:VirtualizedContainerService.HintSize="1072,691.6566666666666" sap2010:WorkflowViewState.IdRef="Sequence_1">
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
       </scg:Dictionary>
     </sap:WorkflowViewStateService.ViewState>
-    <ui:LogMessage DisplayName="Prompt recebido" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Trace">
+    <ui:LogMessage DisplayName="Prompt recebido" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Trace">
       <ui:LogMessage.Message>
         <InArgument x:TypeArguments="x:Object">
-          <CSharpValue x:TypeArguments="x:Object">"LLM_Completion: prompt " + (in_Prompt == null ? 0 : in_Prompt.Length) + " chars"</CSharpValue>
+          <CSharpValue x:TypeArguments="x:Object" sap2010:WorkflowViewState.IdRef="CSharpValue`1_1">"LLM_Completion: prompt " + (in_Prompt == null ? 0 : in_Prompt.Length) + " chars"</CSharpValue>
         </InArgument>
       </ui:LogMessage.Message>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
     </ui:LogMessage>
-    <ui:RetryScope DisplayName="LLM retry ×2 (E5)" sap2010:WorkflowViewState.IdRef="RetryScope_1">
-      <ui:RetryScope.NumberOfRetries>
-        <InArgument x:TypeArguments="x:Int32">
-          <CSharpValue x:TypeArguments="x:Int32">2</CSharpValue>
-        </InArgument>
-      </ui:RetryScope.NumberOfRetries>
-      <ui:RetryScope.RetryInterval>
-        <InArgument x:TypeArguments="s:TimeSpan">
-          <CSharpValue x:TypeArguments="s:TimeSpan">TimeSpan.FromSeconds(5)</CSharpValue>
-        </InArgument>
-      </ui:RetryScope.RetryInterval>
+    <ui:RetryScope LogRetriedExceptions="{x:Null}" RetriedExceptionsLogLevel="{x:Null}" DisplayName="LLM retry ×2 (E5)" sap:VirtualizedContainerService.HintSize="480,264" sap2010:WorkflowViewState.IdRef="RetryScope_1">
       <ui:RetryScope.ActivityBody>
         <ActivityAction>
-          <Sequence DisplayName="Chamada LLM" sap2010:WorkflowViewState.IdRef="Sequence_llm">
-            <Throw DisplayName="LLM pendente — conexão IS" sap2010:WorkflowViewState.IdRef="Throw_pendente">
-              <Throw.Exception>
-                <InArgument x:TypeArguments="s:Exception">
-                  <CSharpValue x:TypeArguments="s:Exception">new InvalidOperationException("LLM pendente: criar conexão 'UiPath GenAI Activities' (uipath-uipath-airdk) na pasta Shared e substituir este Throw por ConnectorActivity — ver T6/T9")</CSharpValue>
-                </InArgument>
-              </Throw.Exception>
+          <Sequence DisplayName="Chamada LLM" sap:VirtualizedContainerService.HintSize="480,96" sap2010:WorkflowViewState.IdRef="Sequence_llm">
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+            <Throw DisplayName="LLM pendente — conexão IS" sap:VirtualizedContainerService.HintSize="450,48" sap2010:WorkflowViewState.IdRef="Throw_pendente">
+              <sap:WorkflowViewStateService.ViewState>
+                <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                  <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+                </scg:Dictionary>
+              </sap:WorkflowViewStateService.ViewState>
+              <InArgument x:TypeArguments="s:Exception">
+                <CSharpValue x:TypeArguments="s:Exception" sap2010:WorkflowViewState.IdRef="CSharpValue`1_2">new InvalidOperationException("LLM pendente: criar conexão 'UiPath GenAI Activities' (uipath-uipath-airdk) na pasta Shared e substituir este Throw por ConnectorActivity — ver T6/T9")</CSharpValue>
+              </InArgument>
             </Throw>
           </Sequence>
         </ActivityAction>
@@ -73,18 +76,33 @@
       <ui:RetryScope.Condition>
         <ActivityFunc x:TypeArguments="x:Boolean" />
       </ui:RetryScope.Condition>
+      <ui:RetryScope.NumberOfRetries>
+        <InArgument x:TypeArguments="x:Int32">
+          <CSharpValue x:TypeArguments="x:Int32" sap2010:WorkflowViewState.IdRef="CSharpValue`1_3">2</CSharpValue>
+        </InArgument>
+      </ui:RetryScope.NumberOfRetries>
+      <ui:RetryScope.RetryInterval>
+        <InArgument x:TypeArguments="x:TimeSpan">
+          <CSharpValue x:TypeArguments="x:TimeSpan" sap2010:WorkflowViewState.IdRef="CSharpValue`1_4">TimeSpan.FromSeconds(5)</CSharpValue>
+        </InArgument>
+      </ui:RetryScope.RetryInterval>
     </ui:RetryScope>
-    <Assign DisplayName="Resposta" sap2010:WorkflowViewState.IdRef="Assign_1">
+    <Assign DisplayName="Resposta" sap:VirtualizedContainerService.HintSize="480,48" sap2010:WorkflowViewState.IdRef="Assign_1">
       <Assign.To>
         <OutArgument x:TypeArguments="x:String">
-          <CSharpReference x:TypeArguments="x:String">out_Texto</CSharpReference>
+          <CSharpReference x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpReference`1_1">out_Texto</CSharpReference>
         </OutArgument>
       </Assign.To>
       <Assign.Value>
         <InArgument x:TypeArguments="x:String">
-          <CSharpValue x:TypeArguments="x:String">""</CSharpValue>
+          <CSharpValue x:TypeArguments="x:String" sap2010:WorkflowViewState.IdRef="CSharpValue`1_5">""</CSharpValue>
         </InArgument>
       </Assign.Value>
+      <sap:WorkflowViewStateService.ViewState>
+        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+          <x:Boolean x:Key="IsExpanded">False</x:Boolean>
+        </scg:Dictionary>
+      </sap:WorkflowViewStateService.ViewState>
     </Assign>
   </Sequence>
 </Activity>
