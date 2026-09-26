@@ -17,6 +17,6 @@
   "queue_name": "SM_WorkItems",
   "bucket_midia": "SM_Midia",
   "bucket_metricas": "SM_Metricas",
-  "minio_endpoint": "",
+  "minio_endpoint": "https://bucket-production-0279.up.railway.app",
   "minio_bucket": "camila"
 }

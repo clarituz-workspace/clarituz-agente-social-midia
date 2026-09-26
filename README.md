@@ -73,7 +73,7 @@ ST-DBP-024: `WaitForFormTaskAndResume` existe **apenas** em `Main.xaml`; workflo
 
 ## Deploy (T10 — já feito)
 
-- Pacote **1.1.0** publicado; processo `clarituz-agente-social-midia` na pasta `Shared` (release `729fd7ab-7ecf-46cb-a90a-1a67c3467748`)
+- Pacote **1.1.1** publicado; processo `clarituz-agente-social-midia` na pasta `Shared` (release `729fd7ab-7ecf-46cb-a90a-1a67c3467748`)
 - Triggers (TZ `E. South America Standard Time`, Unattended):
   - `SM_WorkItems_ConsumirFila` — queue trigger, threshold 1, máx 1 job
   - `SM_Calendario_Semanal` — `0 30 6 ? * MON` (segunda 06:30) → `in_ModoExecucao=CalendarioEditorial`

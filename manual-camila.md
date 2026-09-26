@@ -1,6 +1,6 @@
 # Manual Completo — Camila, Agente de Social Mídia
 
-**Versão:** 1.1.0 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa (texto + imagem + visão) · **Aprendizado:** o calendário semanal prioriza temas e horários que já engajaram
+**Versão:** 1.1.1 · **Plataformas:** Instagram e Facebook · **Tecnologia:** UiPath Automation Cloud + IA generativa (texto + imagem + visão) · **Aprendizado:** o calendário semanal prioriza temas e horários que já engajaram
 
 ---
 
@@ -210,7 +210,7 @@ Os dados já existentes no bucket continuam válidos para o modo legado; os novo
 
 ## 7. Qualidade comprovada
 
-Suíte de testes automatizados executada na versão 1.1.0: **35/35 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
+Suíte de testes automatizados executada na versão 1.1.1: **35/35 verificações — 100% de acerto** (detalhes em `relatorio-qa-testes.md`), incluindo compliance de conteúdo, classificação de sentimento, resolução de URLs, tolerância das respostas da IA e a garantia zero-escrita.
 
 ---
 

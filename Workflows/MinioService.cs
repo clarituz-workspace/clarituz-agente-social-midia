@@ -32,11 +32,21 @@ namespace clarituz_agente_social_midia
                 ForcePathStyle = true // obrigatório para MinIO (virtual-hosted style é AWS-only por padrão)
             });
 
+        // Garante que o bucket existe (idempotente) — deployment zero-touch.
+        private static async Task GarantirBucketAsync(AmazonS3Client s3, JObject cfg)
+        {
+            var bucket = Bucket(cfg);
+            if (await Amazon.S3.Util.AmazonS3Util.DoesS3BucketExistV2Async(s3, bucket).ConfigureAwait(false)) return;
+            try { await s3.PutBucketAsync(bucket).ConfigureAwait(false); }
+            catch (AmazonS3Exception) { /* corrida de criação ou sem permissão — segue */ }
+        }
+
         // PUT idempotente: mesma chave = mesmo objeto — reescrita é upsert natural.
         public static async Task PutJsonAsync(JObject cfg, string accessKey, string secretKey, string chave, JObject obj)
         {
             using (var s3 = Cliente(cfg, accessKey, secretKey))
             {
+                await GarantirBucketAsync(s3, cfg).ConfigureAwait(false);
                 await s3.PutObjectAsync(new PutObjectRequest
                 {
                     BucketName = Bucket(cfg),
@@ -77,6 +87,7 @@ namespace clarituz_agente_social_midia
             var chaves = new List<string>();
             using (var s3 = Cliente(cfg, accessKey, secretKey))
             {
+                await GarantirBucketAsync(s3, cfg).ConfigureAwait(false);
                 string token = null;
                 do
                 {
